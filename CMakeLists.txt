@@ -9,6 +9,7 @@ set(PROJECT_DESCRIPTION "Service discovery based on AVAHI")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 include(CommonSetup)
+#include(FindAVAHI)
 
 # Include headers within source
 # If you create subdirectories within source include headers with subdirectory, i.e. 
@@ -30,6 +31,14 @@ include_directories(${PROJECT_SOURCE_DIR}/src)
 #find_package(Boost REQUIRED)
 #find_package(Boost REQUIRED COMPONENTS graph filesystem)
 #include_directories(${Boost_INCLUDE_DIRS})
+
+#FIND AVAHI
+
+#TODO: not checked for version: avahi version used: 0.6.25
+find_package(AVAHI REQUIRED)
+#TODO: not checked for version: ligsigc++ version used: 2.0.18-2
+find_package(SIGC++ REQUIRED)
+
 
 ### Update external libraries that are available
 set(EXTERNAL_LIBS ${Boost_LIBRARIES} ${QT_LIBRARIES})
