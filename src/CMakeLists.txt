@@ -50,3 +50,13 @@ target_link_libraries(testavahi-framework ${LIBRARIES})
 add_library(avahi-framework ${SOURCES})
 target_link_libraries(avahi-framework ${LIBRARIES})
 
+# There are a lot of automated things that depend on the fact, that the output of the
+# project (binary or library) is the same as the package-name (i.e. PROJECT_NAME)
+add_library(${PROJECT_NAME} SHARED ${SOURCES})
+target_link_libraries(${PROJECT_NAME} ${LIBRARIES})
+
+install(TARGETS ${PROJECT_NAME} 
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+)
+
