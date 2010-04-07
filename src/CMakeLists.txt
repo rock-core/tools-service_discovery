@@ -1,5 +1,7 @@
 ####### Uncomment the following block for Qt setup
 ## include_directories(${CMAKE_CURRENT_BINARY_DIR})
+####### Uncomment the following block for Qt setup
+## include_directories(${CMAKE_CURRENT_BINARY_DIR})
 ## # Add your .ui files ot the following line (and uncomment it)
 ## QT4_WRAP_UI(ui_cpp myproject.ui)
 ## # Add the .h files that define QObject subclasses (that have a Q_OBJECT
@@ -25,9 +27,8 @@
 #    RUNTIME DESTINATION bin
 #    LIBRARY DESTINATION lib
 #)
-
+ 
 set(SOURCES
-
     afAvahiClient.cpp
     afList.cpp
     afLocalService.cpp
@@ -40,6 +41,21 @@ set(SOURCES
     afThreadPoll.cpp
 )
 
+set(HEADERS
+	afAvahiFramework.h
+    afAvahiClient.h
+    afList.h
+    afLocalService.h
+    afPoll.h
+    afRemoteService.h
+    afService.h
+    afServiceBase.h
+    afServiceBrowser.h
+    afSimplePoll.h
+    afThreadPoll.h
+)
+
+
 include_directories(${AVAHI_INCLUDES} ${SIGC++_INCLUDES})
 
 set(LIBRARIES ${AVAHI_LIBRARIES} ${SIGC++_LIBRARY})
@@ -47,13 +63,9 @@ set(LIBRARIES ${AVAHI_LIBRARIES} ${SIGC++_LIBRARY})
 add_executable(testavahi-framework testmain.cpp ${SOURCES})
 target_link_libraries(testavahi-framework ${LIBRARIES})
 
-# There are a lot of automated things that depend on the fact, that the output of the
-# project (binary or library) is the same as the package-name (i.e. PROJECT_NAME)
-add_library(${PROJECT_NAME} ${SOURCES})
+add_library(${PROJECT_NAME} SHARED ${SOURCES})
 target_link_libraries(${PROJECT_NAME} ${LIBRARIES})
-
-install(TARGETS ${PROJECT_NAME} 
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
+install(TARGETS ${PROJECT_NAME}
+	LIBRARY DESTINATION lib
+	ARCHIVE DESTINATION lib
 )
-
