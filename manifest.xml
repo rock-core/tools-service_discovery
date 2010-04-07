@@ -2,20 +2,15 @@
   <description brief="Service discovery based on AVAHI">
   In order to find distributed components and offered services, a distributed services discovery is required. AVAHI provides a basic library, which will be used in this package to develop a high level API.
   </description>
-  <author>Darko Makreshanski/darko.makreshanski@dfki.de</author>
+  <author>Darko Makreshanski/darko.makreshanski@dfki.de, Thomas Roehr/thomas.roehr@dfki.de</author>
   <license></license>
   <url>http://</url>
   <logo>http://</logo>
- <!--
-   To add any dependencies use the depend tag
-  <depend package="dummy-dependency-0" />
-	...
-  <depend package="dummy-dependency-n-1" />
-  <depend package="dummy-dependency-n" />
--->
-<!--DEPEND-ENTRY-->
+ <!-- Dependencies are resolved via osdep file in the autoproj configuration -->
+  <rosdep name="avahi" />
+  <rosdep name="sigc" />
   <versioncontrol type="git" url="" />
   <export>
-    <cpp cflags="" lflags="" />
+    <cpp cflags="" lflags="-lavahi-client" />
   </export>
 </package>
