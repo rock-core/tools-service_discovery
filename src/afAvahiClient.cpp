@@ -9,7 +9,7 @@
 
 #include <iostream>
 #include <cassert>
-
+#include <stdlib.h>
 
 using namespace std;
 
@@ -20,6 +20,7 @@ AvahiClient* afAvahiClient::getAvahiClient() {
 afAvahiClient::afAvahiClient() {
 	afPoll *p;
 	p = new DEFAULT_POLL();
+	locallyAllocated = true;
 	poll = p;
 	int error;
 	//the following creation of avahi client will fail if the avahi daemon is not available, 
@@ -32,13 +33,26 @@ afAvahiClient::afAvahiClient() {
 	}
 }
 
+afAvahiClient::afAvahiClient(afPoll *poll, AvahiClientFlags flags)
+{
+	this->poll = poll;
+	locallyAllocated = false;
+	int error;
+	client = avahi_client_new(poll->getAvahiPoll(), flags, NULL, NULL, &error);
+	//if creation of client is not immediately successful throw error 
+	if (!client) {
+		cerr << "Failed to create client: " << avahi_strerror(error) << endl;
+        throw 0; //TODO: do sth else
+	}
+}
+
 afAvahiClient::~afAvahiClient() {
 	if (client) {
 //		cout << "..DELETING CLIENT" << endl;
 		avahi_client_free(client);
 	}
-	if (poll) {
-		delete poll;
+	if (poll && locallyAllocated) {
+		free(poll);
 	}
 }
 

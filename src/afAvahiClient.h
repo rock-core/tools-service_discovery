@@ -37,6 +37,8 @@ private:
 	 * every avahi client program must enter in a poll loop to speak to the avahi-daemon and receive asynchronous messages
 	 */
 	afPoll *poll;
+	
+	bool locallyAllocated;
 
 public:
 	/**
