@@ -61,7 +61,7 @@ public:
 	);
 	virtual ~afRemoteService();
 
-	//signal for avahi resolver event. TODO this is not implemented yet, and needs to be encapsulated
+	
 	sigc::signal<void,
 		afRemoteService*,
 		AvahiResolverEvent,

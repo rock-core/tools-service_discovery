@@ -30,8 +30,7 @@ afRemoteService::afRemoteService(
 }
 
 afRemoteService::~afRemoteService() {
-
-	
+	//this object is not responsible for
 }
 
 bool afRemoteService::operator ==(afRemoteService serv) {

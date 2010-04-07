@@ -101,10 +101,12 @@ int afLocalService::publish()
 
 void afLocalService::unpublish()
 {
+	cout << "unpublishing" << endl;
 	if (group) {
 		avahi_entry_group_free(group);
 		group = NULL;
 	}
+	cout << "done unpublishing" << endl;
 }
 
 void afLocalService::entry_group_callback(AvahiEntryGroup *g, AvahiEntryGroupState state, void *userdata)

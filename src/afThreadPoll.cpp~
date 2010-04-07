@@ -7,8 +7,6 @@
 
 #include "afThreadPoll.h"
 
-#include <avahi-common/thread-watch.h>
-
 afThreadPoll::afThreadPoll() {
 	poll = avahi_threaded_poll_new();
 }

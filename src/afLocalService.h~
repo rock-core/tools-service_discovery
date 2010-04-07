@@ -87,7 +87,7 @@ public:
 	/**
 	 * opposite of publish. Unpublish a service.
 	 */
-	void unpublish();
+	int unpublish();
 	
 	/**
 	 * update the service additional information

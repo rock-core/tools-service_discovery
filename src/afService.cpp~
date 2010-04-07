@@ -18,7 +18,7 @@ afService::afService(const afService& serv) : afServiceBase((const afServiceBase
 	list<string> strlist = serv.getStringList();
 	AvahiStringList *txt = NULL;
 	//create avahistringlist from a list<string>
-	//this is done to prevent using the same instance of avahistringlist on object copy and then deleting it on the destruction of the object
+	//this is done to prevent using the same instance of avahistringlist on object copy and then deleting it on deleting an object
 	if(strlist.size() > 0) {
 		list<string>::iterator it;
 		it = strlist.begin();

@@ -11,6 +11,10 @@
 #include <list>
 #include <iostream>
 
+/**
+ * an extension class to std::list which contains a special method for finding elements
+ * in this framework, the below special case is used
+ */
 template <class T>
 class afList : public std::list<T> {
 public:
@@ -26,7 +30,11 @@ public:
 
 	}
 };
- 
+
+
+/**
+ * a special case for list of pointers where finding elements is dependent on the pointed object and not the pointer
+ */
 template <>
 template <class T>
 class afList <T*> : public std::list<T*> {
