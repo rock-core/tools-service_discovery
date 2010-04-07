@@ -1,3 +1,8 @@
+Install and usage instructions in ./INSTALL
+
+examples in ./examples/
+
+
 NOTE
 This directory structure follows some simple rules, to allow for generic build
 processes and simplify reuse of this project. 
