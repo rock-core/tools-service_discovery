@@ -1,3 +1,4 @@
+
 ####### Uncomment the following block for Qt setup
 ## include_directories(${CMAKE_CURRENT_BINARY_DIR})
 ####### Uncomment the following block for Qt setup
@@ -42,7 +43,7 @@ set(SOURCES
 )
 
 set(HEADERS
-	afAvahiFramework.h
+    afAvahiFramework.h
     afAvahiClient.h
     afList.h
     afLocalService.h
@@ -63,9 +64,10 @@ set(LIBRARIES ${AVAHI_LIBRARIES} ${SIGC++_LIBRARY})
 add_executable(testavahi-framework testmain.cpp ${SOURCES})
 target_link_libraries(testavahi-framework ${LIBRARIES})
 
-add_library(${PROJECT_NAME} SHARED ${SOURCES})
+add_library(${PROJECT_NAME} ${SOURCES})
 target_link_libraries(${PROJECT_NAME} ${LIBRARIES})
 install(TARGETS ${PROJECT_NAME}
-	LIBRARY DESTINATION lib
+	RUNTIME DESTINATION bin
 	ARCHIVE DESTINATION lib
-)
+)	
+
