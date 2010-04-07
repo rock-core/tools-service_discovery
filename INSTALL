@@ -1,0 +1,18 @@
+To compile and install this library and the header files do the following procedure:
+
+	cd build
+	cmake ..
+	make
+	sudo make install
+	
+To use the library include the following file in your source file:
+
+	#include <service-discovery/afAvahiFramework.h>
+	
+To compile your program include the following libraries with pkg-config
+
+	service-discovery sigc++-2.0 avahi-client
+	 
+For example
+
+	g++ -o test test.cpp `pkg-config --cflags --libs service-discovery sigc++-2.0 avahi-client`
