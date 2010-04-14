@@ -13,7 +13,7 @@ int main(int argc, char** argv)
 	
 	std::list<std::string> strlst;
 	strlst.push_back("service_year=1999");
-	afLocalService serv(&client, "MyTestService", "_mytype._tcp", 10000, strlst);
+	afLocalService serv(&client, "MyTestService", "_mysubtype._mytype._tcp", 10000, strlst);
 	
 	//run the main event loop (in this case in a different thread because default poll is afThreadPoll, so it program will continue normal execution)
 	client.dispatch();

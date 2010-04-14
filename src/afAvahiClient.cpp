@@ -9,7 +9,6 @@
 
 #include <iostream>
 #include <cassert>
-#include <stdlib.h>
 
 using namespace std;
 
@@ -52,7 +51,7 @@ afAvahiClient::~afAvahiClient() {
 		avahi_client_free(client);
 	}
 	if (poll && locallyAllocated) {
-		free(poll);
+		delete poll;
 	}
 }
 
@@ -61,5 +60,7 @@ void afAvahiClient::dispatch() {
 }
 
 void afAvahiClient::stop() {
+	cout << "STOPING" << endl;
 	poll->stop();
+	cout << "STOPED" << endl;
 }

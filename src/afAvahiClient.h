@@ -65,6 +65,8 @@ public:
 	 * exit main loop
 	 */
 	void stop();
+	
+	afPoll* getPoll() {return poll;}
 
 	AvahiClient* getAvahiClient();
 

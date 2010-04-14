@@ -40,8 +40,21 @@ int main(int argc, char** argv)
 	
 	sleep(3);
 	
+	//print services
+	std::cout << "PRINTING SERVICES:\n";
+	afList<afRemoteService*> *services = sbrowser.getServices();
+	afList<afRemoteService*>::iterator it;
+	for (it = services->begin() ; it != services->end() ; it++) {
+		std::cout << "     SERVICE: " << (*it)->getName() << " " << (*it)->getType() << " " << (*it)->getInterface() << std::endl;
+	}
+	std::cout << "FINISHED PRINTING SERVICES.\n";
+	
+	sleep(2);
+	
 	//unpublish the service and check for the signal
+	((afThreadPoll*)client.getPoll())->lock();
 	serv.unpublish();
+	((afThreadPoll*)client.getPoll())->unlock();
 	
 	sleep(2);
 	
