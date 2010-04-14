@@ -89,9 +89,14 @@ int afLocalService::publish()
     	return -4;
     }
     
-    avahi_entry_group_add_record(
-    
-    );
+//    avahi_entry_group_add_record(
+//    	group,
+//    	getInterface(),
+//    	getProtocol(),
+//    	flags,
+//    	getName().c_str(),
+//    	
+//    );
 
     if ((ret = avahi_entry_group_commit(group)) < 0) {
     	cerr << "Failed to commit entry group: " << avahi_strerror(ret) << endl;
