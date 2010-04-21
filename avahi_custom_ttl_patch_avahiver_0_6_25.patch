@@ -1,0 +1,298 @@
+diff --git a/avahi-client/entrygroup.c b/avahi-client/entrygroup.c
+index e2fc3b9..205a570 100644
+--- a/avahi-client/entrygroup.c
++++ b/avahi-client/entrygroup.c
+@@ -101,6 +101,10 @@ fail:
+ }
+ 
+ AvahiEntryGroup* avahi_entry_group_new (AvahiClient *client, AvahiEntryGroupCallback callback, void *userdata) {
++	return avahi_entry_group_new_custom_ttl(client, callback, userdata, 0);
++}
++
++AvahiEntryGroup* avahi_entry_group_new_custom_ttl (AvahiClient *client, AvahiEntryGroupCallback callback, void *userdata, uint32_t ttl) {
+     AvahiEntryGroup *group = NULL;
+     DBusMessage *message = NULL, *reply = NULL;
+     DBusError error;
+@@ -126,17 +130,28 @@ AvahiEntryGroup* avahi_entry_group_new (AvahiClient *client, AvahiEntryGroupCall
+     group->userdata = userdata;
+     group->state_valid = 0;
+     group->path = NULL;
++    group->ttl = ttl;
+     AVAHI_LLIST_PREPEND(AvahiEntryGroup, groups, client->groups, group);
++
++
+     
+     if (!(message = dbus_message_new_method_call(
+               AVAHI_DBUS_NAME,
+               AVAHI_DBUS_PATH_SERVER,
+               AVAHI_DBUS_INTERFACE_SERVER,
+-              "EntryGroupNew"))) {
++              "EntryGroupNewTTL"))) {
+         avahi_client_set_errno(client, AVAHI_ERR_NO_MEMORY);
+         goto fail;
+     }
+ 
++    if (!dbus_message_append_args(
++            message,
++            DBUS_TYPE_UINT32, &ttl,
++            DBUS_TYPE_INVALID)) {
++        avahi_client_set_errno(group->client, AVAHI_ERR_NO_MEMORY);
++        goto fail;
++    }
++
+     if (!(reply = dbus_connection_send_with_reply_and_block (client->bus, message, -1, &error)) ||
+         dbus_error_is_set (&error)) {
+         avahi_client_set_errno (client, AVAHI_ERR_DBUS_ERROR);
+diff --git a/avahi-client/internal.h b/avahi-client/internal.h
+index e49dd15..8e4d837 100644
+--- a/avahi-client/internal.h
++++ b/avahi-client/internal.h
+@@ -60,6 +60,7 @@ struct AvahiEntryGroup {
+     AvahiClient *client;
+     AvahiEntryGroupCallback callback;
+     void *userdata;
++    uint32_t ttl;
+     AVAHI_LLIST_FIELDS(AvahiEntryGroup, groups);
+ };
+ 
+diff --git a/avahi-client/publish.h b/avahi-client/publish.h
+index 1efc85f..d4a4bc4 100644
+--- a/avahi-client/publish.h
++++ b/avahi-client/publish.h
+@@ -22,6 +22,8 @@
+   USA.
+ ***/
+ 
++#define __CUSTOM_TTL__
++
+ #include <inttypes.h>
+ 
+ #include <avahi-common/cdecl.h>
+@@ -58,6 +60,13 @@ AvahiEntryGroup* avahi_entry_group_new(
+     AvahiEntryGroupCallback callback /**< This callback is called whenever the state of this entry group changes. May not be NULL. Please note that this function is called for the first time from within the avahi_entry_group_new() context! Thus, in the callback you should not make use of global variables that are initialized only after your call to avahi_entry_group_new(). A common mistake is to store the AvahiEntryGroup pointer returned by avahi_entry_group_new() in a global variable and assume that this global variable already contains the valid pointer when the callback is called for the first time. A work-around for this is to always use the AvahiEntryGroup pointer passed to the callback function instead of the global pointer. */,
+     void *userdata /**< This arbitrary user data pointer will be passed to the callback functon */);
+ 
++AvahiEntryGroup* avahi_entry_group_new_custom_ttl(
++	AvahiClient *c,
++	AvahiEntryGroupCallback callback,
++	void *userdata,
++	uint32_t ttl
++);
++
+ /** Clean up and free an AvahiEntryGroup object */
+ int avahi_entry_group_free (AvahiEntryGroup *);
+ 
+diff --git a/avahi-core/entry.c b/avahi-core/entry.c
+index 55c9ea2..9a35ed2 100644
+--- a/avahi-core/entry.c
++++ b/avahi-core/entry.c
+@@ -52,6 +52,17 @@
+ #include "rr-util.h"
+ #include "domain-util.h"
+ 
++static uint32_t getTTL(AvahiSEntryGroup* g)
++{
++	if (g->ttl <= 0) {
++		return AVAHI_DEFAULT_TTL;
++	} else {
++		return g->ttl;
++	}
++}
++
++
++
+ static void transport_flags_from_domain(AvahiServer *s, AvahiPublishFlags *flags, const char *domain) {
+     assert(flags);
+     assert(domain);
+@@ -620,7 +631,8 @@ static int server_add_service_strlst_nocopy(
+ 
+     /* Add service enumeration PTR record */
+     
+-    if (!(ptr_entry = server_add_ptr_internal(s, g, interface, protocol, 0, AVAHI_DEFAULT_TTL, ptr_name, svc_name))) {
++/*    if (!(ptr_entry = server_add_ptr_internal(s, g, interface, protocol, 0, AVAHI_DEFAULT_TTL, ptr_name, svc_name))) {*/
++    if (!(ptr_entry = server_add_ptr_internal(s, g, interface, protocol, 0, getTTL(g), ptr_name, svc_name))) {
+         ret = avahi_server_errno(s);
+         goto fail;
+     }
+@@ -650,7 +662,8 @@ static int server_add_service_strlst_nocopy(
+     if (!(flags & AVAHI_PUBLISH_NO_COOKIE))
+         strlst = add_magic_cookie(s, strlst);
+     
+-    txt_entry = server_add_txt_strlst_nocopy(s, g, interface, protocol, AVAHI_PUBLISH_UNIQUE, AVAHI_DEFAULT_TTL, svc_name, strlst);
++/*    txt_entry = server_add_txt_strlst_nocopy(s, g, interface, protocol, AVAHI_PUBLISH_UNIQUE, AVAHI_DEFAULT_TTL, svc_name, strlst);*/
++    txt_entry = server_add_txt_strlst_nocopy(s, g, interface, protocol, AVAHI_PUBLISH_UNIQUE, getTTL(g), svc_name, strlst);
+     strlst = NULL;
+ 
+     if (!txt_entry) {
+@@ -660,7 +673,8 @@ static int server_add_service_strlst_nocopy(
+ 
+     /* Add service type enumeration record */
+     
+-    if (!(enum_entry = server_add_ptr_internal(s, g, interface, protocol, 0, AVAHI_DEFAULT_TTL, enum_ptr, ptr_name))) {
++/*    if (!(enum_entry = server_add_ptr_internal(s, g, interface, protocol, 0, AVAHI_DEFAULT_TTL, enum_ptr, ptr_name))) {*/
++    if (!(enum_entry = server_add_ptr_internal(s, g, interface, protocol, 0, getTTL(g), enum_ptr, ptr_name))) {
+         ret = avahi_server_errno(s);
+         goto fail;
+     }
+@@ -770,7 +784,8 @@ static int server_update_service_txt_strlst_nocopy(
+     if (!(flags & AVAHI_PUBLISH_NO_COOKIE))
+         strlst = add_magic_cookie(s, strlst);
+     
+-    e = server_add_txt_strlst_nocopy(s, g, interface, protocol, AVAHI_PUBLISH_UNIQUE | AVAHI_PUBLISH_UPDATE, AVAHI_DEFAULT_TTL, svc_name, strlst);
++/*    e = server_add_txt_strlst_nocopy(s, g, interface, protocol, AVAHI_PUBLISH_UNIQUE | AVAHI_PUBLISH_UPDATE, AVAHI_DEFAULT_TTL, svc_name, strlst);*/
++    e = server_add_txt_strlst_nocopy(s, g, interface, protocol, AVAHI_PUBLISH_UNIQUE | AVAHI_PUBLISH_UPDATE, getTTL(g), svc_name, strlst);
+     strlst = NULL;
+ 
+     if (!e)
+@@ -857,7 +872,8 @@ int avahi_server_add_service_subtype(
+         goto fail;
+     }
+ 
+-    if ((ret = avahi_server_add_ptr(s, g, interface, protocol, 0, AVAHI_DEFAULT_TTL, ptr_name, svc_name)) < 0)
++/*    if ((ret = avahi_server_add_ptr(s, g, interface, protocol, 0, AVAHI_DEFAULT_TTL, ptr_name, svc_name)) < 0)*/
++    if ((ret = avahi_server_add_ptr(s, g, interface, protocol, 0, getTTL(g), ptr_name, svc_name)) < 0)
+         goto fail;
+ 
+ fail:
+@@ -1040,6 +1056,10 @@ void avahi_s_entry_group_change_state(AvahiSEntryGroup *g, AvahiEntryGroupState
+ }
+ 
+ AvahiSEntryGroup *avahi_s_entry_group_new(AvahiServer *s, AvahiSEntryGroupCallback callback, void* userdata) {
++	return avahi_s_entry_group_new2(s, callback, userdata, 0);
++}
++
++AvahiSEntryGroup *avahi_s_entry_group_new2(AvahiServer *s, AvahiSEntryGroupCallback callback, void* userdata, uint32_t ttl) {
+     AvahiSEntryGroup *g;
+     
+     assert(s);
+@@ -1061,6 +1081,8 @@ AvahiSEntryGroup *avahi_s_entry_group_new(AvahiServer *s, AvahiSEntryGroupCallba
+     g->register_time.tv_usec = 0;
+     AVAHI_LLIST_HEAD_INIT(AvahiEntry, g->entries);
+ 
++	g->ttl = (ttl <= 0) ? AVAHI_DEFAULT_TTL : ttl;
++
+     AVAHI_LLIST_PREPEND(AvahiSEntryGroup, groups, s->groups, g);
+     return g;
+ }
+@@ -1087,6 +1109,8 @@ void avahi_s_entry_group_free(AvahiSEntryGroup *g) {
+     
+     g->server->need_group_cleanup = 1;
+     g->server->need_entry_cleanup = 1;
++
++    avahi_cleanup_dead_entries(g->server);
+ }
+ 
+ static void entry_group_commit_real(AvahiSEntryGroup *g) {
+@@ -1166,6 +1190,8 @@ void avahi_s_entry_group_reset(AvahiSEntryGroup *g) {
+     g->n_probing = 0;
+ 
+     avahi_s_entry_group_change_state(g, AVAHI_ENTRY_GROUP_UNCOMMITED);
++
++    avahi_cleanup_dead_entries(g->server);
+ }
+ 
+ int avahi_entry_is_commited(AvahiEntry *e) {
+diff --git a/avahi-core/internal.h b/avahi-core/internal.h
+index d0a10d6..919ccbc 100644
+--- a/avahi-core/internal.h
++++ b/avahi-core/internal.h
+@@ -95,6 +95,8 @@ struct AvahiSEntryGroup {
+     AvahiTimeEvent *register_time_event;
+ 
+     struct timeval established_at;
++
++	uint32_t ttl;
+     
+     AVAHI_LLIST_FIELDS(AvahiSEntryGroup, groups);
+     AVAHI_LLIST_HEAD(AvahiEntry, entries);
+diff --git a/avahi-core/publish.h b/avahi-core/publish.h
+index 77c49af..b5ec4f6 100644
+--- a/avahi-core/publish.h
++++ b/avahi-core/publish.h
+@@ -53,6 +53,7 @@ const AvahiRecord *avahi_server_iterate(AvahiServer *s, AvahiSEntryGroup *g, voi
+  * avahi_server_add_xxx(). Make sure to call avahi_s_entry_group_commit()
+  * to start the registration process for your RRs */
+ AvahiSEntryGroup *avahi_s_entry_group_new(AvahiServer *s, AvahiSEntryGroupCallback callback, void* userdata);
++AvahiSEntryGroup *avahi_s_entry_group_new2(AvahiServer *s, AvahiSEntryGroupCallback callback, void* userdata, uint32_t ttl);
+ 
+ /** Free an entry group. All RRs assigned to the group are removed from the server */
+ void avahi_s_entry_group_free(AvahiSEntryGroup *g);
+diff --git a/avahi-daemon/dbus-protocol.c b/avahi-daemon/dbus-protocol.c
+index d61935a..0544202 100644
+--- a/avahi-daemon/dbus-protocol.c
++++ b/avahi-daemon/dbus-protocol.c
+@@ -414,6 +414,61 @@ static DBusHandlerResult msg_server_impl(DBusConnection *c, DBusMessage *m, AVAH
+ 
+         return DBUS_HANDLER_RESULT_HANDLED;
+         
++    } else if (dbus_message_is_method_call(m, AVAHI_DBUS_INTERFACE_SERVER, "EntryGroupNewTTL")) {
++
++        Client *client;
++        EntryGroupInfo *i;
++        static const DBusObjectPathVTable vtable = {
++            NULL,
++            avahi_dbus_msg_entry_group_impl,
++            NULL,
++            NULL,
++            NULL,
++            NULL
++        };
++		
++		uint32_t ttl;
++		uint32_t ttl_hostname;
++
++        if (!dbus_message_get_args(m, &error, 
++        
++                DBUS_TYPE_UINT32, &ttl,
++        	
++        DBUS_TYPE_INVALID)) {
++            avahi_log_warn("Error parsing Server::EntryGroupNew message");
++            goto fail;
++        }
++
++        if (disable_user_service_publishing)
++            return avahi_dbus_respond_error(c, m, AVAHI_ERR_NOT_PERMITTED, NULL);
++        
++        if (!(client = client_get(dbus_message_get_sender(m), TRUE))) {
++            avahi_log_warn("Too many clients, client request failed.");
++            return avahi_dbus_respond_error(c, m, AVAHI_ERR_TOO_MANY_CLIENTS, NULL);
++        }
++
++        if (client->n_objects >= OBJECTS_PER_CLIENT_MAX) {
++            avahi_log_warn("Too many objects for client '%s', client request failed.", client->name);
++            return avahi_dbus_respond_error(c, m, AVAHI_ERR_TOO_MANY_OBJECTS, NULL);
++        }
++
++        i = avahi_new(EntryGroupInfo, 1);
++        i->id = ++client->current_id;
++        i->client = client;
++        i->path = NULL;
++        i->n_entries = 0;
++        AVAHI_LLIST_PREPEND(EntryGroupInfo, entry_groups, client->entry_groups, i);
++        client->n_objects++;
++        
++        if (!(i->entry_group = avahi_s_entry_group_new2(avahi_server, avahi_dbus_entry_group_callback, i, ttl))) {
++            avahi_dbus_entry_group_free(i);
++            return avahi_dbus_respond_error(c, m, avahi_server_errno(avahi_server), NULL);
++        }
++
++        i->path = avahi_strdup_printf("/Client%u/EntryGroup%u", client->id, i->id);
++        dbus_connection_register_object_path(c, i->path, &vtable, i);
++        return avahi_dbus_respond_path(c, m, i->path);
++    	
+     } else if (dbus_message_is_method_call(m, AVAHI_DBUS_INTERFACE_SERVER, "EntryGroupNew")) {
+         Client *client;
+         EntryGroupInfo *i;
+diff --git a/common/Makefile.am b/common/Makefile.am
+index 3f88c28..eec0b72 100644
+--- a/common/Makefile.am
++++ b/common/Makefile.am
+@@ -17,7 +17,7 @@
+ # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ # USA.
+ 
+-EXTRA_DIST = gettext.m4 iconv.m4 lib-ld.m4 lib-link.m4 lib-prefix.m4 nls.m4 po.m4 progtest.m4 gettext.m4 iconv.m4 lib-ld.m4 lib-link.m4 lib-prefix.m4 nls.m4 po.m4 progtest.m4 \
++EXTRA_DIST = gettext.m4 iconv.m4 lib-ld.m4 lib-link.m4 lib-prefix.m4 nls.m4 po.m4 progtest.m4 gettext.m4 iconv.m4 lib-ld.m4 lib-link.m4 lib-prefix.m4 nls.m4 po.m4 progtest.m4 gettext.m4 iconv.m4 lib-ld.m4 lib-link.m4 lib-prefix.m4 nls.m4 po.m4 progtest.m4 \
+     doxygen.m4 \
+ 	doxygen.mk \
+ 	python.m4
