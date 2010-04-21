@@ -13,22 +13,29 @@
 
 using namespace std;
 
-afService::afService(const afService& serv) : afServiceBase((const afServiceBase&) serv)
+AvahiStringList* afService::getTxt(list<string> lst)
 {
-	list<string> strlist = serv.getStringList();
-	AvahiStringList *txt = NULL;
-	//create avahistringlist from a list<string>
-	//this is done to prevent using the same instance of avahistringlist on object copy and then deleting it on the destruction of the object
-	if(strlist.size() > 0) {
+	AvahiStringList *stxt = NULL;
+	if(lst.size() > 0) {
 		list<string>::iterator it;
-		it = strlist.begin();
-		txt = avahi_string_list_new((*it).c_str(), NULL);
+		it = lst.begin();
+		stxt = avahi_string_list_new((*it).c_str(), NULL);
 		it++;
-		for (;it != strlist.end(); it++) {
-			txt = avahi_string_list_add(txt, (*it).c_str());
+		for (;it != lst.end(); it++) {
+			stxt = avahi_string_list_add(stxt, (*it).c_str());
 		}
 	}
-	this->txt = txt;
+	return stxt;
+}
+
+afService::afService(const afService& serv) : afServiceBase((const afServiceBase&) serv)
+{
+	this->stringlist = list<string>(serv.getStringList());
+	//create avahistringlist from a list<string>
+	//this is done to prevent using the same instance of avahistringlist on object copy and then deleting it on the destruction of the object
+	this->txt = afService::getTxt(serv.getStringList());
+	this->port = serv.getPort();
+	this->dontCheckTXT = serv.dontCheckTXT;
 }
 
 afService::afService(
@@ -42,20 +49,11 @@ afService::afService(
 			list<string> strlist
 			) : afServiceBase(client, interf, prot, name, type, domain) {
 	this->port = port;
+	this->dontCheckTXT = false;
 
 	//create avahistringlist from list<string>
-	AvahiStringList *txt = NULL;
-	if(strlist.size() > 0) {
-		list<string>::iterator it;
-		it = strlist.begin();
-		txt = avahi_string_list_new((*it).c_str(), NULL);
-		it++;
-		for (;it != strlist.end(); it++) {
-			txt = avahi_string_list_add(txt, (*it).c_str());
-		}
-	}
 	this->stringlist = strlist;
-	this->txt = txt;
+	this->txt = afService::getTxt(strlist);
 }
 
 afService::~afService() {
@@ -69,7 +67,9 @@ bool afService::operator==(afService comp) {
 		return false;
 	if (port != comp.getPort())
 		return false;
-	if (stringlist != comp.getStringList())
-		return false;
+	if (!(this->dontCheckTXT || comp.dontCheckTXT)) {
+		if (stringlist != comp.getStringList())
+			return false;
+	}
 	return true;
 }

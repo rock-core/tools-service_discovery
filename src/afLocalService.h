@@ -24,6 +24,8 @@ private:
 	AvahiEntryGroup *group;
 	AvahiPublishFlags flags;
 	
+	uint32_t ttl;
+	
 	static void entry_group_callback(AvahiEntryGroup *g, AvahiEntryGroupState state, void *userdata);
 
 public:
@@ -35,6 +37,7 @@ public:
 	 * @param type the type of the service: usually "_sometype._tcp" (must have a ._tcp or ._udp at the end for a protocol type)
 	 * @param port the port number at which the service is present
 	 * @param list a list of strings as additional information (TODO: avahi api supports map of strings, implement this functionality)
+	 * @param ttl time to live of the service in case of network failure
 	 * @param publish true if the related entry group is to be immediately commited
 	 */
 	afLocalService(
@@ -43,6 +46,7 @@ public:
 			std::string type,
 			uint16_t port,
 			std::list<std::string> list,
+			uint32_t ttl=0,
 			bool publish=true
 			);
 	/**
@@ -56,6 +60,7 @@ public:
 	 * @param domain domain of the service (above default is ".local")
 	 * @param port the port number at which the service is present
 	 * @param list a list of strings as additional information (TODO: avahi api supports map of strings, implement this functionality)
+	 * @param ttl time to live of the service in case of network failure
 	 * @param publish true if the related entry group is to be immediately commited
 	 */
 	afLocalService(
@@ -68,6 +73,7 @@ public:
 			std::string domain,
 			uint16_t port,
 			std::list<std::string> list,
+			uint32_t ttl=0,
 			bool publish=false
 			);
 	virtual ~afLocalService();
@@ -91,9 +97,8 @@ public:
 	
 	/**
 	 * update the service additional information
-	 * TODO this is not implemented, implement this
 	 */
-	void update();
+	int updateStringList(std::list<std::string> list);
 
 };
 

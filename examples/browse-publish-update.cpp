@@ -1,17 +1,20 @@
 /**
- * a example source file for browsing services with the avahi c++ framework
+ * a example source file for browsing services and publishing and updating a service with the avahi c++ framework
  */
  
 #include <stdlib.h>
 #include <iostream>
 #include <service-discovery/afAvahiFramework.h>
  
-void testAdded (afRemoteService* rms) {
-	std::cout << " -=- TESTING SIGNAL: ADDED SERVICE: " << rms->getName() << std::endl;
+ 
+void testUpdated (afRemoteService* rms) {
+	std::cout << " -=- TESTING SIGNAL: UPDATED SERVICE: " << rms->getName() << std::endl;
 }
 
-void testRemoved (afRemoteService rms) {
-	std::cout << " -=- TESTING SIGNAL: REMOVED SERVICE: " << rms.getName() << std::endl;
+void testAdded (afRemoteService* rms) {
+	std::cout << " -=- TESTING SIGNAL: ADDED SERVICE: " << rms->getName() << std::endl;
+	//connect a callback on service txt updates
+	rms->afRemoteServiceSignal.connect(sigc::ptr_fun(testUpdated));
 }
 
  
@@ -27,9 +30,6 @@ int main(int argc, char** argv)
 	//connect a callback to the service added signal. Method can also be a class member. Look at sigc++ api
 	sbrowser.afServiceAdded.connect(sigc::ptr_fun(testAdded));
 	
-	//connect a callback to the service removed signal
-	sbrowser.afServiceRemoved.connect(sigc::ptr_fun(testRemoved));
-
 	//publish a sample service to test the callbacks
 	std::list<std::string> strlst;
 	strlst.push_back("service_year=1999");
@@ -38,7 +38,16 @@ int main(int argc, char** argv)
 	//run the main event loop (in this case in a different thread because default poll is afThreadPoll, so it program will continue normal execution)
 	client.dispatch();
 	
-	sleep(3);
+	sleep(5);
+	
+	//update the signal txt record
+	((afThreadPoll*)client.getPoll())->lock();
+	strlst.push_back("somethingelse=10");
+	std::cout << "Updating string list\n";
+	serv.updateStringList(strlst);
+	((afThreadPoll*)client.getPoll())->unlock();
+	
+	sleep(5);
 	
 	//print services
 	std::cout << "PRINTING SERVICES:\n";
@@ -48,16 +57,9 @@ int main(int argc, char** argv)
 		std::cout << "     SERVICE: " << (*it)->getName() << " " << (*it)->getType() << " " << (*it)->getInterface() << std::endl;
 	}
 	std::cout << "FINISHED PRINTING SERVICES.\n";
-	
-	sleep(2);
-	
-	//unpublish the service and check for the signal. first must lock the object to prevent concurrency issues
-	((afThreadPoll*)client.getPoll())->lock();
-	serv.unpublish();
-	((afThreadPoll*)client.getPoll())->unlock();
-	
-	sleep(2);
-	
+
+	sleep(5);
+		
 	//stop main loop. not really needed if nothing is done afterwards
 	client.stop();	
 	

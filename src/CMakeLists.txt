@@ -61,8 +61,8 @@ include_directories(${AVAHI_INCLUDES} ${SIGC++_INCLUDES})
 
 set(LIBRARIES ${AVAHI_LIBRARIES} ${SIGC++_LIBRARY})
 
-add_executable(testavahi-framework testmain.cpp ${SOURCES})
-target_link_libraries(testavahi-framework ${LIBRARIES})
+#add_executable(testavahi-framework testmain.cpp ${SOURCES})
+#target_link_libraries(testavahi-framework ${LIBRARIES})
 
 add_library(${PROJECT_NAME} ${SOURCES})
 target_link_libraries(${PROJECT_NAME} ${LIBRARIES})

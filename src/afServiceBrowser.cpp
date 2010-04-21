@@ -108,18 +108,31 @@ void afServiceBrowser::resolveCallback(AvahiServiceResolver *sr, AvahiIfIndex in
 			}
 
 
-			bool found = true;
             afRemoteService *rms = new afRemoteService(sb, interface, protocol, sname, stype, sdomain, strlist, port, shost, *address, sr);
-			cout << "SERVICE RESOLVED: " << rms->getInterface() << " " << rms->getProtocol() << " " << rms->getName() << " " << rms->getType() << " " << rms->getDomain() << " ; ADDING SERVICE...   ";
+			cout << "SERVICE RESOLVED: " << rms->getInterface() << " " << rms->getProtocol() << " " << rms->getName() << " " << rms->getType() << " " << rms->getDomain() << " ; ";
+			
+			
             if (!sb->getServices()->find(*rms)) {
-            	sb->getServices()->push_back(rms);
-            	found = false;
+
+				rms->dontCheckTXT = true;
+				afRemoteService *srv;
+				if (srv = sb->getServices()->find(*rms)) {
+	
+					cout << "SERVICE ALREADY IN DB, BUT TXT RECORD HAS CHANGED\n";
+					srv->afRemoteServiceSignal.emit(srv);
+					
+				} else {
+					
+					rms->dontCheckTXT = false;
+		        	sb->getServices()->push_back(rms);
+		            cout << "SERVICE ADDED" << endl;
+	            	sb->afServiceAdded.emit(rms);
+				}
+
+            } else {
+	            cout << "SERVICE NOT ADDED (ALREADY IN DB)" << endl;
             }
 
-            cout << ((found) ? "NOT ADDED (ALREADY IN DB)" : "ADDED") << endl;
-            if (!found) {
-            	sb->afServiceAdded.emit(rms);
-            }
 //			printls(*(sb->getServices()));
 
 

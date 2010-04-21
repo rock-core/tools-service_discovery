@@ -34,6 +34,7 @@ afRemoteService::~afRemoteService() {
 	
 }
 
+
 bool afRemoteService::operator ==(afRemoteService serv) {
 	bool upres = (afService) (*this) == (afService) serv;
 	if (!upres)
@@ -42,4 +43,7 @@ bool afRemoteService::operator ==(afRemoteService serv) {
 		return false;
 	if (getAddressString().compare(serv.getAddressString()) != 0)
 		return false;
+	return true;
 }
+
+

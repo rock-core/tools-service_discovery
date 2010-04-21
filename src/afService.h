@@ -18,7 +18,7 @@ class afAvahiClient;
 #include "afServiceBase.h"
 
 class afService : public afServiceBase {
-private:
+protected:
 	/**
 	 * port of the service
 	 */
@@ -27,7 +27,20 @@ private:
 	AvahiStringList *txt;
 	/** the list of string correspondent of avahistringlist */
 	std::list<std::string> stringlist;
+	
+	static AvahiStringList* getTxt(std::list<std::string>);
+	
+	void setTxt(AvahiStringList* ntxt) {
+		if (txt) {
+			avahi_string_list_free(txt);
+		}
+		txt = ntxt;
+	}
+	
+	
 public:
+
+	bool dontCheckTXT;
 
 	afService(const afService&);
 

@@ -26,7 +26,7 @@ class afRemoteService;
  * class for handling service that are found and resolved by the service browsers
  */
 class afRemoteService: public afService {
-private:
+protected:
 	/**
 	 * a service browser instance connected to this remote service
 	 */
@@ -62,11 +62,13 @@ public:
 	virtual ~afRemoteService();
 
 	//signal for avahi resolver event. TODO this is not implemented yet, and needs to be encapsulated
+//	sigc::signal<void,
+//		afRemoteService*,
+//		AvahiResolverEvent,
+//		AvahiLookupResultFlags,
+//		void*> afAvahiRemoteServiceSignal;
 	sigc::signal<void,
-		afRemoteService*,
-		AvahiResolverEvent,
-		AvahiLookupResultFlags,
-		void*> afAvahiRemoteServiceSignal;
+		afRemoteService*> afRemoteServiceSignal;
 
     AvahiAddress getAddress() const
     {
