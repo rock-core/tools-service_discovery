@@ -46,6 +46,9 @@ protected:
 	AvahiServiceResolver *sr;
 public:
 
+	//the data used in the service browser. pointer also used here so that the memory is freed along with the service resolver
+	ResolveData* resolveData;
+
 	afRemoteService(
 			afServiceBrowser *browser,
 			AvahiIfIndex interf,

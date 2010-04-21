@@ -28,6 +28,7 @@ void afServiceBrowser::bootstrap() {
 		cerr << "Failed to create avahi service browser: " << avahi_strerror(avahi_client_errno(client->getAvahiClient()));
 		throw 0; //TODO improve this
 	}
+	serviceResolveTryCount = 5;
 }
 
 afServiceBrowser::afServiceBrowser(afAvahiClient *client, AvahiIfIndex interface, AvahiProtocol protocol, std::string type, std::string domain, AvahiLookupFlags flags, void* data)
@@ -80,19 +81,29 @@ afServiceBrowser::~afServiceBrowser() {
 //a callback called on a service resolver event
 void afServiceBrowser::resolveCallback(AvahiServiceResolver *sr, AvahiIfIndex interface, AvahiProtocol protocol, AvahiResolverEvent event, const char *name, const char *type, const char *domain, const char *host, const AvahiAddress *address, uint16_t port, AvahiStringList *txt, AvahiLookupResultFlags flags, void *userdata)
 {
-    afServiceBrowser *sb = (afServiceBrowser*) userdata;
+	ResolveData *data = (ResolveData*) userdata;
+    afServiceBrowser *sb = data->sb;
     switch(event)
     {
         // if found service cannot be resolved, throw an error
         case AVAHI_RESOLVER_FAILURE:
             cerr << "RESOLVER failed to resolve service" << name << " of type " << type << " in domain " << domain << endl;
             cerr << "Error: " << avahi_strerror(avahi_client_errno(avahi_service_resolver_get_client(sr))) << endl;
-            //TODO either free the resolver immediately (as it is now) or maybe wait more to see if the service will be resolved
-            avahi_service_resolver_free(sr);
+            if (data->count >= sb->serviceResolveTryCount) {
+            	cerr << "Failed attempts to resolve this service has exceeded the limit. Service resolver object freed.\n";
+            	delete data;
+	            avahi_service_resolver_free(sr);
+            } else {
+            	data->count = data->count + 1;
+            	cerr << "Failed attempt " << data->count << " out of " << sb->serviceResolveTryCount << endl;
+            }
             break;
 
         // if found service can be resolved
         case AVAHI_RESOLVER_FOUND:
+
+			//reset the counter for retries
+			data->count = 0;
 
 			string sname(name);
 			string stype(type);
@@ -109,6 +120,7 @@ void afServiceBrowser::resolveCallback(AvahiServiceResolver *sr, AvahiIfIndex in
 
 
             afRemoteService *rms = new afRemoteService(sb, interface, protocol, sname, stype, sdomain, strlist, port, shost, *address, sr);
+            rms->resolveData = data;
 			cout << "SERVICE RESOLVED: " << rms->getInterface() << " " << rms->getProtocol() << " " << rms->getName() << " " << rms->getType() << " " << rms->getDomain() << " ; ";
 			
 			
@@ -160,9 +172,15 @@ void afServiceBrowser::browseCallback(AvahiServiceBrowser *sb, AvahiIfIndex inte
         // if browser finds a new service
         case AVAHI_BROWSER_NEW:
         	cout << "NEW SERVICE FOUND" << endl;
+        	
+        	ResolveData *tdata;
+        	tdata = new ResolveData();
+        	tdata->sb = asb;
+        	tdata->count = 0;
+        	
 //            cerr << "BROWSER found new service:" << name << "of type:" << type << "in domain:" << domain;
             // try to resolve the new found service. If resolver object cannot be created, throw an error
-            if (!(avahi_service_resolver_new(client, interface, protocol, name, type, domain, AVAHI_PROTO_UNSPEC, AvahiLookupFlags (0), resolveCallback, userdata)))
+            if (!(avahi_service_resolver_new(client, interface, protocol, name, type, domain, AVAHI_PROTO_UNSPEC, AvahiLookupFlags (0), resolveCallback, tdata)))
             {
                 cerr << "Failed to resolve service:" << name << ". Error: " << avahi_strerror(avahi_client_errno(client));
             }
@@ -185,6 +203,13 @@ void afServiceBrowser::browseCallback(AvahiServiceBrowser *sb, AvahiIfIndex inte
 						sr = (*it)->getServiceResolver();
 						if (sr)
 							avahi_service_resolver_free(sr);
+						
+						
+						//delete the object used to count failed attempts						
+						ResolveData *sdata = (*it)->resolveData;
+						if (sdata) {
+							delete sdata;
+						}
 						
 						//emit the service removed signal
 						asb->afServiceRemoved.emit((*(*it)));

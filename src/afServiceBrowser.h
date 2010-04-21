@@ -8,6 +8,7 @@
 #ifndef AFSERVICEBROWSER_H_
 #define AFSERVICEBROWSER_H_
 
+struct ResolveData;
 class afServiceBrowser;
 
 #include <sigc++/sigc++.h>
@@ -15,6 +16,13 @@ class afServiceBrowser;
 #include "afRemoteService.h"
 #include "afAvahiClient.h"
 #include "afList.h"
+
+//struct used to count failed attempts of service resolution
+struct ResolveData {
+	afServiceBrowser *sb;
+	int count;
+};
+
 
 /**
  * a class encapsulating the service browser object of avahi
@@ -57,6 +65,10 @@ private:
 	}
 
 public:
+
+	//the browser will keep the service resolver object upon this amount of failed attempts
+	int serviceResolveTryCount;
+
 	afServiceBrowser(
 			afAvahiClient *client,
 			std::string type);
