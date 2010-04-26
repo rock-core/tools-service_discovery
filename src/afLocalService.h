@@ -14,6 +14,7 @@
 
 
 /**
+ * @brief
  * A class for service objects that are meant to be published
  */
 class afLocalService: public afService {

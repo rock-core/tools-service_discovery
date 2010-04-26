@@ -13,6 +13,7 @@
 #include "afAvahiClient.h"
 
 /**
+ * @brief
  * an abstract base service class used to represent the basic info of a service as received from a service browser callback
  */
 class afServiceBase {

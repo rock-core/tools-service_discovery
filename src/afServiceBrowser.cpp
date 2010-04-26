@@ -137,7 +137,7 @@ void afServiceBrowser::resolveCallback(AvahiServiceResolver *sr, AvahiIfIndex in
 					
 					rms->dontCheckTXT = false;
 		        	sb->getServices()->push_back(rms);
-		            cout << "SERVICE ADDED" << endl;
+		            cout << "SERVICE ADDED: SIGNAL TO " << sb->afServiceAdded.size() << " SLOTS" << endl;
 	            	sb->afServiceAdded.emit(rms);
 				}
 

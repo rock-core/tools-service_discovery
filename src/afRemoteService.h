@@ -23,6 +23,7 @@ class afRemoteService;
 
 
 /**
+ * @brief
  * class for handling service that are found and resolved by the service browsers
  */
 class afRemoteService: public afService {

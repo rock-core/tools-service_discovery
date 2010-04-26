@@ -12,6 +12,7 @@
 #include <avahi-common/simple-watch.h>
 
 /**
+ * @brief
  * a simple event loop poll for avahi
  */
 class afSimplePoll: public afPoll {

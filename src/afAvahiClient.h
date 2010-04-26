@@ -24,6 +24,7 @@ class afAvahiClient;
 
 
 /**
+ * @brief
  * The "mother" class
  * Every avahi program must set up a client that will be connected to the avahi-daemon
  */

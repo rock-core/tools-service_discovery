@@ -12,6 +12,7 @@
 #include <avahi-common/thread-watch.h>
 
 /**
+ * @brief
  * a threaded poll for avahi. Upon dispatching creates a separate thread and executes main event loop in this thread
  */
 class afThreadPoll: public afPoll {

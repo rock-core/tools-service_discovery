@@ -12,6 +12,7 @@
 #include <avahi-common/error.h>
 
 /**
+ * @brief
  * base class for avahi poll
  * possible polls are:
  *		- a simple poll

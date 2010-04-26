@@ -1,4 +1,5 @@
 /**
+ * @file
  * a example source file for browsing services and publishing and updating a service with the avahi c++ framework
  */
  
