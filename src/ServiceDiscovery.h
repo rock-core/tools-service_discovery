@@ -1,8 +1,17 @@
 #ifndef RIMRES_SERVICEDISCOVERY_CORE_H_
 #define RIMRES_SERVICEDISCOVERY_CORE_H_
 
+#include <string>
+#include "afAvahiClient.h"
+#include "afServiceBrowser.h"
+
 namespace dfki { namespace communication {
 
+
+/**
+ * @brief
+ * A wrapper class for the framework
+ */
 class ServiceDiscovery
 {
 
@@ -12,11 +21,18 @@ public:
 
 	struct Configuration // : default configuration here
 	{
-		// required configuration properties
-		// IOR
-		// NAME
-		// AVAHI_TYPE
-		// AVAHI_PORT
+	
+		std::string IOR;
+		std::string name;
+
+		std::list<std::string> stringlist;
+		
+		uint32_t ttl;
+		
+		//should these be constants?
+		std::string avahi_type;
+		uint16_t avahi_port; 
+
 	};
 
 	void configure(const struct Configuration& configuration);
@@ -26,13 +42,19 @@ public:
 	void stop();
 	
 	// return ior or alternate identifier
-	// std::string findService(SearchPattern searchPattern);
+	OrocosComponentRemoteService* findService(std::string pattern);
 
-	// the callback function will be used to store the entries, so this will be handled within this library. Just account for that 
-	// std::map<Service, ServiceDescription> 
+private:
+
+	bool started;
+
+	afAvahiClient *client;
+	afServiceBrowser *browser;
+	OrocosComponentLocalService *localserv;
+
+	struct Configuration conf;
 
 };
-
 
 }}
 

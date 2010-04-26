@@ -40,6 +40,8 @@ set(SOURCES
     afServiceBrowser.cpp
     afSimplePoll.cpp
     afThreadPoll.cpp
+    OrocosComponentService.cpp
+    ServiceDiscovery.cpp
 )
 
 set(HEADERS

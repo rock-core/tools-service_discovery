@@ -12,14 +12,12 @@
 #include <string>
 #include <list>
 
-namespace dfki {
-namespace communication {
+namespace dfki { namespace communication {
 
 class afService;
 class afAvahiClient;
 
-}
-}
+}}
 
 #include "afServiceBase.h"
 
