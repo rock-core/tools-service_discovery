@@ -11,6 +11,9 @@
 #include "afPoll.h"
 #include <avahi-common/thread-watch.h>
 
+namespace dfki {
+namespace communication {
+
 /**
  * @brief
  * a threaded poll for avahi. Upon dispatching creates a separate thread and executes main event loop in this thread
@@ -42,6 +45,10 @@ public:
 	void unlock() {avahi_threaded_poll_unlock(poll);}
 	
 };
+
+
+}
+}
 
 #endif /* AFTHREADPOLL_H_ */
 

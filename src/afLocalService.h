@@ -12,6 +12,8 @@
 #include "afService.h"
 #include <avahi-client/publish.h>
 
+namespace dfki {
+namespace communication {
 
 /**
  * @brief
@@ -102,5 +104,8 @@ public:
 	int updateStringList(std::list<std::string> list);
 
 };
+
+}
+}
 
 #endif /* AFLOCALSERVICE_H_ */

@@ -8,14 +8,24 @@
 #ifndef AFSERVICEBROWSER_H_
 #define AFSERVICEBROWSER_H_
 
+namespace dfki {
+namespace communication {
+
 struct ResolveData;
 class afServiceBrowser;
+
+}
+}
 
 #include <sigc++/sigc++.h>
 #include <avahi-client/client.h>
 #include "afRemoteService.h"
 #include "afAvahiClient.h"
 #include "afList.h"
+
+
+namespace dfki {
+namespace communication {
 
 /**
  * @brief
@@ -126,5 +136,9 @@ public:
                             const AvahiAddress *address, uint16_t port, AvahiStringList *list, AvahiLookupResultFlags flags, void *userdata);
 
 };
+
+}
+}
+
 
 #endif /* AFSERVICEBROWSER_H_ */

@@ -8,7 +8,13 @@
 #ifndef AFREMOTESERVICE_H_
 #define AFREMOTESERVICE_H_
 
+namespace dfki {
+namespace communication {
+
 class afRemoteService;
+
+}
+}
 
 #include <sigc++/sigc++.h>
 #include "afService.h"
@@ -21,6 +27,8 @@ class afRemoteService;
 //	AvahiLookupResultFlags,
 //	void*> afAvahiRemoteServiceSlot;
 
+namespace dfki {
+namespace communication {
 
 /**
  * @brief
@@ -109,5 +117,8 @@ public:
 
     bool operator==(afRemoteService serv);
 };
+
+}
+}
 
 #endif /* AFREMOTESERVICE_H_ */

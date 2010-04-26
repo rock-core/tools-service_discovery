@@ -9,6 +9,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace dfki::communication;
 
 afServiceBase::afServiceBase(
 			afAvahiClient *client,

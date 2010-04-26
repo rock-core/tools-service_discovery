@@ -13,6 +13,7 @@
 #include <avahi-client/publish.h>
 
 using namespace std;
+using namespace dfki::communication;
 
 afLocalService::~afLocalService() {
 	if (group) {

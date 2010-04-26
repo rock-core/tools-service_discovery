@@ -8,9 +8,14 @@
 #ifndef AFSERVICEBASE_H_
 #define AFSERVICEBASE_H_
 
+
 #include <avahi-client/client.h>
 #include <string>
 #include "afAvahiClient.h"
+
+namespace dfki {
+namespace communication {
+
 
 /**
  * @brief
@@ -103,5 +108,8 @@ public:
     	return client;
     }
 };
+
+}
+}
 
 #endif /* AFSERVICEBASE_H_ */

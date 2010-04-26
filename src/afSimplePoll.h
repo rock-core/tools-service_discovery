@@ -11,6 +11,10 @@
 #include "afPoll.h"
 #include <avahi-common/simple-watch.h>
 
+namespace dfki {
+namespace communication {
+
+
 /**
  * @brief
  * a simple event loop poll for avahi
@@ -32,5 +36,9 @@ public:
 	void stop();
 	const AvahiPoll* getAvahiPoll();
 };
+
+
+}
+}
 
 #endif /* AFSIMPLEPOLL_H_ */

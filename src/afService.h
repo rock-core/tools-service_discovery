@@ -8,14 +8,24 @@
 #ifndef AFSERVICE_H_
 #define AFSERVICE_H_
 
-class afService;
-class afAvahiClient;
-
 #include <avahi-client/lookup.h>
 #include <string>
 #include <list>
 
+namespace dfki {
+namespace communication {
+
+class afService;
+class afAvahiClient;
+
+}
+}
+
 #include "afServiceBase.h"
+
+
+namespace dfki {
+namespace communication {
 
 class afService : public afServiceBase {
 protected:
@@ -74,5 +84,8 @@ public:
 	}
 
 };
+
+}
+}
 
 #endif /* AFSERVICE_H_ */

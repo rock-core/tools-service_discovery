@@ -11,6 +11,9 @@
 #include <avahi-common/watch.h>
 #include <avahi-common/error.h>
 
+namespace dfki {
+namespace communication {
+
 /**
  * @brief
  * base class for avahi poll
@@ -32,5 +35,8 @@ public:
 	virtual const AvahiPoll* getAvahiPoll() = 0;
 
 };
+
+}
+}
 
 #endif /* AFPOLL_H_ */

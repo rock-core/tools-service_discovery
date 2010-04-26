@@ -12,6 +12,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace dfki::communication;
 
 AvahiStringList* afService::getTxt(list<string> lst)
 {

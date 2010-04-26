@@ -13,6 +13,7 @@
 #include <string>
 
 using namespace std;
+using namespace dfki::communication;
 
 void afServiceBrowser::bootstrap() {
 	browser = avahi_service_browser_new(

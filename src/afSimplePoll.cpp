@@ -7,6 +7,9 @@
 
 #include "afSimplePoll.h"
 #include <iostream>
+
+using namespace dfki::communication;
+
 afSimplePoll::afSimplePoll() {
 	poll = avahi_simple_poll_new();
 }

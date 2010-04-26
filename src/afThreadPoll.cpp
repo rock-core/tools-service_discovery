@@ -9,6 +9,8 @@
 
 #include <avahi-common/thread-watch.h>
 
+using namespace dfki::communication;
+
 afThreadPoll::afThreadPoll() {
 	poll = avahi_threaded_poll_new();
 }

@@ -11,6 +11,9 @@
 #include <list>
 #include <iostream>
 
+namespace dfki {
+namespace communication {
+
 /**
  * an extension class to std::list which contains a special method for finding elements
  * in this framework, the below special case is used
@@ -51,5 +54,9 @@ public:
 		return NULL;
 	}
 };
+
+}
+}
+
 
 #endif /* AFLIST_H_ */

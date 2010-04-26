@@ -6,6 +6,7 @@
  */
 
 #include "afPoll.h"
+using namespace dfki::communication;
 
 afPoll::afPoll() {
 	// TODO Auto-generated constructor stub

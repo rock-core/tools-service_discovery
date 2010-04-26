@@ -10,7 +10,13 @@
 
 #define DEFAULT_POLL afThreadPoll
 
+namespace dfki {
+namespace communication {
+
 class afAvahiClient;
+		
+}
+}
 
 #include <avahi-client/client.h>
 #include <sigc++/sigc++.h>
@@ -22,6 +28,8 @@ class afAvahiClient;
 #include "afThreadPoll.h"
 //#include "afServiceBrowser.h"
 
+namespace dfki {
+namespace communication {
 
 /**
  * @brief
@@ -72,5 +80,9 @@ public:
 	AvahiClient* getAvahiClient();
 
 };
+
+
+}
+}
 
 #endif /* AFAVAHICLIENT_H_ */

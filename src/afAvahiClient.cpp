@@ -11,6 +11,7 @@
 #include <cassert>
 
 using namespace std;
+using namespace dfki::communication;
 
 AvahiClient* afAvahiClient::getAvahiClient() {
 	return client;
