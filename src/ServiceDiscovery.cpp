@@ -1,9 +1,6 @@
-
-
 #include "ServiceDiscovery.h"
 
-using namespace std;
-using namespace dfki::communication;
+namespace dfki { namespace communication {
 
 ServiceDiscovery::ServiceDiscovery()
 {
@@ -19,7 +16,7 @@ void ServiceDiscovery::start()
 	client = new afAvahiClient();
 	browser = new afServiceBrowser(client, conf.avahi_type);
 	
-	localserv = new OrocosComponentLocalService(client, conf.name, conf.avahi_type, IOR, conf.stringlist, ttl);
+	localserv = new OrocosComponentLocalService(client, conf.name, conf.avahi_type, conf.avahi_port, conf.IOR, conf.stringlist, conf.ttl);
 	
 	client->dispatch();
 	
@@ -32,9 +29,11 @@ void ServiceDiscovery::stop()
 {
 	client->stop();
 	
-	delete localserv();
-	delete browser();
-	delete client();
+	delete localserv;
+	delete browser;
+	delete client;
 	
 	started = false;
 }
+
+}}

@@ -1,6 +1,14 @@
 #ifndef __OROCOS_COMPONENT_SERVICE_H__
 #define __OROCOS_COMPONENT_SERVICE_H__
 
+#include <stdio.h>
+#include <cstdlib>
+#include <iostream>
+#include <vector>
+#include <string>
+#include <list>
+#include <sstream>
+
 #include "afService.h"
 #include "afLocalService.h"
 #include "afRemoteService.h"

@@ -1,23 +1,15 @@
-
-#include <cstdlib>
-#include <iostream>
-#include <vector>
-#include <string>
-#include <list>
-#include <sstream>
 #include "OrocosComponentService.h"
 
-using namespace std;
-using namespace dfki::communication;
+namespace dfki { namespace communication {
 
-OrocosComponentServiceBase::OrocosComponentServiceBase(list<string> &list)
+OrocosComponentServiceBase::OrocosComponentServiceBase(std::list<std::string> &list)
 {
 	
 	
 	int tokens = 0;
 	
 	{
-		std::list<string>::iterator it;
+		std::list<std::string>::iterator it;
 		for (it = list.begin() ; it != list.end() ; it++) {
 			if ((*it).substr(0, 8) == "IORSIZE=") {
 				tokens = atoi((*it).substr(8).c_str());
@@ -28,19 +20,19 @@ OrocosComponentServiceBase::OrocosComponentServiceBase(list<string> &list)
 	}
 	
 	if (tokens == 0) {
-		cerr << "OrocosComponentServiceBase: IOR not found in string list.\n";
+		std::cerr << "OrocosComponentServiceBase: IOR not found in string list.\n";
 		throw ior_not_in_list;
 	}
 	
-	vector<string> ior_vector(tokens, "");
+	std::vector<std::string> ior_vector(tokens, "");
 	for (int i = 0 ; i < tokens ; i++) {
-		std::list<string>::iterator it;
+		std::list<std::string>::iterator it;
 		for (it = list.begin() ; it != list.end() ; ++it) {
 			if ((*it).substr(0, 3) == "IOR") {
 				size_t found;
 				found = (*it).find("=");
 
-				if (found == string::npos) {
+				if (found == std::string::npos) {
 					continue;	
 				}
 				int ind = atoi( (*it).substr(3, (int) found - 3).c_str() );
@@ -55,10 +47,10 @@ OrocosComponentServiceBase::OrocosComponentServiceBase(list<string> &list)
 		}
 	}
 	
-	string ior_t = "";
+	std::string ior_t = "";
 	for (int i = 0 ; i < tokens ; i++) {
 		if (ior_vector[i] == "") {
-			cerr << "OrocosComponentServiceBase: incomplete IOR in string list\n";
+			std::cerr << "OrocosComponentServiceBase: incomplete IOR in string list\n";
 			throw ior_incomplete;
 		}
 		ior_t += ior_vector[i];
@@ -68,7 +60,7 @@ OrocosComponentServiceBase::OrocosComponentServiceBase(list<string> &list)
 	
 }
 
-OrocosComponentServiceBase::OrocosComponentServiceBase(string IOR, list<string> &list)
+OrocosComponentServiceBase::OrocosComponentServiceBase(std::string IOR, std::list<std::string> &list)
 {
 	
 	int size = IOR.size();
@@ -89,4 +81,4 @@ OrocosComponentServiceBase::OrocosComponentServiceBase(string IOR, list<string> 
 	
 }
 
-
+}} 

@@ -4,6 +4,7 @@
 #include <string>
 #include "afAvahiClient.h"
 #include "afServiceBrowser.h"
+#include "OrocosComponentService.h"
 
 namespace dfki { namespace communication {
 
@@ -48,9 +49,9 @@ private:
 
 	bool started;
 
-	afAvahiClient *client;
-	afServiceBrowser *browser;
-	OrocosComponentLocalService *localserv;
+	afAvahiClient* client;
+	afServiceBrowser* browser;
+	OrocosComponentLocalService* localserv;
 
 	struct Configuration conf;
 
