@@ -22,6 +22,11 @@ class afServiceBrowser;
 #include "afRemoteService.h"
 #include "afAvahiClient.h"
 #include "afList.h"
+#include "afService.h"
+#include <iostream>
+#include <map>
+#include <list>
+#include <string>
 
 
 namespace dfki {
@@ -63,7 +68,7 @@ private:
 
 	void bootstrap();
 
-	afList<afRemoteService *> services;
+	afList<afRemoteService> services;
 
 	const char* getInType() {
 		return type.c_str();
@@ -105,15 +110,21 @@ public:
 //		void*> afServiceBrowserSignal;
 
 	/** signal for addition of a service */
-	sigc::signal<void, afRemoteService*> afServiceAdded;
+	sigc::signal<void, afRemoteService> afServiceAdded;
 
 	/** signal for removal of a service */
 	sigc::signal<void,
 		afRemoteService> afServiceRemoved;
 
-    afList<afRemoteService*> *getServices()
+    afList<afRemoteService> getServices()
     {
-        return &services;
+        return services;
+    }
+    
+    //to be used only by the static callbacks. TODO: how to avoid this to be public
+    afList<afRemoteService> *getInternalServices()
+    {
+    	return &services;
     }
 
     AvahiServiceBrowser* getAvahiBrowser()

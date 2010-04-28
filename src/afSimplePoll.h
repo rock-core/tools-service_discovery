@@ -10,6 +10,7 @@
 
 #include "afPoll.h"
 #include <avahi-common/simple-watch.h>
+#include <iostream>
 
 namespace dfki {
 namespace communication {

@@ -67,8 +67,9 @@ class OrocosComponentRemoteService : public OrocosComponentServiceBase , public 
 			uint16_t port,
 			std::string host_name,
 			AvahiAddress address,
-			AvahiServiceResolver *sr
-	) : OrocosComponentServiceBase(list), afRemoteService(browser, interf, prot, name, type, domain ,list, port, host_name, address, sr) {}
+			AvahiServiceResolver *sr,
+			sigc::signal<void, afRemoteService> *afrms
+	) : OrocosComponentServiceBase(list), afRemoteService(browser, interf, prot, name, type, domain ,list, port, host_name, address, sr, afrms) {}
 	virtual ~OrocosComponentRemoteService() {}
 	
 };

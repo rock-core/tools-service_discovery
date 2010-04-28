@@ -7,11 +7,12 @@
 #include <iostream>
 #include <service-discovery/afAvahiFramework.h>
  
-void testAdded (afRemoteService* rms) {
-	std::cout << " -=- TESTING SIGNAL: ADDED SERVICE: " << rms->getName() << std::endl;
+
+void testAdded (dfki::communication::afRemoteService rms) {
+	std::cout << " -=- TESTING SIGNAL: ADDED SERVICE: " << rms.getName() << std::endl;
 }
 
-void testRemoved (afRemoteService rms) {
+void testRemoved (dfki::communication::afRemoteService rms) {
 	std::cout << " -=- TESTING SIGNAL: REMOVED SERVICE: " << rms.getName() << std::endl;
 }
 
@@ -20,10 +21,10 @@ int main(int argc, char** argv)
 {
 	
 	//create a client with default constructor with threaded poll
-	afAvahiClient client;
+	dfki::communication::afAvahiClient client;
 	
 	//create a service browser
-	afServiceBrowser sbrowser(&client, "_rimres._tcp");
+	dfki::communication::afServiceBrowser sbrowser(&client, "_rimres._tcp");
 
 	//connect a callback to the service added signal. Method can also be a class member. Look at sigc++ api
 	sbrowser.afServiceAdded.connect(sigc::ptr_fun(testAdded));
@@ -34,7 +35,7 @@ int main(int argc, char** argv)
 	//publish a sample service to test the callbacks
 	std::list<std::string> strlst;
 	strlst.push_back("service_year=1999");
-	afLocalService serv(&client, "MyTestService", "_rimres._tcp", 10000, strlst);
+	dfki::communication::afLocalService serv(&client, "MyTestService", "_rimres._tcp", 10000, strlst);
 	
 	//run the main event loop (in this case in a different thread because default poll is afThreadPoll, so it program will continue normal execution)
 	client.dispatch();
@@ -43,19 +44,19 @@ int main(int argc, char** argv)
 	
 	//print services
 	std::cout << "PRINTING SERVICES:\n";
-	afList<afRemoteService*> *services = sbrowser.getServices();
-	afList<afRemoteService*>::iterator it;
-	for (it = services->begin() ; it != services->end() ; it++) {
-		std::cout << "     SERVICE: " << (*it)->getName() << " " << (*it)->getType() << " " << (*it)->getInterface() << std::endl;
+	dfki::communication::afList<dfki::communication::afRemoteService> services = sbrowser.getServices();
+	dfki::communication::afList<dfki::communication::afRemoteService>::iterator it;
+	for (it = services.begin() ; it != services.end() ; it++) {
+		std::cout << "     SERVICE: " << (*it).getName() << " " << (*it).getType() << " " << (*it).getInterface() << std::endl;
 	}
 	std::cout << "FINISHED PRINTING SERVICES.\n";
 	
 	sleep(2);
 	
 	//unpublish the service and check for the signal. first must lock the object to prevent concurrency issues
-	((afThreadPoll*)client.getPoll())->lock();
+	((dfki::communication::afThreadPoll*)client.getPoll())->lock();
 	serv.unpublish();
-	((afThreadPoll*)client.getPoll())->unlock();
+	((dfki::communication::afThreadPoll*)client.getPoll())->unlock();
 	
 	sleep(2);
 	

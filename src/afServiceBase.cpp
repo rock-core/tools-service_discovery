@@ -6,10 +6,8 @@
  */
 
 #include "afServiceBase.h"
-#include <iostream>
 
-using namespace std;
-using namespace dfki::communication;
+namespace dfki { namespace communication {
 
 afServiceBase::afServiceBase(
 			afAvahiClient *client,
@@ -20,7 +18,7 @@ afServiceBase::afServiceBase(
 			std::string domain
 			) {
 	if (!client) {
-		cerr << "Client pointer NULL\n";
+		std::cerr << "Client pointer NULL\n";
 		throw 0; //TODO do sth else
 	}
 	this->client = client;
@@ -49,3 +47,5 @@ bool afServiceBase::operator==(afServiceBase comp) {
 		return false;
 	return true;
 }
+
+}}

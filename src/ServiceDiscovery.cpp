@@ -2,15 +2,20 @@
 
 namespace dfki { namespace communication {
 
-ServiceDiscovery::ServiceDiscovery()
+ServiceDiscovery::ServiceDiscovery() : conf("", "", "")
 {
-	started = false;	
+	started = false;
+	configured = false;	
 }
 
 void ServiceDiscovery::start()
 {
 	if (started) {
-		return;
+		throw already_started;
+	}
+	
+	if (!configured) {
+		throw not_configured;
 	}
 	
 	client = new afAvahiClient();
@@ -23,6 +28,11 @@ void ServiceDiscovery::start()
 	//TODO: make it resistant to client failures
 	started = true;
 	
+}
+
+void ServiceDiscovery::configure(const struct Configuration& configuration) {
+	conf = configuration;
+	configured = true;
 }
 
 void ServiceDiscovery::stop()

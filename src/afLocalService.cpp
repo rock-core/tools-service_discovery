@@ -7,13 +7,8 @@
  */
 
 #include "afLocalService.h"
-#include <list>
-#include <string>
-#include <iostream>
-#include <avahi-client/publish.h>
 
-using namespace std;
-using namespace dfki::communication;
+namespace  dfki { namespace communication {
 
 afLocalService::~afLocalService() {
 	if (group) {
@@ -64,13 +59,13 @@ int afLocalService::publish()
 {
 
 	if (!getClient()) {
-		cerr << "Client pointer is NULL\n";
+		std::cerr << "Client pointer is NULL\n";
 		return -1;
 	}
 
 
 	if (group) {
-		cerr << "AvahiEntryGroup pointer not null. Already published?\n";
+		std::cerr << "AvahiEntryGroup pointer not null. Already published?\n";
 		return -2;
 	}
 
@@ -81,7 +76,7 @@ int afLocalService::publish()
 	cerr << "INFO: avahi API is not patched for custom TTL\n";
 	if (!(group = avahi_entry_group_new(getClient()->getAvahiClient(), entry_group_callback, this))) {
 #endif	
-		cerr << "Failed to create entry group: " << avahi_strerror(avahi_client_errno(getClient()->getAvahiClient())) << endl;
+		std::cerr << "Failed to create entry group: " << avahi_strerror(avahi_client_errno(getClient()->getAvahiClient())) << std::endl;
         return -3;
     }
    
@@ -98,13 +93,13 @@ int afLocalService::publish()
 				getPort(),
 				getTxt())) < 0) {
 
-		cerr << "Failed to add service: " << avahi_strerror(ret) << endl;
+		std::cerr << "Failed to add service: " << avahi_strerror(ret) << std::endl;
 		unpublish();
 		return -4;
 	}
 	
     if ((ret = avahi_entry_group_commit(group)) < 0) {
-    	cerr << "Failed to commit entry group: " << avahi_strerror(ret) << endl;
+    	std::cerr << "Failed to commit entry group: " << avahi_strerror(ret) << std::endl;
     	unpublish();
     	return -5;
     }
@@ -126,21 +121,21 @@ void afLocalService::entry_group_callback(AvahiEntryGroup *g, AvahiEntryGroupSta
 	afLocalService* ls = (afLocalService*) userdata;
     switch (state) {
         case AVAHI_ENTRY_GROUP_ESTABLISHED :
-            cout << "SERVICE: " << ls->getName() << " ESTABLISHED\n";
+            std::cout << "SERVICE: " << ls->getName() << " ESTABLISHED\n";
             break;
 
         case AVAHI_ENTRY_GROUP_COLLISION : {
-			cerr << "Service collision for service: " << ls->getType() << " : " << ls->getName() << endl;
+			std::cerr << "Service collision for service: " << ls->getType() << " : " << ls->getName() << std::endl;
             break;
         }
 
         case AVAHI_ENTRY_GROUP_FAILURE :
-        	cerr
+        	std::cerr
 				<< "Entry group for service: "
 				<< ls->getName()
 				<< " failed: "
 				<<  avahi_strerror(avahi_client_errno(avahi_entry_group_get_client(g)))
-				<< endl;
+				<< std::endl;
             break;
 
         case AVAHI_ENTRY_GROUP_UNCOMMITED:
@@ -149,9 +144,9 @@ void afLocalService::entry_group_callback(AvahiEntryGroup *g, AvahiEntryGroupSta
     }
 }
 
-int afLocalService::updateStringList(list<string> listn) {
+int afLocalService::updateStringList(std::list<std::string> listn) {
 	if (!group) {
-		cerr << "Entry group not found for updating string list\n";
+		std::cerr << "Entry group not found for updating string list\n";
 		return -1;
 	}
 	
@@ -167,7 +162,7 @@ int afLocalService::updateStringList(list<string> listn) {
 				getType().c_str(),
 				getDomainChar(),
 				list)) < 0) {
-		cerr << "Failed to update txt for service: " << avahi_strerror(res) << endl;
+		std::cerr << "Failed to update txt for service: " << avahi_strerror(res) << std::endl;
 		return -2;
 	}
 	
@@ -177,3 +172,5 @@ int afLocalService::updateStringList(list<string> listn) {
 	return 0;
 	
 }
+
+}}

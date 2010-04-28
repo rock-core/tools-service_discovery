@@ -7,10 +7,7 @@
 
 #include "afRemoteService.h"
 
-#include <iostream>
-
-using namespace std;
-using namespace dfki::communication;
+namespace dfki { namespace communication {
 
 afRemoteService::afRemoteService(
 			afServiceBrowser *browser,
@@ -23,11 +20,15 @@ afRemoteService::afRemoteService(
 			uint16_t port,
 			std::string host_name,
 			AvahiAddress address,
-			AvahiServiceResolver *sr
+			AvahiServiceResolver *sr,
+			sigc::signal<void,
+		afRemoteService> *afRemoteServiceSignal
+
 	) : afService(browser->getClient(), interf, prot, name, type, domain, port, list) {
 	this->host_name = host_name;
 	this->address = address;
 	this->sr = sr;
+	this->afRemoteServiceSignal = afRemoteServiceSignal;
 }
 
 afRemoteService::~afRemoteService() {
@@ -47,4 +48,5 @@ bool afRemoteService::operator ==(afRemoteService serv) {
 	return true;
 }
 
+}}
 

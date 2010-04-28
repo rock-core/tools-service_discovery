@@ -7,9 +7,9 @@
 
 #include "afThreadPoll.h"
 
-#include <avahi-common/thread-watch.h>
 
-using namespace dfki::communication;
+namespace dfki { namespace communication {
+
 
 afThreadPoll::afThreadPoll() {
 	poll = avahi_threaded_poll_new();
@@ -34,4 +34,7 @@ void afThreadPoll::dispatch()
 const AvahiPoll* afThreadPoll::getAvahiPoll() {
 	return avahi_threaded_poll_get(poll);
 }
+
+
+}}
 

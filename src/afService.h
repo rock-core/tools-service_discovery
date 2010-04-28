@@ -11,6 +11,7 @@
 #include <avahi-client/lookup.h>
 #include <string>
 #include <list>
+#include <iostream>
 
 namespace dfki { namespace communication {
 

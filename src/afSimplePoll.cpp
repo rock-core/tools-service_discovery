@@ -6,9 +6,8 @@
  */
 
 #include "afSimplePoll.h"
-#include <iostream>
 
-using namespace dfki::communication;
+namespace dfki { namespace communication {
 
 afSimplePoll::afSimplePoll() {
 	poll = avahi_simple_poll_new();
@@ -31,3 +30,5 @@ void afSimplePoll::stop() {
 const AvahiPoll* afSimplePoll::getAvahiPoll() {
 	return avahi_simple_poll_get(poll);
 }
+
+}}

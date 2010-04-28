@@ -22,6 +22,8 @@ class afAvahiClient;
 #include <sigc++/sigc++.h>
 
 #include <string>
+#include <iostream>
+#include <cassert>
 
 #include "afPoll.h"
 #include "afSimplePoll.h"

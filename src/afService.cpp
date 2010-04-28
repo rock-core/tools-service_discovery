@@ -7,18 +7,14 @@
 
 #include "afService.h"
 
-#include <list>
-#include <string>
-#include <iostream>
 
-using namespace std;
-using namespace dfki::communication;
+namespace dfki { namespace communication {
 
-AvahiStringList* afService::getTxt(list<string> lst)
+AvahiStringList* afService::getTxt(std::list<std::string> lst)
 {
 	AvahiStringList *stxt = NULL;
 	if(lst.size() > 0) {
-		list<string>::iterator it;
+		std::list<std::string>::iterator it;
 		it = lst.begin();
 		stxt = avahi_string_list_new((*it).c_str(), NULL);
 		it++;
@@ -31,7 +27,7 @@ AvahiStringList* afService::getTxt(list<string> lst)
 
 afService::afService(const afService& serv) : afServiceBase((const afServiceBase&) serv)
 {
-	this->stringlist = list<string>(serv.getStringList());
+	this->stringlist = std::list<std::string>(serv.getStringList());
 	//create avahistringlist from a list<string>
 	//this is done to prevent using the same instance of avahistringlist on object copy and then deleting it on the destruction of the object
 	this->txt = afService::getTxt(serv.getStringList());
@@ -47,7 +43,7 @@ afService::afService(
 			std::string type,
 			std::string domain,
 			uint16_t port,
-			list<string> strlist
+			std::list<std::string> strlist
 			) : afServiceBase(client, interf, prot, name, type, domain) {
 	this->port = port;
 	this->dontCheckTXT = false;
@@ -74,3 +70,6 @@ bool afService::operator==(afService comp) {
 	}
 	return true;
 }
+
+}}
+

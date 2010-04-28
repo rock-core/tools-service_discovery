@@ -10,8 +10,8 @@
 #include <iostream>
 #include <cassert>
 
-using namespace std;
-using namespace dfki::communication;
+
+namespace dfki {namespace communication {
 
 AvahiClient* afAvahiClient::getAvahiClient() {
 	return client;
@@ -28,7 +28,7 @@ afAvahiClient::afAvahiClient() {
 	client = avahi_client_new(poll->getAvahiPoll(), (AvahiClientFlags) 0, NULL, NULL, &error);
 	//if creation of client is not immediately successful throw error 
 	if (!client) {
-		cerr << "Failed to create client: " << avahi_strerror(error) << endl;
+		std::cerr << "Failed to create client: " << avahi_strerror(error) << std::endl;
         throw 0; //TODO: do sth else
 	}
 }
@@ -41,7 +41,7 @@ afAvahiClient::afAvahiClient(afPoll *poll, AvahiClientFlags flags)
 	client = avahi_client_new(poll->getAvahiPoll(), flags, NULL, NULL, &error);
 	//if creation of client is not immediately successful throw error 
 	if (!client) {
-		cerr << "Failed to create client: " << avahi_strerror(error) << endl;
+		std::cerr << "Failed to create client: " << avahi_strerror(error) << std::endl;
         throw 0; //TODO: do sth else
 	}
 }
@@ -61,7 +61,9 @@ void afAvahiClient::dispatch() {
 }
 
 void afAvahiClient::stop() {
-	cout << "STOPING" << endl;
+	std::cout << "STOPING" << std::endl;
 	poll->stop();
-	cout << "STOPED" << endl;
+	std::cout << "STOPED" << std::endl;
 }
+
+}}

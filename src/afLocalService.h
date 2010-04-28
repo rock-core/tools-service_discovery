@@ -11,6 +11,9 @@
 #include "afAvahiClient.h"
 #include "afService.h"
 #include <avahi-client/publish.h>
+#include <list>
+#include <string>
+#include <iostream>
 
 namespace dfki {
 namespace communication {

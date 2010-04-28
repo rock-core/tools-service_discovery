@@ -20,6 +20,8 @@ class afRemoteService;
 #include "afService.h"
 #include "afServiceBrowser.h"
 #include <avahi-client/lookup.h>
+#include <iostream>
+
 
 //typedef sigc::slot<void,
 //	afRemoteService*,
@@ -53,6 +55,13 @@ protected:
 	 * avahi service resolver object
 	 */
 	AvahiServiceResolver *sr;
+	
+	/**
+	 * signal  
+	 */
+	sigc::signal<void,
+		afRemoteService> *afRemoteServiceSignal;
+	 
 public:
 
 	//the data used in the service browser. pointer also used here so that the memory is freed along with the service resolver
@@ -69,19 +78,34 @@ public:
 			uint16_t port,
 			std::string host_name,
 			AvahiAddress address,
-			AvahiServiceResolver *sr
+			AvahiServiceResolver *sr,
+			sigc::signal<void,
+		afRemoteService> *afrms
+
 	);
 	virtual ~afRemoteService();
 
-	//signal for avahi resolver event. TODO this is not implemented yet, and needs to be encapsulated
-//	sigc::signal<void,
-//		afRemoteService*,
-//		AvahiResolverEvent,
-//		AvahiLookupResultFlags,
-//		void*> afAvahiRemoteServiceSignal;
-	sigc::signal<void,
-		afRemoteService*> afRemoteServiceSignal;
-
+	bool attachSlot(const sigc::slot<void, afRemoteService>& slot_) {
+		if (!afRemoteServiceSignal) {
+			return false;
+		}
+		afRemoteServiceSignal->connect(slot_);
+		return true;
+	}
+	
+	//to be used only by the service browser. TODO: avoid public use
+	void emitSignal() {
+		if (afRemoteServiceSignal) {
+			afRemoteServiceSignal->emit(*this);
+		}
+	}
+	//to be used only by the service browser. TODO: avoid public use
+	void freeSignal() {
+		if (afRemoteServiceSignal) {
+			delete afRemoteServiceSignal;
+		}
+	}
+	
     AvahiAddress getAddress() const
     {
         return address;

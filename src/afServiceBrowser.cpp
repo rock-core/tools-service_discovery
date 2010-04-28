@@ -6,14 +6,8 @@
  */
 
 #include "afServiceBrowser.h"
-#include "afService.h"
-#include <iostream>
-#include <map>
-#include <list>
-#include <string>
 
-using namespace std;
-using namespace dfki::communication;
+namespace dfki { namespace communication {
 
 void afServiceBrowser::bootstrap() {
 	browser = avahi_service_browser_new(
@@ -26,7 +20,7 @@ void afServiceBrowser::bootstrap() {
 				browseCallback,
 				this);
 	if (!browser) {
-		cerr << "Failed to create avahi service browser: " << avahi_strerror(avahi_client_errno(client->getAvahiClient()));
+		std::cerr << "Failed to create avahi service browser: " << avahi_strerror(avahi_client_errno(client->getAvahiClient())) << std::endl;
 		throw 0; //TODO improve this
 	}
 	serviceResolveTryCount = 5;
@@ -54,19 +48,30 @@ afServiceBrowser::afServiceBrowser(afAvahiClient *client, std::string type) {
 	this->bootstrap();
 }
 
+void freeAfRemoteService(afRemoteService srv) {
+	AvahiServiceResolver *sr;
+	sr = srv.getServiceResolver();
+	if (sr)
+		avahi_service_resolver_free(sr);
+
+	//delete the object used to count failed attempts						
+	ResolveData *sdata = srv.resolveData;
+	if (sdata) {
+		delete sdata;
+	}
+	
+	//remove the signal object
+	srv.freeSignal();
+
+}
+
 afServiceBrowser::~afServiceBrowser() {
 	if (browser)
 		avahi_service_browser_free(browser);
-	list<afRemoteService*>::iterator it;
+	std::list<afRemoteService>::iterator it;
 	//free service resolvers
 	for (it = services.begin() ; it != services.end(); ++it) {
-		if (*it) {
-			AvahiServiceResolver *sr;
-			sr = (*it)->getServiceResolver();
-			if (sr)
-				avahi_service_resolver_free(sr);
-			delete (*it);
-		}
+		freeAfRemoteService((*it));
 	}
 }
 
@@ -88,15 +93,15 @@ void afServiceBrowser::resolveCallback(AvahiServiceResolver *sr, AvahiIfIndex in
     {
         // if found service cannot be resolved, throw an error
         case AVAHI_RESOLVER_FAILURE:
-            cerr << "RESOLVER failed to resolve service" << name << " of type " << type << " in domain " << domain << endl;
-            cerr << "Error: " << avahi_strerror(avahi_client_errno(avahi_service_resolver_get_client(sr))) << endl;
+            std::cerr << "RESOLVER failed to resolve service" << name << " of type " << type << " in domain " << domain << std::endl;
+            std::cerr << "Error: " << avahi_strerror(avahi_client_errno(avahi_service_resolver_get_client(sr))) << std::endl;
             if (data->count >= sb->serviceResolveTryCount) {
-            	cerr << "Failed attempts to resolve this service has exceeded the limit. Service resolver object freed.\n";
+            	std::cerr << "Failed attempts to resolve this service has exceeded the limit. Service resolver object freed.\n";
             	delete data;
 	            avahi_service_resolver_free(sr);
             } else {
             	data->count = data->count + 1;
-            	cerr << "Failed attempt " << data->count << " out of " << sb->serviceResolveTryCount << endl;
+            	std::cerr << "Failed attempt " << data->count << " out of " << sb->serviceResolveTryCount << std::endl;
             }
             break;
 
@@ -106,13 +111,13 @@ void afServiceBrowser::resolveCallback(AvahiServiceResolver *sr, AvahiIfIndex in
 			//reset the counter for retries
 			data->count = 0;
 
-			string sname(name);
-			string stype(type);
-			string sdomain(domain);
-			string shost(host);
+			std::string sname(name);
+			std::string stype(type);
+			std::string sdomain(domain);
+			std::string shost(host);
 
 			//create the additional info string list
-			list<string> strlist;
+			std::list<std::string> strlist;
 			AvahiStringList *tmp = txt;
 			while (tmp != NULL) {
 				strlist.push_back((const char*) tmp->text);
@@ -120,33 +125,33 @@ void afServiceBrowser::resolveCallback(AvahiServiceResolver *sr, AvahiIfIndex in
 			}
 
 
-            afRemoteService *rms = new afRemoteService(sb, interface, protocol, sname, stype, sdomain, strlist, port, shost, *address, sr);
-            rms->resolveData = data;
-			cout << "SERVICE RESOLVED: " << rms->getInterface() << " " << rms->getProtocol() << " " << rms->getName() << " " << rms->getType() << " " << rms->getDomain() << " ; ";
+            afRemoteService rms(sb, interface, protocol, sname, stype, sdomain, strlist, port, shost, *address, sr, new sigc::signal<void, afRemoteService>());
+            rms.resolveData = data;
+			std::cout << "SERVICE RESOLVED: " << rms.getInterface() << " " << rms.getProtocol() << " " << rms.getName() << " " << rms.getType() << " " << rms.getDomain() << " ; ";
 			
 			
-            if (!sb->getServices()->find(*rms)) {
+            if (!sb->getInternalServices()->find(rms)) {
 
-				rms->dontCheckTXT = true;
+				rms.dontCheckTXT = true;
 				afRemoteService *srv;
-				if (srv = sb->getServices()->find(*rms)) {
+				if (srv = sb->getInternalServices()->find(rms)) {
 	
-					cout << "SERVICE ALREADY IN DB, BUT TXT RECORD HAS CHANGED\n";
-					srv->afRemoteServiceSignal.emit(srv);
+					std::cout << "SERVICE ALREADY IN DB, BUT TXT RECORD HAS CHANGED\n";
+					srv->emitSignal();
 					
 				} else {
 					
-					rms->dontCheckTXT = false;
-		        	sb->getServices()->push_back(rms);
-		            cout << "SERVICE ADDED: SIGNAL TO " << sb->afServiceAdded.size() << " SLOTS" << endl;
+					rms.dontCheckTXT = false;
+		        	sb->getInternalServices()->push_back(rms);
+		            std::cout << "SERVICE ADDED: SIGNAL TO " << sb->afServiceAdded.size() << " SLOTS" << std::endl;
 	            	sb->afServiceAdded.emit(rms);
 				}
 
             } else {
-	            cout << "SERVICE NOT ADDED (ALREADY IN DB)" << endl;
+	            std::cout << "SERVICE NOT ADDED (ALREADY IN DB)" << std::endl;
             }
 
-//			printls(*(sb->getServices()));
+//			printls(*(sb->getInternalServices()));
 
 
             break;
@@ -167,12 +172,12 @@ void afServiceBrowser::browseCallback(AvahiServiceBrowser *sb, AvahiIfIndex inte
     {
         // if browser failure occurs, throw an error
         case AVAHI_BROWSER_FAILURE:
-            cerr << "BROWSER failed. Error: " << avahi_strerror(avahi_client_errno(client));
+            std::cerr << "BROWSER failed. Error: " << avahi_strerror(avahi_client_errno(client)) << std::endl;
             break;
 
         // if browser finds a new service
         case AVAHI_BROWSER_NEW:
-        	cout << "NEW SERVICE FOUND" << endl;
+        	std::cout << "NEW SERVICE FOUND" << std::endl;
         	
         	ResolveData *tdata;
         	tdata = new ResolveData();
@@ -183,62 +188,51 @@ void afServiceBrowser::browseCallback(AvahiServiceBrowser *sb, AvahiIfIndex inte
             // try to resolve the new found service. If resolver object cannot be created, throw an error
             if (!(avahi_service_resolver_new(client, interface, protocol, name, type, domain, AVAHI_PROTO_UNSPEC, AvahiLookupFlags (0), resolveCallback, tdata)))
             {
-                cerr << "Failed to resolve service:" << name << ". Error: " << avahi_strerror(avahi_client_errno(client));
+                std::cerr << "Failed to resolve service:" << name << ". Error: " << avahi_strerror(avahi_client_errno(client)) << std::endl;
             }
             break;
 
         // if browser finds a service removal event
         case AVAHI_BROWSER_REMOVE:
-			cout << "REMOVING SERVICE: " << interface << " " << name << " " << type << " " << domain << " ...   ";
+			std::cout << "REMOVING SERVICE: " << interface << " " << name << " " << type << " " << domain << " ...   ";
         	{
 				bool removed = false;
-				string sname(name);
-				string stype(type);
-				string sdomain(domain);
+				std::string sname(name);
+				std::string stype(type);
+				std::string sdomain(domain);
 				afServiceBase serv(asb->getClient(), interface, protocol, sname, stype, sdomain);
-				list<afRemoteService*>::iterator it;
+				std::list<afRemoteService>::iterator it;
 				//find the signal to be removed
-				for (it = asb->getServices()->begin() ; it != asb->getServices()->end(); ++it) {
-					if ((afServiceBase) (**it) == serv) {
-						AvahiServiceResolver *sr;
-						sr = (*it)->getServiceResolver();
-						if (sr)
-							avahi_service_resolver_free(sr);
-						
-						
-						//delete the object used to count failed attempts						
-						ResolveData *sdata = (*it)->resolveData;
-						if (sdata) {
-							delete sdata;
-						}
+				for (it = asb->getInternalServices()->begin() ; it != asb->getInternalServices()->end(); ++it) {
+					if ((afServiceBase) (*it) == serv) {
 						
 						//emit the service removed signal
-						asb->afServiceRemoved.emit((*(*it)));
+						asb->afServiceRemoved.emit((*it));
 						
-						delete (*it);
-						asb->getServices()->erase(it);
+						freeAfRemoteService((*it));
+						
+						asb->getInternalServices()->erase(it);
 						removed = true;
 						break;
 					}
 				}
-				cout <<( (removed) ? "SERVICE REMOVED" : "SERVICE NOT REMOVED") << endl;
+				std::cout <<( (removed) ? "SERVICE REMOVED" : "SERVICE NOT REMOVED") << std::endl;
         	}
 
             break;
 
         case AVAHI_BROWSER_ALL_FOR_NOW:
-        	cout << "ALL_FOR_NOW" << endl;
+        	std::cout << "ALL_FOR_NOW" << std::endl;
 //            qDebug() << "ALL_FOR_NOW";
             break;
 
         case AVAHI_BROWSER_CACHE_EXHAUSTED:
-        	cout << "CACHE_EXHAUSTED" << endl;
+        	std::cout << "CACHE_EXHAUSTED" << std::endl;
 //            qDebug() << "CACHE_EXCHAUSTED";
             break;
     }
 }
 
-
-
+}}
 
 

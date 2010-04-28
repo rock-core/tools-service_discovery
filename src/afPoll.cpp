@@ -6,7 +6,8 @@
  */
 
 #include "afPoll.h"
-using namespace dfki::communication;
+
+namespace  dfki {namespace communication {
 
 afPoll::afPoll() {
 	// TODO Auto-generated constructor stub
@@ -16,3 +17,5 @@ afPoll::afPoll() {
 afPoll::~afPoll() {
 	// TODO Auto-generated destructor stub
 }
+
+}}

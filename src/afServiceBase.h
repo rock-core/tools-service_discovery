@@ -11,6 +11,7 @@
 
 #include <avahi-client/client.h>
 #include <string>
+#include <iostream>
 #include "afAvahiClient.h"
 
 namespace dfki {

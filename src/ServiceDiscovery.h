@@ -9,6 +9,11 @@
 namespace dfki { namespace communication {
 
 
+enum SDException {
+	already_started,
+	not_configured
+};
+
 /**
  * @brief
  * A wrapper class for the framework
@@ -23,6 +28,13 @@ public:
 	struct Configuration // : default configuration here
 	{
 	
+	
+		Configuration(std::string IOR, std::string name, std::string avahi_type) : avahi_port(12000), ttl(0) {
+			this->IOR = IOR;
+			this->name = name;
+			this->avahi_type = avahi_type;
+		}
+		
 		std::string IOR;
 		std::string name;
 
@@ -53,6 +65,7 @@ private:
 	afServiceBrowser* browser;
 	OrocosComponentLocalService* localserv;
 
+	bool configured;
 	struct Configuration conf;
 
 };
