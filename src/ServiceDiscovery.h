@@ -2,6 +2,7 @@
 #define RIMRES_SERVICEDISCOVERY_CORE_H_
 
 #include <string>
+#include <vector>
 #include "afAvahiClient.h"
 #include "afServiceBrowser.h"
 #include "OrocosComponentService.h"
@@ -18,7 +19,7 @@ enum SDException {
  * @brief
  * A wrapper class for the framework
  */
-class ServiceDiscovery
+class ServiceDiscovery : public sigc::trackable
 {
 
 public: 
@@ -33,6 +34,13 @@ public:
 			this->IOR = IOR;
 			this->name = name;
 			this->avahi_type = avahi_type;
+		}
+		Configuration(std::string IOR, std::string name, std::string avahi_type, uint16_t avahi_port, uint32_t ttl) {
+			this->IOR = IOR;
+			this->name = name;
+			this->avahi_type = avahi_type;
+			this->avahi_port = avahi_port;
+			this->ttl = ttl;
 		}
 		
 		std::string IOR;
@@ -53,11 +61,34 @@ public:
 	void start();
 
 	void stop();
-	
-	// return ior or alternate identifier
-	OrocosComponentRemoteService* findService(std::string pattern);
+
+	/**
+	 * name searches in service name and txt for txt records. both are "OR"-ed
+	 */
+	struct SearchPattern 
+	{
+		SearchPattern(std::string name) : txt("") {
+			this->name = name;
+		}
+
+		SearchPattern(std::string name, std::string txt) {
+			this->name = name;
+		}
+		std::string name;
+		std::string txt;
+	};
+		
+	std::vector<OrocosComponentRemoteService> findServices(SearchPattern pattern);
+
+	sigc::signal<void, OrocosComponentRemoteService> OrocosComponentAddedSignal;
+	sigc::signal<void, OrocosComponentRemoteService> OrocosComponentRemovedSignal;
 
 private:
+
+	void addedService(afRemoteService serv);
+	void removedService(afRemoteService serv);
+
+	afList<OrocosComponentRemoteService> services;
 
 	bool started;
 

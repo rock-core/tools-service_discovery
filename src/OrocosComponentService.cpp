@@ -2,9 +2,8 @@
 
 namespace dfki { namespace communication {
 
-OrocosComponentServiceBase::OrocosComponentServiceBase(std::list<std::string> &list)
+void OrocosComponentServiceBase::extractIOR(std::list<std::string> &list)
 {
-	
 	
 	int tokens = 0;
 	
@@ -60,7 +59,7 @@ OrocosComponentServiceBase::OrocosComponentServiceBase(std::list<std::string> &l
 	
 }
 
-OrocosComponentServiceBase::OrocosComponentServiceBase(std::string IOR, std::list<std::string> &list)
+void OrocosComponentServiceBase::insertIOR(std::string IOR, std::list<std::string> &list)
 {
 	
 	int size = IOR.size();
@@ -79,6 +78,33 @@ OrocosComponentServiceBase::OrocosComponentServiceBase(std::string IOR, std::lis
 		list.push_back( "IOR" + val + "=" + IOR.substr(200*i, 200) );
 	}
 	
+	this->IOR = IOR;
+	
 }
+
+bool OrocosComponentRemoteService::operator==(const OrocosComponentRemoteService& ors) 
+{
+	bool upres = (OrocosComponentServiceBase) (*this) == (OrocosComponentServiceBase) ors;
+	if (!upres) {
+		return false;
+	}
+	
+	upres = (afRemoteService) (*this) == (afRemoteService) ors;
+	if (!upres) {
+		return false;
+	}
+	
+	return true;
+}
+
+bool OrocosComponentServiceBase::operator==(OrocosComponentServiceBase ors) 
+{
+	if (IOR != ors.getIOR()) {
+		return false;
+	}
+	return true;
+}
+
+
 
 }} 

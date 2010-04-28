@@ -16,22 +16,37 @@ namespace communication {
 
 /**
  * an extension class to std::list which contains a special method for finding elements
- * in this framework, the below special case is used
  */
 template <class T>
 class afList : public std::list<T> {
 public:
-	T* find(T &x)
+	typename std::list<T>::iterator find(const T &x)
 	{
+	
 		typename std::list<T>::iterator it;
 		for (it = this->begin(); it != this->end(); it++) {
 			if ((*it) == x) {
-				return &(*it);
+				return it;
 			}
 		}
-		return NULL;
+		return this->end();
 
 	}
+	
+//	template <class D>
+//	typename std::list<T>::iterator findUpperClass(const D &x)
+//	{
+//	
+//		typename std::list<T>::iterator it;
+//		for (it = this->begin(); it != this->end(); it++) {
+//			if ((D) (*it) == x) {
+//				return it;
+//			}
+//		}
+//		return this->end();
+
+//	}
+
 };
 
 
@@ -42,16 +57,16 @@ template <>
 template <class T>
 class afList <T*> : public std::list<T*> {
 public:
-	T* find(T &x)
+	typename std::list<T>::iterator find(T &x)
 	{
 		typename std::list<T*>::iterator it;
 		for (it = this->begin() ; it != this->end(); it++) {
 			T* ptr = (*it);
 			if ((*ptr) == x) {
-				return (*it);
+				return it;
 			}
 		}
-		return NULL;
+		return this->end();
 	}
 };
 

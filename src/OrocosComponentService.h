@@ -22,17 +22,21 @@ enum OCSException {
 
 class OrocosComponentServiceBase {
 
-	private:
+	protected:
 		std::string IOR;
 
+		void extractIOR(std::list<std::string> &list);
+		void insertIOR(std::string IOR, std::list<std::string> &list);
+
 	public:
-	
-		OrocosComponentServiceBase(std::list<std::string> &list);
-		OrocosComponentServiceBase(std::string IOR, std::list<std::string> &list);
+		
+		OrocosComponentServiceBase() : IOR("") {}
 	
 		virtual ~OrocosComponentServiceBase() {}
 	
 		std::string getIOR() {return IOR;}
+		
+		bool operator==(OrocosComponentServiceBase);
 	
 };	
 
@@ -48,29 +52,41 @@ class OrocosComponentLocalService : public OrocosComponentServiceBase , public a
 			std::list<std::string> list,
 			uint32_t ttl=0,
 			bool publish=true
-	) : OrocosComponentServiceBase(IOR, list), afLocalService(client, name, type ,port, list, ttl, publish) {}
+	) : afLocalService(client, name, type ,port, list, ttl, false) {
+
+		//insert IOR into the string list
+		insertIOR(IOR, stringlist);
+		
+		//update the avahi string list
+		AvahiStringList* ntxt = getTxt(stringlist);
+		setTxt(ntxt);
+		
+		if (publish) {
+			this->publish();
+		}
+		
+	}
 	virtual ~OrocosComponentLocalService() {}
 	
 };
 
 class OrocosComponentRemoteService : public OrocosComponentServiceBase , public afRemoteService {
 
+
 	public:
-	OrocosComponentRemoteService(
-			afServiceBrowser *browser,
-			AvahiIfIndex interf,
-			AvahiProtocol prot,
-			std::string name,
-			std::string type,
-			std::string domain,
-			std::list<std::string> list,
-			uint16_t port,
-			std::string host_name,
-			AvahiAddress address,
-			AvahiServiceResolver *sr,
-			sigc::signal<void, afRemoteService> *afrms
-	) : OrocosComponentServiceBase(list), afRemoteService(browser, interf, prot, name, type, domain ,list, port, host_name, address, sr, afrms) {}
+	OrocosComponentRemoteService(afRemoteService &serv) :  afRemoteService(serv) {
+		
+		
+		extractIOR(stringlist);
+
+		AvahiStringList* ntxt = getTxt(stringlist);
+		setTxt(ntxt);
+		
+		
+	}
 	virtual ~OrocosComponentRemoteService() {}
+
+	bool operator==(const OrocosComponentRemoteService&);
 	
 };
 	

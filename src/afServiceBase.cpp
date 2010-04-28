@@ -34,16 +34,18 @@ afServiceBase::~afServiceBase() {
 	// TODO Auto-generated destructor stub
 }
 
-bool afServiceBase::operator==(afServiceBase comp) {
-	if (interface != comp.getInterface())
+bool afServiceBase::operator==(const afServiceBase& comp) {
+	if (interface != comp.getInterface() &&  !(interface == AVAHI_IF_UNSPEC || comp.getInterface() == AVAHI_IF_UNSPEC))
 		return false;
-	if (protocol != comp.getProtocol())
+	if (protocol != comp.getProtocol() && !( protocol == AVAHI_PROTO_UNSPEC || comp.getProtocol() == AVAHI_PROTO_UNSPEC))
 		return false;
 	if (name.compare(comp.getName()) != 0)
 		return false;
 	if (type.compare(comp.getType()) != 0)
 		return false;
-	if (domain.compare(comp.getDomain()) != 0)
+	std::string td1 = (domain == "" || domain == "local") ? "" : domain;
+	std::string td2 = (comp.getDomain() == "" || comp.getDomain() == "local") ? "" : comp.getDomain();
+	if (td1 != td2)
 		return false;
 	return true;
 }

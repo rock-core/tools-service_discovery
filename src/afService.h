@@ -65,7 +65,7 @@ public:
 			);
 	virtual ~afService();
 
-	bool operator==(afService);
+	bool operator==(const afService&);
 
     uint16_t getPort() const
     {

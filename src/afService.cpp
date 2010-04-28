@@ -27,7 +27,8 @@ AvahiStringList* afService::getTxt(std::list<std::string> lst)
 
 afService::afService(const afService& serv) : afServiceBase((const afServiceBase&) serv)
 {
-	this->stringlist = std::list<std::string>(serv.getStringList());
+	
+	this->stringlist = serv.getStringList();
 	//create avahistringlist from a list<string>
 	//this is done to prevent using the same instance of avahistringlist on object copy and then deleting it on the destruction of the object
 	this->txt = afService::getTxt(serv.getStringList());
@@ -58,7 +59,7 @@ afService::~afService() {
 		avahi_string_list_free(txt);
 }
 
-bool afService::operator==(afService comp) {
+bool afService::operator==(const afService& comp) {
 	bool upres = (afServiceBase) (*this) == (afServiceBase) comp;
 	if (!upres)
 		return false;

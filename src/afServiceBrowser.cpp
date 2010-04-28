@@ -68,7 +68,7 @@ void freeAfRemoteService(afRemoteService srv) {
 afServiceBrowser::~afServiceBrowser() {
 	if (browser)
 		avahi_service_browser_free(browser);
-	std::list<afRemoteService>::iterator it;
+	afList<afRemoteService>::iterator it;
 	//free service resolvers
 	for (it = services.begin() ; it != services.end(); ++it) {
 		freeAfRemoteService((*it));
@@ -130,14 +130,15 @@ void afServiceBrowser::resolveCallback(AvahiServiceResolver *sr, AvahiIfIndex in
 			std::cout << "SERVICE RESOLVED: " << rms.getInterface() << " " << rms.getProtocol() << " " << rms.getName() << " " << rms.getType() << " " << rms.getDomain() << " ; ";
 			
 			
-            if (!sb->getInternalServices()->find(rms)) {
+            if (sb->getInternalServices()->find(rms) == sb->getInternalServices()->end()) {
 
 				rms.dontCheckTXT = true;
-				afRemoteService *srv;
-				if (srv = sb->getInternalServices()->find(rms)) {
+				afList<afRemoteService>::iterator srv;
+				srv = sb->getInternalServices()->find(rms);
+				if (srv != sb->getInternalServices()->end()) {
 	
 					std::cout << "SERVICE ALREADY IN DB, BUT TXT RECORD HAS CHANGED\n";
-					srv->emitSignal();
+					(*srv).emitSignal();
 					
 				} else {
 					
@@ -201,7 +202,7 @@ void afServiceBrowser::browseCallback(AvahiServiceBrowser *sb, AvahiIfIndex inte
 				std::string stype(type);
 				std::string sdomain(domain);
 				afServiceBase serv(asb->getClient(), interface, protocol, sname, stype, sdomain);
-				std::list<afRemoteService>::iterator it;
+				afList<afRemoteService>::iterator it;
 				//find the signal to be removed
 				for (it = asb->getInternalServices()->begin() ; it != asb->getInternalServices()->end(); ++it) {
 					if ((afServiceBase) (*it) == serv) {

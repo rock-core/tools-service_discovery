@@ -85,6 +85,7 @@ public:
 	);
 	virtual ~afRemoteService();
 
+	//TODO: TODO: TODO: synchronize access to this object
 	bool attachSlot(const sigc::slot<void, afRemoteService>& slot_) {
 		if (!afRemoteServiceSignal) {
 			return false;
@@ -105,6 +106,11 @@ public:
 			delete afRemoteServiceSignal;
 		}
 	}
+	
+	sigc::signal<void, afRemoteService> * getSignal() {
+		return afRemoteServiceSignal;
+	}
+	
 	
     AvahiAddress getAddress() const
     {

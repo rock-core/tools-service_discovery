@@ -61,7 +61,7 @@ public:
 			);
 	virtual ~afServiceBase();
 
-	bool operator==(afServiceBase);
+	bool operator==(const afServiceBase&);
 
     std::string getDomain() const
     {

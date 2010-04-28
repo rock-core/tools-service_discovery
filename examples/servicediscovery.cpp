@@ -1,42 +1,50 @@
 
-#include <service-discovery/OrocosComponentService.h>
+#include <service-discovery/ServiceDiscovery.h>
+#include <stdlib.h>
 
 using namespace std;
 using namespace dfki::communication;
 
+void addedOrocosComponent(OrocosComponentRemoteService rms)
+{
+	std::cout << " -=- OROCOS Component found: " << rms.getName() << std::endl;
+}
+
 int main (int argc, char const* argv[])
 {
-	
-	list<string> ls;
-	ls.push_back("DSFDSF");
-	ls.push_back("23");
-	ls.push_back("IORSIZE=2");
-	ls.push_back("IOR1=prvdel");
-	ls.push_back("IOR2=vtordel");
-	
-	afAvahiClient client;
-	
-	afServiceBrowser browser(&client, "_rimres._tcp");
-	
-	AvahiAddress addr;
-	
-	OrocosComponentRemoteService rserv(&browser, AVAHI_IF_UNSPEC, AVAHI_PROTO_UNSPEC, "SDF", "_rimres._tcp", "", ls, 10000, "MYSHO", addr, NULL);
-	
-	cout << rserv.getIOR() << endl;
-	
-	OrocosComponentLocalService lserv(&client, "MyOrocosService", "_rimres._tcp", 10000, 
+
+	string IOR = 	
 			string("12345678901234567890123456789012345678901234567890") +
 			string("12345678901234567890123456789012345678901234567890") +
 			string("12345678901234567890123456789012345678901234567890") +
 			string("12345678901234567890123456789012345678901234567890") +
 			string("12345678901234567890123456789012345678901234567890") +
 			string("12345678901234567890123456789012345678901234567890") +
-			string("12345678901234567890123456789012345678901234567890"),
-		rserv.getStringList());
+			string("12345678901234567890123456789012345678901234567890");
 		
-	client.dispatch();
+	ServiceDiscovery servdesc;
+	ServiceDiscovery::Configuration conf(IOR, "SampleComponent" ,"_rimres._tcp");
+	servdesc.OrocosComponentAddedSignal.connect(sigc::ptr_fun(addedOrocosComponent));
+	servdesc.configure(conf);
+
+
+	ServiceDiscovery servdesc2;
+	ServiceDiscovery::Configuration conf2(IOR, "SampleComponent2" ,"_rimres._tcp");
+	servdesc2.configure(conf2);
 	
-	sleep(10);
+	servdesc.start();
+	
+	sleep(3);
+	servdesc2.start();
+	
+	sleep(5);
+	std::vector<OrocosComponentRemoteService> servs =  servdesc.findServices(ServiceDiscovery::SearchPattern("Sample"));
+	std::cout << " - Found services: " << servs.size() << std::endl;
+		
+	servdesc.stop();	
+	
+	sleep(3);
+	servdesc2.stop();
 	
 	return 0;
 }
