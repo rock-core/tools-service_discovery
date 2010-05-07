@@ -73,7 +73,7 @@ int afLocalService::publish()
 #ifdef __CUSTOM_TTL__
 	if (!(group = avahi_entry_group_new_custom_ttl(getClient()->getAvahiClient(), entry_group_callback, this, ttl))) {
 #else
-	cerr << "INFO: avahi API is not patched for custom TTL\n";
+	std::cerr << "INFO: avahi API is not patched for custom TTL\n";
 	if (!(group = avahi_entry_group_new(getClient()->getAvahiClient(), entry_group_callback, this))) {
 #endif	
 		std::cerr << "Failed to create entry group: " << avahi_strerror(avahi_client_errno(getClient()->getAvahiClient())) << std::endl;
