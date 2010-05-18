@@ -73,3 +73,4 @@ install(TARGETS ${PROJECT_NAME}
 	ARCHIVE DESTINATION lib
 )	
 
+add_subdirectory(examples)

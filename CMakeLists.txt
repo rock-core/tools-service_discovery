@@ -46,7 +46,4 @@ set(EXTERNAL_LIBS ${Boost_LIBRARIES} ${QT_LIBRARIES})
 # Process CMakeLists.txt in the following subdirectory
 add_subdirectory(src)
 
-# Build examples
-add_subdirectory(examples)
-
 
