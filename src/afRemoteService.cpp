@@ -6,8 +6,11 @@
  */
 
 #include "afRemoteService.h"
+#include <iostream>
 
 namespace dfki { namespace communication {
+
+static afLoggingWrapper logger("afRemoteService");
 
 afRemoteService::afRemoteService(
 			afServiceBrowser *browser,
@@ -29,11 +32,19 @@ afRemoteService::afRemoteService(
 	this->address = address;
 	this->sr = sr;
 	this->afRemoteServiceSignal = afRemoteServiceSignal;
+
+	if (sem_init(&afRMS_sem,0,1) == -1) {
+		logger.log(FATAL, "Semaphore initialization failed");
+		throw 1;
+	}
+	
 }
 
 afRemoteService::~afRemoteService() {
 
-	
+	if (sem_destroy(&afRMS_sem) == -1) {
+		logger.log(WARN, "Semaphore destruction failed");
+	}
 }
 
 

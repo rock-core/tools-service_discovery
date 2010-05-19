@@ -21,6 +21,7 @@ class afRemoteService;
 #include "afServiceBrowser.h"
 #include <avahi-client/lookup.h>
 #include <iostream>
+#include <semaphore.h>
 
 
 //typedef sigc::slot<void,
@@ -61,6 +62,11 @@ protected:
 	 */
 	sigc::signal<void,
 		afRemoteService> *afRemoteServiceSignal;
+
+	/**
+	 * semaphore for the afRemoteServiceSignal object
+	 */
+	sem_t afRMS_sem;
 	 
 public:
 
@@ -90,14 +96,18 @@ public:
 		if (!afRemoteServiceSignal) {
 			return false;
 		}
+		sem_wait(&afRMS_sem);
 		afRemoteServiceSignal->connect(slot_);
+		sem_post(&afRMS_sem);		
 		return true;
 	}
 	
 	//to be used only by the service browser. TODO: avoid public use
 	void emitSignal() {
 		if (afRemoteServiceSignal) {
+			sem_wait(&afRMS_sem);
 			afRemoteServiceSignal->emit(*this);
+			sem_post(&afRMS_sem);
 		}
 	}
 	//to be used only by the service browser. TODO: avoid public use
@@ -107,9 +117,9 @@ public:
 		}
 	}
 	
-	sigc::signal<void, afRemoteService> * getSignal() {
-		return afRemoteServiceSignal;
-	}
+//	sigc::signal<void, afRemoteService> * getSignal() {
+//		return afRemoteServiceSignal;
+//	}
 	
 	
     AvahiAddress getAddress() const

@@ -40,23 +40,24 @@ set(SOURCES
     afServiceBrowser.cpp
     afSimplePoll.cpp
     afThreadPoll.cpp
+    afLoggingWrapper.cpp
     OrocosComponentService.cpp
     ServiceDiscovery.cpp
 )
 
-set(HEADERS
-    afAvahiFramework.h
-    afAvahiClient.h
-    afList.h
-    afLocalService.h
-    afPoll.h
-    afRemoteService.h
-    afService.h
-    afServiceBase.h
-    afServiceBrowser.h
-    afSimplePoll.h
-    afThreadPoll.h
-)
+#set(HEADERS
+#    afAvahiFramework.h
+#    afAvahiClient.h
+#    afList.h
+#    afLocalService.h
+#    afPoll.h
+#    afRemoteService.h
+#    afService.h
+#    afServiceBase.h
+#    afServiceBrowser.h
+#    afSimplePoll.h
+#    afThreadPoll.h
+#)
 
 
 include_directories(${AVAHI_INCLUDES} ${SIGC++_INCLUDES})

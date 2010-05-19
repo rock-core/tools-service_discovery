@@ -19,5 +19,7 @@
 #include "afPoll.h"
 #include "afSimplePoll.h"
 #include "afThreadPoll.h"
+#include "afConfiguration.h"
+#include "afLoggingWrapper.h"
 
 #endif

@@ -13,6 +13,12 @@ void addedOrocosComponent(OrocosComponentRemoteService rms)
 int main (int argc, char const* argv[])
 {
 
+#ifdef AVAHI_ALLOW_LOOPBACK
+	std::cout << "AVAHI_ALLOW_LOOPBACK defined\n";
+#else
+	std::cout << "AVAHI_ALLOW_LOOPBACK undefined\n";
+#endif
+
 	string IOR = 	
 			string("12345678901234567890123456789012345678901234567890") +
 			string("12345678901234567890123456789012345678901234567890") +

@@ -2,6 +2,8 @@
 
 namespace dfki { namespace communication {
 
+static afLoggingWrapper logger ("ServiceDiscovery");
+
 ServiceDiscovery::ServiceDiscovery() : conf("", "", "")
 {
 	client = NULL;
@@ -88,7 +90,7 @@ void ServiceDiscovery::addedService(afRemoteService rms)
 		
 			
 	} catch(OCSException e) {
-		std::cerr << "Failed to create orocos component service from remote service object.\n";
+		logger.log(WARN, "Failed to create orocos component service from remote service object");
 	}
 }
 
