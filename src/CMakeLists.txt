@@ -41,6 +41,7 @@ set(SOURCES
     afSimplePoll.cpp
     afThreadPoll.cpp
     afLoggingWrapper.cpp
+    afConfigurator.cpp
     OrocosComponentService.cpp
     ServiceDiscovery.cpp
 )

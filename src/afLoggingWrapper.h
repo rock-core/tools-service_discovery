@@ -14,10 +14,8 @@
 #undef error
 #undef info
 
-//#ifdef LOGGER_EXTERNAL_		
 #include <log4cxx/logger.h>
 #include <log4cxx/propertyconfigurator.h>
-//#endif
 
 #include <string>
 #include <stdio.h>
@@ -35,7 +33,9 @@ using namespace std;
 
 namespace dfki { namespace communication {
 
-	enum Priority	{ FATAL, ERROR, WARN, INFO, DEBUG, TRACE, NOTSET };
+	enum Priority	{ FATAL, ERROR, WARN, INFO, DEBUG
+//	, TRACE, NOTSET 
+	};
 
 	/**
 	 * @class LoggingWrapper
@@ -68,47 +68,18 @@ namespace dfki { namespace communication {
  		*/
 		void log(Priority priority, const char* format, ...);
 
-//		/**
-//		 * Activates the local logging
-//		 */
-//		void activateLocalLogging();
-//		/**
-//		 * Deactivates the local logging
-//		 */
-//		void deactivateLocalLogging();
 
 		/**
 		 * specified where to be logged locally. Note that local logging has to be activated.
 		 */
 		void setLocalOutputs(bool file, bool console);
 
-//		/**
-//		 * Activates the remote logging
-//		 */
-//		void activateRemoteLogging();
-//		/**
-//		 * Deactivates the remote logging
-//		 */
-//		void deactivateRemoteLogging();
-		
-//		/**
-// 		* Set the asynchronous error handler, so that error message can 
-// 		* be forwarded to the control center
-// 		* @param process
-// 		*/
-//		void setAsyncErrorHandler(IScoutSubSystemProcess* process);
 
 	private:
 		std::string classname_;
 
-//		bool isLocalLoggingActive;
-//		bool isRemoteLoggingActive;
-		
-//		#ifdef LOGGER_EXTERNAL_
 		log4cxx::LoggerPtr logger_;
-//		#endif
 
-//		static Lunares::IScoutSubSystemProcess* asyncErrorHandler_;
 	};
 
 }} // end namespace
