@@ -16,7 +16,7 @@ void afConfigurator::configureDefaultLoggingProperties()
 {
 	log4cxx::helpers::Properties props;
 // Good resource:  http://www.johnmunsch.com/projects/Presentations/docs/Log4J/log.properties 	
-	props.put("log4j.rootLogger", "WARN, stmConsole");
+	props.put("log4j.rootLogger", "INFO, stmConsole");
 	props.put("log4j.appender.stmConsole","org.apache.log4j.ConsoleAppender");
 	props.put("log4j.appender.stmConsole.layout","org.apache.log4j.PatternLayout");
 	props.put("log4j.appender.stmConsole.layout.ConversionPattern","%d [%t] %-5p %c - %m%n");
