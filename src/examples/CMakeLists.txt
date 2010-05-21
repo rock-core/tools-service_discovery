@@ -4,6 +4,7 @@ set(EXAMPLES
     browse-simplepoll
     publish
     servicediscovery
+    logging
 )
 
 include_directories(${AVAHI_INCLUDES} ${SIGC++_INCLUDES})

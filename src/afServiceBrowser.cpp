@@ -25,6 +25,17 @@ void afServiceBrowser::bootstrap() {
 		logger.log(FATAL, "Failed to create avahi service browser: %s", avahi_strerror(avahi_client_errno(client->getAvahiClient())));
 		throw 0; //TODO improve this
 	}
+	if (
+			sem_init(&services_sem,0,1) == -1
+				||
+			sem_init(&service_added_sem,0,1) == -1
+				||
+			sem_init(&service_removed_sem,0,1) == -1
+		) {
+		logger.log(FATAL, "Semaphore initialization failed");
+		throw 1;
+	}
+
 	serviceResolveTryCount = 5;
 }
 
@@ -72,9 +83,11 @@ afServiceBrowser::~afServiceBrowser() {
 		avahi_service_browser_free(browser);
 	afList<afRemoteService>::iterator it;
 	//free service resolvers
+	sem_wait(&services_sem);
 	for (it = services.begin() ; it != services.end(); ++it) {
 		freeAfRemoteService((*it));
 	}
+	sem_post(&services_sem);
 }
 
 //void printls(list<afRemoteService> ls) {
@@ -135,8 +148,10 @@ void afServiceBrowser::resolveCallback(AvahiServiceResolver *sr, AvahiIfIndex in
             rms.resolveData = data;
             logger.log(INFO, "Service resolved: %d %d %s %s %s", (int)rms.getInterface(), (int)rms.getProtocol(), rms.getName().c_str(), rms.getType().c_str(), rms.getDomain().c_str());
 			
+			sem_wait(sb->getServicesSem());
             if (sb->getInternalServices()->find(rms) == sb->getInternalServices()->end()) {
-
+				
+				
 				rms.dontCheckTXT = true;
 				afList<afRemoteService>::iterator srv;
 				srv = sb->getInternalServices()->find(rms);
@@ -149,13 +164,17 @@ void afServiceBrowser::resolveCallback(AvahiServiceResolver *sr, AvahiIfIndex in
 					
 					rms.dontCheckTXT = false;
 		        	sb->getInternalServices()->push_back(rms);
+
 		        	logger.log(INFO, "Service added to DB. Signal sent to %d slots", sb->afServiceAdded.size());
-	            	sb->afServiceAdded.emit(rms);
+	            	sb->serviceAddedEmit(rms);
+		
 				}
 
             } else {
+
             	logger.log(INFO, "Service not added (already in DB)");
             }
+			sem_post(sb->getServicesSem());
 
 //			printls(*(sb->getInternalServices()));
 
@@ -208,11 +227,12 @@ void afServiceBrowser::browseCallback(AvahiServiceBrowser *sb, AvahiIfIndex inte
 				afServiceBase serv(asb->getClient(), interface, protocol, sname, stype, sdomain);
 				afList<afRemoteService>::iterator it;
 				//find the signal to be removed
+				sem_wait(asb->getServicesSem());
 				for (it = asb->getInternalServices()->begin() ; it != asb->getInternalServices()->end(); ++it) {
 					if ((afServiceBase) (*it) == serv) {
 						
 						//emit the service removed signal
-						asb->afServiceRemoved.emit((*it));
+						asb->serviceRemovedEmit((*it));
 						
 						freeAfRemoteService((*it));
 						
@@ -221,6 +241,7 @@ void afServiceBrowser::browseCallback(AvahiServiceBrowser *sb, AvahiIfIndex inte
 						break;
 					}
 				}
+				sem_post(asb->getServicesSem());
 				logger.log(INFO, ( (removed) ? "Service removed" : "Service not removed"));
         	}
 

@@ -12,13 +12,14 @@ namespace dfki {
 namespace communication {
 
 class afRemoteService;
+class afServiceBrowser;
+struct ResolveData;
 
 }
 }
 
 #include <sigc++/sigc++.h>
 #include "afService.h"
-#include "afServiceBrowser.h"
 #include <avahi-client/lookup.h>
 #include <iostream>
 #include <semaphore.h>
@@ -91,8 +92,7 @@ public:
 	);
 	virtual ~afRemoteService();
 
-	//TODO: TODO: TODO: synchronize access to this object
-	bool attachSlot(const sigc::slot<void, afRemoteService>& slot_) {
+	bool serviceSignalConnect(const sigc::slot<void, afRemoteService>& slot_) {
 		if (!afRemoteServiceSignal) {
 			return false;
 		}
@@ -160,5 +160,7 @@ public:
 
 }
 }
+
+#include "afServiceBrowser.h"
 
 #endif /* AFREMOTESERVICE_H_ */

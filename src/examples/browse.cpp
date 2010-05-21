@@ -26,10 +26,10 @@ int main(int argc, char** argv)
 	dfki::communication::afServiceBrowser sbrowser(&client, "_rimres._tcp");
 
 	//connect a callback to the service added signal. Method can also be a class member. Look at sigc++ api
-	sbrowser.afServiceAdded.connect(sigc::ptr_fun(testAdded));
+	sbrowser.serviceAddedConnect(sigc::ptr_fun(testAdded));
 	
 	//connect a callback to the service removed signal
-	sbrowser.afServiceRemoved.connect(sigc::ptr_fun(testRemoved));
+	sbrowser.serviceRemovedConnect(sigc::ptr_fun(testRemoved));
 
 	//publish a sample service to test the callbacks
 	std::list<std::string> strlst;

@@ -24,7 +24,7 @@ int main (int argc, char const* argv[])
 		
 	ServiceDiscovery servdesc;
 	ServiceDiscovery::Configuration conf(IOR, "SampleComponent" ,"_rimres._tcp");
-	servdesc.OrocosComponentAddedSignal.connect(sigc::ptr_fun(addedOrocosComponent));
+	servdesc.addedComponentConnect(sigc::ptr_fun(addedOrocosComponent));
 	servdesc.configure(conf);
 
 

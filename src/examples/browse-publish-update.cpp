@@ -15,7 +15,7 @@ void testUpdated (dfki::communication::afRemoteService rms) {
 void testAdded (dfki::communication::afRemoteService rms) {
 	std::cout << " -=- TESTING SIGNAL: ADDED SERVICE: " << rms.getName() << std::endl;
 	//connect a callback on service txt updates
-	rms.attachSlot(sigc::ptr_fun(testUpdated));
+	rms.serviceSignalConnect(sigc::ptr_fun(testUpdated));
 }
 
  
@@ -29,7 +29,7 @@ int main(int argc, char** argv)
 	dfki::communication::afServiceBrowser sbrowser(&client, "_rimres._tcp");
 
 	//connect a callback to the service added signal. Method can also be a class member. Look at sigc++ api
-	sbrowser.afServiceAdded.connect(sigc::ptr_fun(testAdded));
+	sbrowser.serviceAddedConnect(sigc::ptr_fun(testAdded));
 	
 	//publish a sample service to test the callbacks
 	std::list<std::string> strlst;
