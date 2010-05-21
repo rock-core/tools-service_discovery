@@ -39,9 +39,10 @@ find_package(AVAHI REQUIRED)
 #TODO: not checked for version: ligsigc++ version used: 2.0.18-2
 find_package(SIGC++ REQUIRED)
 
+find_package(Log4Cxx REQUIRED)
 
 ### Update external libraries that are available
-set(EXTERNAL_LIBS ${Boost_LIBRARIES} ${QT_LIBRARIES})
+set(EXTERNAL_LIBS ${Boost_LIBRARIES} ${QT_LIBRARIES} )
 
 # Process CMakeLists.txt in the following subdirectory
 add_subdirectory(src)

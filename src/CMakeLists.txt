@@ -61,9 +61,9 @@ set(SOURCES
 #)
 
 
-include_directories(${AVAHI_INCLUDES} ${SIGC++_INCLUDES})
+include_directories(${AVAHI_INCLUDES} ${SIGC++_INCLUDES} ${LOG4CXX_INCLUDE_DIR})
 
-set(LIBRARIES ${AVAHI_LIBRARIES} ${SIGC++_LIBRARY} log4cxx)
+set(LIBRARIES ${AVAHI_LIBRARIES} ${SIGC++_LIBRARY} ${LOG4CXX_LIBRARIES})
 
 #add_executable(testavahi-framework testmain.cpp ${SOURCES})
 #target_link_libraries(testavahi-framework ${LIBRARIES})
