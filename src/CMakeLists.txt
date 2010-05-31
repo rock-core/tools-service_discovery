@@ -73,6 +73,7 @@ target_link_libraries(${PROJECT_NAME} ${LIBRARIES})
 install(TARGETS ${PROJECT_NAME}
 	RUNTIME DESTINATION bin
 	ARCHIVE DESTINATION lib
+	LIBRARY DESTINATION lib
 )	
 
 add_subdirectory(examples)
