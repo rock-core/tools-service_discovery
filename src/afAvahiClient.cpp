@@ -13,6 +13,8 @@
 
 namespace dfki {namespace communication {
 
+static afLoggingWrapper logger("afAvahiClient");
+
 AvahiClient* afAvahiClient::getAvahiClient() {
 	return client;
 }
@@ -28,7 +30,8 @@ afAvahiClient::afAvahiClient() {
 	client = avahi_client_new(poll->getAvahiPoll(), (AvahiClientFlags) 0, NULL, NULL, &error);
 	//if creation of client is not immediately successful throw error 
 	if (!client) {
-		std::cerr << "Failed to create client: " << avahi_strerror(error) << std::endl;
+//		std::cerr << "Failed to create client: " << avahi_strerror(error) << std::endl;
+		logger.log(FATAL, "Failed to create client: %s" , avahi_strerror(error));
         throw 0; //TODO: do sth else
 	}
 }
@@ -41,12 +44,14 @@ afAvahiClient::afAvahiClient(afPoll *poll, AvahiClientFlags flags)
 	client = avahi_client_new(poll->getAvahiPoll(), flags, NULL, NULL, &error);
 	//if creation of client is not immediately successful throw error 
 	if (!client) {
-		std::cerr << "Failed to create client: " << avahi_strerror(error) << std::endl;
+//		std::cerr << "Failed to create client: " << avahi_strerror(error) << std::endl;
+		logger.log(FATAL, "Failed to create client: %s" , avahi_strerror(error));
         throw 0; //TODO: do sth else
 	}
 }
 
 afAvahiClient::~afAvahiClient() {
+	logger.log(DEBUG, "Destructing client");
 	if (client) {
 //		cout << "..DELETING CLIENT" << endl;
 		avahi_client_free(client);
@@ -57,13 +62,13 @@ afAvahiClient::~afAvahiClient() {
 }
 
 void afAvahiClient::dispatch() {
+	logger.log(DEBUG, "Dispatching client");
 	poll->dispatch();
 }
 
 void afAvahiClient::stop() {
-	std::cout << "STOPING" << std::endl;
+	logger.log(DEBUG, "Stopping client");
 	poll->stop();
-	std::cout << "STOPED" << std::endl;
 }
 
 }}

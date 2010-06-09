@@ -2,6 +2,8 @@
 
 namespace dfki { namespace communication {
 
+static afLoggingWrapper logger ("ServiceDiscovery");
+
 ServiceDiscovery::ServiceDiscovery() : conf("", "", "")
 {
 	client = NULL;
@@ -9,6 +11,18 @@ ServiceDiscovery::ServiceDiscovery() : conf("", "", "")
 	browser = NULL;
 	started = false;
 	configured = false;	
+
+	if (
+			sem_init(&services_sem,0,1) == -1
+				||
+			sem_init(&added_component_sem,0,1) == -1
+				||
+			sem_init(&removed_component_sem,0,1) == -1
+		) {
+		logger.log(FATAL, "Semaphore initialization failed");
+		throw 1;
+	}
+	
 }
 
 ServiceDiscovery::~ServiceDiscovery()
@@ -28,8 +42,8 @@ void ServiceDiscovery::start()
 	
 	client = new afAvahiClient();
 	browser = new afServiceBrowser(client, conf.avahi_type);
-	browser->afServiceAdded.connect(sigc::mem_fun(this, &ServiceDiscovery::addedService));
-	browser->afServiceRemoved.connect(sigc::mem_fun(this, &ServiceDiscovery::removedService));
+	browser->serviceAddedConnect(sigc::mem_fun(this, &ServiceDiscovery::addedService));
+	browser->serviceRemovedConnect(sigc::mem_fun(this, &ServiceDiscovery::removedService));
 	
 	localserv = new OrocosComponentLocalService(client, conf.name, conf.avahi_type, conf.avahi_port, conf.IOR, conf.stringlist, conf.ttl);
 	
@@ -66,8 +80,10 @@ void ServiceDiscovery::stop()
 		delete client;
 		client = NULL;		
 	}
-	
+
+	sem_wait(&services_sem);
 	services.clear();
+	sem_post(&services_sem);
 	
 	started = false;
 }
@@ -81,14 +97,18 @@ void ServiceDiscovery::addedService(afRemoteService rms)
 		if (!((afService) (*localserv) == (afService) rms)) {
 
 
+			sem_wait(&services_sem);
 			services.push_back(orms);
+			sem_post(&services_sem);
+			sem_wait(&added_component_sem);
 			OrocosComponentAddedSignal.emit(orms);
+			sem_post(&added_component_sem);
 
 		}
 		
 			
 	} catch(OCSException e) {
-		std::cerr << "Failed to create orocos component service from remote service object.\n";
+		logger.log(WARN, "Failed to create orocos component service from remote service object");
 	}
 }
 
@@ -99,8 +119,12 @@ void ServiceDiscovery::removedService(afRemoteService rms)
 		OrocosComponentRemoteService orms(rms);	
 		afList<OrocosComponentRemoteService>::iterator it = services.find(orms);
 		if (it != services.end()) {
+			sem_wait(&removed_component_sem);
 			OrocosComponentRemovedSignal.emit(orms);
+			sem_post(&removed_component_sem);
+			sem_wait(&services_sem);
 			services.erase(it);
+			sem_post(&services_sem);
 		}
 	} catch(OCSException e) {
 		
@@ -112,6 +136,7 @@ std::vector<OrocosComponentRemoteService> ServiceDiscovery::findServices(SearchP
 {
 	std::vector<OrocosComponentRemoteService> res;
 	afList<OrocosComponentRemoteService>::iterator it;
+	sem_wait(&services_sem);
 	for (it = services.begin() ; it != services.end() ; it++) {
 		size_t found;
 		if (pattern.name != "") {
@@ -133,6 +158,7 @@ std::vector<OrocosComponentRemoteService> ServiceDiscovery::findServices(SearchP
 			}
 		}
 	}
+	sem_post(&services_sem);
 	return res;
 }
 

@@ -40,36 +40,41 @@ set(SOURCES
     afServiceBrowser.cpp
     afSimplePoll.cpp
     afThreadPoll.cpp
+    afLoggingWrapper.cpp
+    afConfigurator.cpp
     OrocosComponentService.cpp
     ServiceDiscovery.cpp
 )
 
-set(HEADERS
-    afAvahiFramework.h
-    afAvahiClient.h
-    afList.h
-    afLocalService.h
-    afPoll.h
-    afRemoteService.h
-    afService.h
-    afServiceBase.h
-    afServiceBrowser.h
-    afSimplePoll.h
-    afThreadPoll.h
-)
+#set(HEADERS
+#    afAvahiFramework.h
+#    afAvahiClient.h
+#    afList.h
+#    afLocalService.h
+#    afPoll.h
+#    afRemoteService.h
+#    afService.h
+#    afServiceBase.h
+#    afServiceBrowser.h
+#    afSimplePoll.h
+#    afThreadPoll.h
+#)
 
 
-include_directories(${AVAHI_INCLUDES} ${SIGC++_INCLUDES})
+include_directories(${AVAHI_INCLUDES} ${SIGC++_INCLUDES} ${LOG4CXX_INCLUDE_DIR})
 
-set(LIBRARIES ${AVAHI_LIBRARIES} ${SIGC++_LIBRARY})
+set(LIBRARIES ${AVAHI_LIBRARIES} ${SIGC++_LIBRARY} ${LOG4CXX_LIBRARIES})
 
 #add_executable(testavahi-framework testmain.cpp ${SOURCES})
 #target_link_libraries(testavahi-framework ${LIBRARIES})
 
-add_library(${PROJECT_NAME} ${SOURCES})
+add_library(${PROJECT_NAME} SHARED ${SOURCES})
 target_link_libraries(${PROJECT_NAME} ${LIBRARIES})
+
 install(TARGETS ${PROJECT_NAME}
 	RUNTIME DESTINATION bin
 	ARCHIVE DESTINATION lib
+	LIBRARY DESTINATION lib
 )	
 
+add_subdirectory(examples)

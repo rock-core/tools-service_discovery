@@ -4,7 +4,7 @@
  */
  
 #include <stdlib.h>
-#include <service-discovery/afAvahiFramework.h>
+#include "../afAvahiFramework.h"
 #include <iostream>
 
 using namespace std;

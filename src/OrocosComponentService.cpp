@@ -2,6 +2,8 @@
 
 namespace dfki { namespace communication {
 
+static afLoggingWrapper logger("OrocosComponentService");
+
 void OrocosComponentServiceBase::extractIOR(std::list<std::string> &list)
 {
 	
@@ -19,7 +21,7 @@ void OrocosComponentServiceBase::extractIOR(std::list<std::string> &list)
 	}
 	
 	if (tokens == 0) {
-		std::cerr << "OrocosComponentServiceBase: IOR not found in string list.\n";
+		logger.log(FATAL, "OrocosComponentServiceBase - IOR not found in string list");
 		throw ior_not_in_list;
 	}
 	
@@ -49,7 +51,7 @@ void OrocosComponentServiceBase::extractIOR(std::list<std::string> &list)
 	std::string ior_t = "";
 	for (int i = 0 ; i < tokens ; i++) {
 		if (ior_vector[i] == "") {
-			std::cerr << "OrocosComponentServiceBase: incomplete IOR in string list\n";
+			logger.log(FATAL, "OrocosComponentServiceBase - incomplete IOR in string list");
 			throw ior_incomplete;
 		}
 		ior_t += ior_vector[i];

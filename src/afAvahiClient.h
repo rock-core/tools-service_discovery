@@ -28,6 +28,7 @@ class afAvahiClient;
 #include "afPoll.h"
 #include "afSimplePoll.h"
 #include "afThreadPoll.h"
+#include "afLoggingWrapper.h"
 //#include "afServiceBrowser.h"
 
 namespace dfki {

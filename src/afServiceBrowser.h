@@ -27,7 +27,7 @@ class afServiceBrowser;
 #include <map>
 #include <list>
 #include <string>
-
+#include <semaphore.h>
 
 namespace dfki {
 namespace communication {
@@ -70,6 +70,8 @@ private:
 
 	afList<afRemoteService> services;
 
+	sem_t services_sem;
+
 	const char* getInType() {
 		return type.c_str();
 	}
@@ -81,6 +83,18 @@ private:
 			return domain.c_str();
 		}
 	}
+
+
+	/** signal for addition of a service */
+	sigc::signal<void, afRemoteService> afServiceAdded;
+
+	/** signal for removal of a service */
+	sigc::signal<void,
+		afRemoteService> afServiceRemoved;
+
+	sem_t service_added_sem;
+
+	sem_t service_removed_sem;
 
 public:
 
@@ -109,16 +123,38 @@ public:
 //		afRemoteService*,
 //		void*> afServiceBrowserSignal;
 
-	/** signal for addition of a service */
-	sigc::signal<void, afRemoteService> afServiceAdded;
 
-	/** signal for removal of a service */
-	sigc::signal<void,
-		afRemoteService> afServiceRemoved;
+	void serviceAddedConnect(const sigc::slot<void, afRemoteService>& slot_) {
+		sem_wait(&service_added_sem);
+		afServiceAdded.connect(slot_);
+		sem_post(&service_added_sem);
+	}
+
+	void serviceAddedEmit(afRemoteService rms) {
+		sem_wait(&service_added_sem);
+		afServiceAdded.emit(rms);
+		sem_post(&service_added_sem);
+	}
+
+
+	void serviceRemovedConnect(const sigc::slot<void, afRemoteService>& slot_) {
+		sem_wait(&service_removed_sem);
+		afServiceRemoved.connect(slot_);
+		sem_post(&service_removed_sem);
+	}
+
+	void serviceRemovedEmit(afRemoteService rms) {
+		sem_wait(&service_removed_sem);
+		afServiceRemoved.emit(rms);
+		sem_post(&service_removed_sem);
+	}
 
     afList<afRemoteService> getServices()
     {
-        return services;
+    	sem_wait(&services_sem);
+    	afList<afRemoteService> tlist = services;
+    	sem_post(&services_sem);
+        return tlist;
     }
     
     //to be used only by the static callbacks. TODO: how to avoid this to be public
@@ -126,6 +162,13 @@ public:
     {
     	return &services;
     }
+    //to be used only by the static callbacks. TODO: how to avoid this to be public
+    sem_t* getServicesSem()
+    {
+    	return &services_sem;
+    }
+
+    
 
     AvahiServiceBrowser* getAvahiBrowser()
 	{

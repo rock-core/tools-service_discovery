@@ -1,55 +1,58 @@
-/*
- * testmain.cpp
- *
- *  Created on: Mar 17, 2010
- *      Author: darko
- */
 
-#include "afAvahiClient.h"
-#include "afServiceBrowser.h"
-#include "afLocalService.h"
-#include <string>
-#include <iostream>
-#include <sigc++/sigc++.h>
-#include <csignal>
-#include <stdlib.h>
-#include <cassert>
-#include <avahi-common/strlst.h>
+// deprecated
 
-using namespace std;
+///*
+// * testmain.cpp
+// *
+// *  Created on: Mar 17, 2010
+// *      Author: darko
+// */
 
-afAvahiClient avahiclient;
+//#include "afAvahiClient.h"
+//#include "afServiceBrowser.h"
+//#include "afLocalService.h"
+//#include <string>
+//#include <iostream>
+//#include <sigc++/sigc++.h>
+//#include <csignal>
+//#include <stdlib.h>
+//#include <cassert>
+//#include <avahi-common/strlst.h>
 
-void handleSIGINT(int sig) {
-	cout << ".CAUGHT SIG " << sig << endl;
-	avahiclient.stop();
-}
+//using namespace std;
 
-void testCallback (afServiceBrowser* browser,
-    AvahiBrowserEvent event,
-	afRemoteService *service,
-	void* data) {
-	cout << "testCallback" << endl;
-}
+//afAvahiClient avahiclient;
 
-void testAdded (afRemoteService* rms) {
-	cout << " - TESTING SIGNAL: ADDEDD SERVICE: " << rms->getName() << endl;
-}
+//void handleSIGINT(int sig) {
+//	cout << ".CAUGHT SIG " << sig << endl;
+//	avahiclient.stop();
+//}
 
-int main(int argc, char* argv[]) {
+//void testCallback (afServiceBrowser* browser,
+//    AvahiBrowserEvent event,
+//	afRemoteService *service,
+//	void* data) {
+//	cout << "testCallback" << endl;
+//}
 
-//	assert(avahiclient.getAvahiClient());
-	signal(SIGTERM, handleSIGINT);
-	signal(SIGINT, handleSIGINT);
-	afServiceBrowser sbrowser(&avahiclient, "_rimres._tcp");
-	sbrowser.afServiceAdded.connect(sigc::ptr_fun(testAdded));
-//	sbrowser.afServiceBrowserSignal.connect(sigc::ptr_fun(testCallback));
+//void testAdded (afRemoteService* rms) {
+//	cout << " - TESTING SIGNAL: ADDEDD SERVICE: " << rms->getName() << endl;
+//}
 
-	list<string> txt;
-	txt.push_back("darko=makreshanski");
-	txt.push_back("dd=makreshanski");
-	afLocalService service(&avahiclient, "darkoaftest", "_rimres._tcp", 12000, txt);
+//int main(int argc, char* argv[]) {
 
-	avahiclient.dispatch();
+////	assert(avahiclient.getAvahiClient());
+//	signal(SIGTERM, handleSIGINT);
+//	signal(SIGINT, handleSIGINT);
+//	afServiceBrowser sbrowser(&avahiclient, "_rimres._tcp");
+//	sbrowser.afServiceAdded.connect(sigc::ptr_fun(testAdded));
+////	sbrowser.afServiceBrowserSignal.connect(sigc::ptr_fun(testCallback));
 
-}
+//	list<string> txt;
+//	txt.push_back("darko=makreshanski");
+//	txt.push_back("dd=makreshanski");
+//	afLocalService service(&avahiclient, "darkoaftest", "_rimres._tcp", 12000, txt);
+
+//	avahiclient.dispatch();
+
+//}

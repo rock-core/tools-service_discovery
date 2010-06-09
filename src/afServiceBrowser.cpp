@@ -9,6 +9,8 @@
 
 namespace dfki { namespace communication {
 
+static afLoggingWrapper logger("afServiceBrowser");
+
 void afServiceBrowser::bootstrap() {
 	browser = avahi_service_browser_new(
 				client->getAvahiClient(),
@@ -20,9 +22,20 @@ void afServiceBrowser::bootstrap() {
 				browseCallback,
 				this);
 	if (!browser) {
-		std::cerr << "Failed to create avahi service browser: " << avahi_strerror(avahi_client_errno(client->getAvahiClient())) << std::endl;
+		logger.log(FATAL, "Failed to create avahi service browser: %s", avahi_strerror(avahi_client_errno(client->getAvahiClient())));
 		throw 0; //TODO improve this
 	}
+	if (
+			sem_init(&services_sem,0,1) == -1
+				||
+			sem_init(&service_added_sem,0,1) == -1
+				||
+			sem_init(&service_removed_sem,0,1) == -1
+		) {
+		logger.log(FATAL, "Semaphore initialization failed");
+		throw 1;
+	}
+
 	serviceResolveTryCount = 5;
 }
 
@@ -70,9 +83,11 @@ afServiceBrowser::~afServiceBrowser() {
 		avahi_service_browser_free(browser);
 	afList<afRemoteService>::iterator it;
 	//free service resolvers
+	sem_wait(&services_sem);
 	for (it = services.begin() ; it != services.end(); ++it) {
 		freeAfRemoteService((*it));
 	}
+	sem_post(&services_sem);
 }
 
 //void printls(list<afRemoteService> ls) {
@@ -93,15 +108,19 @@ void afServiceBrowser::resolveCallback(AvahiServiceResolver *sr, AvahiIfIndex in
     {
         // if found service cannot be resolved, throw an error
         case AVAHI_RESOLVER_FAILURE:
-            std::cerr << "RESOLVER failed to resolve service" << name << " of type " << type << " in domain " << domain << std::endl;
-            std::cerr << "Error: " << avahi_strerror(avahi_client_errno(avahi_service_resolver_get_client(sr))) << std::endl;
+        	logger.log(WARN, "Resolver failed to resolve service %s of type %s on interface %d. Error: %s", 
+        						name, 
+        						type, 
+        						interface,
+        						avahi_strerror(avahi_client_errno(avahi_service_resolver_get_client(sr))));
             if (data->count >= sb->serviceResolveTryCount) {
-            	std::cerr << "Failed attempts to resolve this service has exceeded the limit. Service resolver object freed.\n";
+            	//TODO: it seems that it doesn't make more attempts'
+            	logger.log(WARN, "Failed attempts to resolve this service has exceeded the limit. Service resolver object freed");
             	delete data;
 	            avahi_service_resolver_free(sr);
             } else {
             	data->count = data->count + 1;
-            	std::cerr << "Failed attempt " << data->count << " out of " << sb->serviceResolveTryCount << std::endl;
+            	logger.log(WARN, "Failed attempt %d out of %d", data->count, sb->serviceResolveTryCount);
             }
             break;
 
@@ -127,30 +146,35 @@ void afServiceBrowser::resolveCallback(AvahiServiceResolver *sr, AvahiIfIndex in
 
             afRemoteService rms(sb, interface, protocol, sname, stype, sdomain, strlist, port, shost, *address, sr, new sigc::signal<void, afRemoteService>());
             rms.resolveData = data;
-			std::cout << "SERVICE RESOLVED: " << rms.getInterface() << " " << rms.getProtocol() << " " << rms.getName() << " " << rms.getType() << " " << rms.getDomain() << " ; ";
+            logger.log(INFO, "Service resolved: %d %d %s %s %s", (int)rms.getInterface(), (int)rms.getProtocol(), rms.getName().c_str(), rms.getType().c_str(), rms.getDomain().c_str());
 			
-			
+			sem_wait(sb->getServicesSem());
             if (sb->getInternalServices()->find(rms) == sb->getInternalServices()->end()) {
-
+				
+				
 				rms.dontCheckTXT = true;
 				afList<afRemoteService>::iterator srv;
 				srv = sb->getInternalServices()->find(rms);
 				if (srv != sb->getInternalServices()->end()) {
-	
-					std::cout << "SERVICE ALREADY IN DB, BUT TXT RECORD HAS CHANGED\n";
+
+					logger.log(INFO, "Service already in DB, but txt records have changed");
 					(*srv).emitSignal();
 					
 				} else {
 					
 					rms.dontCheckTXT = false;
 		        	sb->getInternalServices()->push_back(rms);
-		            std::cout << "SERVICE ADDED: SIGNAL TO " << sb->afServiceAdded.size() << " SLOTS" << std::endl;
-	            	sb->afServiceAdded.emit(rms);
+
+		        	logger.log(INFO, "Service added to DB. Signal sent to %d slots", sb->afServiceAdded.size());
+	            	sb->serviceAddedEmit(rms);
+		
 				}
 
             } else {
-	            std::cout << "SERVICE NOT ADDED (ALREADY IN DB)" << std::endl;
+
+            	logger.log(INFO, "Service not added (already in DB)");
             }
+			sem_post(sb->getServicesSem());
 
 //			printls(*(sb->getInternalServices()));
 
@@ -168,17 +192,16 @@ void afServiceBrowser::browseCallback(AvahiServiceBrowser *sb, AvahiIfIndex inte
 	AvahiClient* client = avahi_service_browser_get_client(sb);
     afServiceBrowser *asb = (afServiceBrowser*) userdata;
 
-
 	switch (event)
     {
         // if browser failure occurs, throw an error
         case AVAHI_BROWSER_FAILURE:
-            std::cerr << "BROWSER failed. Error: " << avahi_strerror(avahi_client_errno(client)) << std::endl;
+        	logger.log(FATAL, "Browser failed. Error: %s", avahi_strerror(avahi_client_errno(client)));
             break;
 
         // if browser finds a new service
         case AVAHI_BROWSER_NEW:
-        	std::cout << "NEW SERVICE FOUND" << std::endl;
+        	logger.log(INFO, "New service detected");
         	
         	ResolveData *tdata;
         	tdata = new ResolveData();
@@ -189,13 +212,13 @@ void afServiceBrowser::browseCallback(AvahiServiceBrowser *sb, AvahiIfIndex inte
             // try to resolve the new found service. If resolver object cannot be created, throw an error
             if (!(avahi_service_resolver_new(client, interface, protocol, name, type, domain, AVAHI_PROTO_UNSPEC, AvahiLookupFlags (0), resolveCallback, tdata)))
             {
-                std::cerr << "Failed to resolve service:" << name << ". Error: " << avahi_strerror(avahi_client_errno(client)) << std::endl;
+            	logger.log(FATAL, "Failed to create service resolver object for: %s. Error: ", name, avahi_strerror(avahi_client_errno(client)));
             }
             break;
 
         // if browser finds a service removal event
         case AVAHI_BROWSER_REMOVE:
-			std::cout << "REMOVING SERVICE: " << interface << " " << name << " " << type << " " << domain << " ...   ";
+        	logger.log(INFO, "Removing service: %d %s %s %s", interface, name, type, domain);
         	{
 				bool removed = false;
 				std::string sname(name);
@@ -204,11 +227,12 @@ void afServiceBrowser::browseCallback(AvahiServiceBrowser *sb, AvahiIfIndex inte
 				afServiceBase serv(asb->getClient(), interface, protocol, sname, stype, sdomain);
 				afList<afRemoteService>::iterator it;
 				//find the signal to be removed
+				sem_wait(asb->getServicesSem());
 				for (it = asb->getInternalServices()->begin() ; it != asb->getInternalServices()->end(); ++it) {
 					if ((afServiceBase) (*it) == serv) {
 						
 						//emit the service removed signal
-						asb->afServiceRemoved.emit((*it));
+						asb->serviceRemovedEmit((*it));
 						
 						freeAfRemoteService((*it));
 						
@@ -217,19 +241,18 @@ void afServiceBrowser::browseCallback(AvahiServiceBrowser *sb, AvahiIfIndex inte
 						break;
 					}
 				}
-				std::cout <<( (removed) ? "SERVICE REMOVED" : "SERVICE NOT REMOVED") << std::endl;
+				sem_post(asb->getServicesSem());
+				logger.log(INFO, ( (removed) ? "Service removed" : "Service not removed"));
         	}
 
             break;
 
         case AVAHI_BROWSER_ALL_FOR_NOW:
-        	std::cout << "ALL_FOR_NOW" << std::endl;
-//            qDebug() << "ALL_FOR_NOW";
+        	logger.log(INFO, "ALL_FOR_NOW");
             break;
 
         case AVAHI_BROWSER_CACHE_EXHAUSTED:
-        	std::cout << "CACHE_EXHAUSTED" << std::endl;
-//            qDebug() << "CACHE_EXCHAUSTED";
+        	logger.log(INFO, "CACHE_EXHAUSTED");
             break;
     }
 }

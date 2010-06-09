@@ -9,6 +9,8 @@
 
 namespace dfki { namespace communication {
 
+static afLoggingWrapper logger("afServiceBase");
+
 afServiceBase::afServiceBase(
 			afAvahiClient *client,
 			AvahiIfIndex interf,
@@ -18,7 +20,7 @@ afServiceBase::afServiceBase(
 			std::string domain
 			) {
 	if (!client) {
-		std::cerr << "Client pointer NULL\n";
+		logger.log(FATAL, "Client pointer NULL");
 		throw 0; //TODO do sth else
 	}
 	this->client = client;

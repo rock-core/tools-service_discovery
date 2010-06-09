@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <semaphore.h>
 #include "afAvahiClient.h"
 #include "afServiceBrowser.h"
 #include "OrocosComponentService.h"
@@ -80,15 +81,30 @@ public:
 		
 	std::vector<OrocosComponentRemoteService> findServices(SearchPattern pattern);
 
-	sigc::signal<void, OrocosComponentRemoteService> OrocosComponentAddedSignal;
-	sigc::signal<void, OrocosComponentRemoteService> OrocosComponentRemovedSignal;
+	void addedComponentConnect(const sigc::slot<void, OrocosComponentRemoteService>& slot) {
+		sem_wait(&added_component_sem);
+		OrocosComponentAddedSignal.connect(slot);
+		sem_post(&added_component_sem);
+	}
+
+	void removedComponentConnect(const sigc::slot<void, OrocosComponentRemoteService>& slot) {
+		sem_wait(&removed_component_sem);
+		OrocosComponentRemovedSignal.connect(slot);
+		sem_post(&removed_component_sem);
+	}
 
 private:
 
 	void addedService(afRemoteService serv);
 	void removedService(afRemoteService serv);
 
+	sigc::signal<void, OrocosComponentRemoteService> OrocosComponentAddedSignal;
+	sigc::signal<void, OrocosComponentRemoteService> OrocosComponentRemovedSignal;
+	sem_t added_component_sem;
+	sem_t removed_component_sem;
+
 	afList<OrocosComponentRemoteService> services;
+	sem_t services_sem;
 
 	bool started;
 
