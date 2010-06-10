@@ -1,9 +1,12 @@
 #ifndef RIMRES_SERVICEDISCOVERY_CORE_H_
 #define RIMRES_SERVICEDISCOVERY_CORE_H_
 
+#include <semaphore.h>
+
+#include <map>
 #include <string>
 #include <vector>
-#include <semaphore.h>
+
 #include "afAvahiClient.h"
 #include "afServiceBrowser.h"
 #include "OrocosComponentService.h"
@@ -29,8 +32,9 @@ public:
 
 	struct Configuration // : default configuration here
 	{
-	
-	
+        Configuration()
+        {
+        }
 		Configuration(std::string IOR, std::string name, std::string avahi_type) : avahi_port(12000), ttl(0) {
 			this->IOR = IOR;
 			this->name = name;
@@ -43,18 +47,15 @@ public:
 			this->avahi_port = avahi_port;
 			this->ttl = ttl;
 		}
-		
+
 		std::string IOR;
 		std::string name;
-
+        uint32_t ttl;
 		std::list<std::string> stringlist;
-		
-		uint32_t ttl;
 		
 		//should these be constants?
 		std::string avahi_type;
-		uint16_t avahi_port; 
-
+		uint16_t avahi_port;
 	};
 
 	void configure(const struct Configuration& configuration);
@@ -95,6 +96,11 @@ public:
 
 private:
 
+    /**
+     * Adds the service and emits a signal for the external callback.
+     * Its thread-safe. It will also accept its own service, but no copies
+     * (so every module name has to be unique). 
+     */
 	void addedService(afRemoteService serv);
 	void removedService(afRemoteService serv);
 
@@ -103,7 +109,8 @@ private:
 	sem_t added_component_sem;
 	sem_t removed_component_sem;
 
-	afList<OrocosComponentRemoteService> services;
+	//afList<OrocosComponentRemoteService> services;
+    std::map<std::string, OrocosComponentRemoteService> services;
 	sem_t services_sem;
 
 	bool started;
