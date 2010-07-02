@@ -1,14 +1,14 @@
 Install and usage instructions in ./INSTALL
-
 examples in ./examples/
 
+PATCHING
+The deb package contains a patched version of avahi for i386. It has been created with checkinstall.
 
 NOTE
 This directory structure follows some simple rules, to allow for generic build
 processes and simplify reuse of this project. 
 
 For build automation the project structure should be parsed and validated
-
 
 STRUCTURE
 -- src/ 
