@@ -32,9 +32,7 @@ How to patch and buid avahi:
 3. Apply the patches with
 	
 	git apply avahi_custom_ttl_patch_avahiver_0_6_25.patch
-
-   Note: Open avahi_loopback_patch_avahiver_0_6_25.patch in a text browser
-	 and add the changes manually. 
+    git apply avahi_loopback_patch_avahiver_0_6_25.patch 
 
 4. Run 'autogen.sh'.
 

@@ -1,22 +1,44 @@
-Index: iface-pfroute.c
-===================================================================
---- iface-pfroute.c	(revision 1777)
-+++ iface-pfroute.c	(working copy)
-@@ -82,10 +82,9 @@
+From 3f143d72826a5f3f8396aee3b826e8417adfecb6 Mon Sep 17 00:00:00 2001
+From: stefan <stefan.haase@dfki.de>
+Date: Mon, 5 Jul 2010 16:56:48 +0200
+Subject: [PATCH] Allows loopback now.
+
+---
+ avahi-core/iface-linux.c   |    3 +--
+ avahi-core/iface-pfroute.c |    8 +++-----
+ 2 files changed, 4 insertions(+), 7 deletions(-)
+
+diff --git a/avahi-core/iface-linux.c b/avahi-core/iface-linux.c
+index c8ed9e0..2bcd364 100644
+--- a/avahi-core/iface-linux.c
++++ b/avahi-core/iface-linux.c
+@@ -106,8 +106,7 @@ static void netlink_callback(AvahiNetlink *nl, struct nlmsghdr *n, void* userdat
+         hw->flags_ok =
+             (ifinfomsg->ifi_flags & IFF_UP) &&
+             (!m->server->config.use_iff_running || (ifinfomsg->ifi_flags & IFF_RUNNING)) &&
+-            !(ifinfomsg->ifi_flags & IFF_LOOPBACK) &&
+-            (ifinfomsg->ifi_flags & IFF_MULTICAST) &&
++            ((ifinfomsg->ifi_flags & IFF_LOOPBACK) || (ifinfomsg->ifi_flags & IFF_MULTICAST)) &&
+             (m->server->config.allow_point_to_point || !(ifinfomsg->ifi_flags & IFF_POINTOPOINT));
+ 
+         /* Handle interface attributes */
+diff --git a/avahi-core/iface-pfroute.c b/avahi-core/iface-pfroute.c
+index 391081e..cea28c3 100644
+--- a/avahi-core/iface-pfroute.c
++++ b/avahi-core/iface-pfroute.c
+@@ -82,9 +82,8 @@ static void rtm_info(struct rt_msghdr *rtm, AvahiInterfaceMonitor *m)
    hw->flags_ok =
      (ifm->ifm_flags & IFF_UP) &&
      (!m->server->config.use_iff_running || (ifm->ifm_flags & IFF_RUNNING)) &&
 -    !(ifm->ifm_flags & IFF_LOOPBACK) &&
 -    (ifm->ifm_flags & IFF_MULTICAST) &&
 -    (m->server->config.allow_point_to_point || !(ifm->ifm_flags & IFF_POINTOPOINT));
--  
 +    ((ifm->ifm_flags & IFF_LOOPBACK) || (ifm->ifm_flags & IFF_MULTICAST)) &&
 +    (m->server->config.allow_point_to_point || !(ifm->ifm_flags & IFF_POINTOPOINT);
-+
+   
    avahi_free(hw->name);
    hw->name = avahi_strndup(sdl->sdl_data, sdl->sdl_nlen);
-       
-@@ -406,8 +405,7 @@
+@@ -429,8 +428,7 @@ static void if_add_interface(struct lifreq *lifreq, AvahiInterfaceMonitor *m, in
          hw->flags_ok =
              (flags & IFF_UP) &&
              (!m->server->config.use_iff_running || (flags & IFF_RUNNING)) &&
@@ -26,17 +48,6 @@ Index: iface-pfroute.c
              (m->server->config.allow_point_to_point || !(flags & IFF_POINTOPOINT));
          hw->name = avahi_strdup(lifreq->lifr_name);
          hw->mtu = mtu;
-Index: iface-linux.c
-===================================================================
---- iface-linux.c	(revision 1777)
-+++ iface-linux.c	(working copy)
-@@ -106,8 +106,7 @@
-         hw->flags_ok =
-             (ifinfomsg->ifi_flags & IFF_UP) &&
-             (!m->server->config.use_iff_running || (ifinfomsg->ifi_flags & IFF_RUNNING)) &&
--            !(ifinfomsg->ifi_flags & IFF_LOOPBACK) &&
--            (ifinfomsg->ifi_flags & IFF_MULTICAST) &&
-+	    ((ifinfomsg->ifi_flags & IFF_LOOPBACK) || (ifinfomsg->ifi_flags & IFF_MULTICAST)) &&
-             (m->server->config.allow_point_to_point || !(ifinfomsg->ifi_flags & IFF_POINTOPOINT));
- 
-         /* Handle interface attributes */
+-- 
+1.6.3.3
+
