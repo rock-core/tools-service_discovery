@@ -2,7 +2,9 @@ Install and usage instructions in ./INSTALL
 examples in ./examples/
 
 PATCHING
-The deb package contains a patched version of avahi for i386. It has been created with checkinstall.
+The deb package contains a patched version of avahi for i386 and for amd64. 
+It has been created with checkinstall. See the INSTALL for a complete
+description how to patch and build avahi.
 
 NOTE
 This directory structure follows some simple rules, to allow for generic build

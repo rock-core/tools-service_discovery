@@ -16,3 +16,44 @@ To compile your program include the following libraries with pkg-config
 For example
 
 	g++ -o test test.cpp `pkg-config --cflags --libs service-discovery sigc++-2.0 avahi-client`
+
+
+How to patch and buid avahi:
+1. Clone the avahi-git-repository with
+ 
+    	git clone git://git.0pointer.de/avahi.git
+
+   and change to the avahi-folder.
+
+2. Check out the tagged official release point 0.6.25 with 
+
+     	git checkout v0.6.25
+
+3. Apply the patches with
+	
+	git apply avahi_custom_ttl_patch_avahiver_0_6_25.patch
+
+   Note: Open avahi_loopback_patch_avahiver_0_6_25.patch in a text browser
+	 and add the changes manually. 
+
+4. Run 'autogen.sh'.
+
+5. Configure with 
+
+	./configure --disable-manpages --disable-mono
+
+6. Build with './make'
+
+7. Optional: Create the folder 'doc-pak' and copy all
+   docs/README/INSTALL/etc. to that folder.
+
+8. Install with 'checkinstall'.
+
+	Note: 
+	checkinstall can be installed via 'apt-get checkinstall'.
+	As a preparation you will be asked for a deb-description and -name 
+	and you can change general informations. 
+	Afterwards checkinstall will create a debian packet which will be 
+	used for installation.
+	This allows a simple removal with 'dpkg -r avahi' if needed.
+	
