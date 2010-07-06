@@ -62,6 +62,18 @@ void ServiceDiscovery::configure(const struct Configuration& configuration) {
 	configured = true;
 }
 
+std::vector<std::string> ServiceDiscovery::getServiceNames()
+{
+    std::vector<std::string> names;
+    std::map<std::string, OrocosComponentRemoteService>::iterator it;
+    sem_wait(&services_sem);
+    for (it = services.begin() ; it != services.end() ; it++) {
+	    names.push_back(it->first);
+	}
+    sem_post(&services_sem);
+    return names;
+}
+
 void ServiceDiscovery::stop()
 {
 	if (client)

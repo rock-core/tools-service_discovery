@@ -60,6 +60,8 @@ public:
 
 	void configure(const struct Configuration& configuration);
 
+    std::vector<std::string> getServiceNames();
+
 	void start();
 
 	void stop();
