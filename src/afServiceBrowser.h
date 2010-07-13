@@ -29,6 +29,8 @@ class afServiceBrowser;
 #include <string>
 #include <semaphore.h>
 
+#include "ServiceDescription.h"
+
 namespace dfki {
 namespace communication {
 

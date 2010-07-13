@@ -44,6 +44,10 @@ set(SOURCES
     afConfigurator.cpp
     OrocosComponentService.cpp
     ServiceDiscovery.cpp
+    ServiceDescription.cpp 
+    ServiceEvent.cpp
+    ServiceConfiguration.cpp
+    ServicePublisher.cpp
 )
 
 #set(HEADERS

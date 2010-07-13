@@ -5,14 +5,13 @@
 using namespace std;
 using namespace dfki::communication;
 
-void addedOrocosComponent(OrocosComponentRemoteService rms)
+void addedComponent(ServiceDescription service)
 {
-	std::cout << " -=- OROCOS Component found: " << rms.getName() << std::endl;
+	std::cout << " -=- Service found: " << service.getName() << std::endl;
 }
 
 int main (int argc, char const* argv[])
 {
-
 	string IOR = 	
 			string("12345678901234567890123456789012345678901234567890") +
 			string("12345678901234567890123456789012345678901234567890") +
@@ -23,22 +22,20 @@ int main (int argc, char const* argv[])
 			string("12345678901234567890123456789012345678901234567890");
 		
 	ServiceDiscovery servdesc;
-	ServiceDiscovery::Configuration conf(IOR, "SampleComponent" ,"_rimres._tcp");
-	servdesc.addedComponentConnect(sigc::ptr_fun(addedOrocosComponent));
-	servdesc.configure(conf);
-
+	ServiceConfiguration conf("SampleComponent","_rimres._tcp");
+	conf.setDescription("IOR",IOR);
 
 	ServiceDiscovery servdesc2;
-	ServiceDiscovery::Configuration conf2(IOR, "SampleComponent2" ,"_rimres._tcp");
-	servdesc2.configure(conf2);
-	
-	servdesc.start();
+	ServiceConfiguration conf2("SampleComponent2" ,"_rimres._tcp");
+	conf.setDescription("IOR", IOR);
+
+	servdesc.start(conf);
 	
 	sleep(3);
-	servdesc2.start();
+	servdesc2.start(conf2);
 	
 	sleep(5);
-	std::vector<OrocosComponentRemoteService> servs =  servdesc.findServices(ServiceDiscovery::SearchPattern("Sample"));
+	std::vector<ServiceDescription> servs =  servdesc.findServices(ServiceDiscovery::SearchPattern("Sample"));
 	std::cout << " - Found services: " << servs.size() << std::endl;
 		
 	servdesc.stop();	

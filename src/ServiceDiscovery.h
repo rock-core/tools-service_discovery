@@ -1,15 +1,14 @@
 #ifndef RIMRES_SERVICEDISCOVERY_CORE_H_
 #define RIMRES_SERVICEDISCOVERY_CORE_H_
 
-#include <semaphore.h>
-
-#include <map>
 #include <string>
 #include <vector>
-
+#include <semaphore.h>
 #include "afAvahiClient.h"
 #include "afServiceBrowser.h"
-#include "OrocosComponentService.h"
+#include "ServiceEvent.h"
+#include "ServiceConfiguration.h"
+#include "ServicePublisher.h"
 
 namespace dfki { namespace communication {
 
@@ -20,8 +19,26 @@ enum SDException {
 };
 
 /**
+ * @class ServiceDiscovery
  * @brief
- * A wrapper class for the framework
+ * A wrapper class for the avahi service discovery
+ * @verbatim
+ * void callbackFunction()
+ * {
+ *    // what to perform when component has been added
+ * }
+ * std::string someServiceData;
+ * ServiceDiscovery::ServiceDiscovery;
+ * ServiceDiscovery::Configuration conf(someServiceData, "ModuleA", "_module._tcp");
+ * service.addedComponentConnect(signc::mem_fun(*this, &callbackFunction));
+ * service.configure(conf);
+ * service.start();
+ *
+ * std::vector<ServiceDescription>
+ * service.findServices(
+ * 
+ * service.start();
+ * @endverbatim
  */
 class ServiceDiscovery : public sigc::trackable
 {
@@ -30,39 +47,7 @@ public:
 	ServiceDiscovery();
 	~ServiceDiscovery();
 
-	struct Configuration // : default configuration here
-	{
-        Configuration()
-        {
-        }
-		Configuration(std::string IOR, std::string name, std::string avahi_type) : avahi_port(12000), ttl(0) {
-			this->IOR = IOR;
-			this->name = name;
-			this->avahi_type = avahi_type;
-		}
-		Configuration(std::string IOR, std::string name, std::string avahi_type, uint16_t avahi_port, uint32_t ttl) {
-			this->IOR = IOR;
-			this->name = name;
-			this->avahi_type = avahi_type;
-			this->avahi_port = avahi_port;
-			this->ttl = ttl;
-		}
-
-		std::string IOR;
-		std::string name;
-        uint32_t ttl;
-		std::list<std::string> stringlist;
-		
-		//should these be constants?
-		std::string avahi_type;
-		uint16_t avahi_port;
-	};
-
-	void configure(const struct Configuration& configuration);
-
-    std::vector<std::string> getServiceNames();
-
-	void start();
+	void start(const ServiceConfiguration& conf);
 
 	void stop();
 
@@ -77,52 +62,67 @@ public:
 
 		SearchPattern(std::string name, std::string txt) {
 			this->name = name;
+			this->txt = txt;
 		}
+
+		SearchPattern(std::string name, std::string label, std::string txt)
+		{
+			this->name = name;
+			this->label = label;
+			this->txt = txt;
+		}
+
 		std::string name;
+		std::string label;
 		std::string txt;
 	};
 		
-	std::vector<OrocosComponentRemoteService> findServices(SearchPattern pattern);
+	std::vector<ServiceDescription> findServices(SearchPattern pattern);
 
-	void addedComponentConnect(const sigc::slot<void, OrocosComponentRemoteService>& slot) {
+	
+	std::vector<std::string> getServiceNames();
+
+
+	void addedComponentConnect(const sigc::slot<void, ServiceEvent>& slot) {
 		sem_wait(&added_component_sem);
-		OrocosComponentAddedSignal.connect(slot);
+		ServiceAddedSignal.connect(slot);
 		sem_post(&added_component_sem);
 	}
 
-	void removedComponentConnect(const sigc::slot<void, OrocosComponentRemoteService>& slot) {
+	void removedComponentConnect(const sigc::slot<void, ServiceEvent>& slot) {
 		sem_wait(&removed_component_sem);
-		OrocosComponentRemovedSignal.connect(slot);
+		ServiceRemovedSignal.connect(slot);
 		sem_post(&removed_component_sem);
 	}
 
 private:
 
-    /**
-     * Adds the service and emits a signal for the external callback.
-     * Its thread-safe. It will also accept its own service, but no copies
-     * (so every module name has to be unique). 
-     */
-	void addedService(afRemoteService serv);
-	void removedService(afRemoteService serv);
+	/**
+	* Added service
+	*/
+	void addedService(const afRemoteService& service);
 
-	sigc::signal<void, OrocosComponentRemoteService> OrocosComponentAddedSignal;
-	sigc::signal<void, OrocosComponentRemoteService> OrocosComponentRemovedSignal;
+	/**
+	* Removed service
+	*/
+	void removedService(const afRemoteService& service);
+
+	sigc::signal<void, ServiceEvent> ServiceAddedSignal;
+	sigc::signal<void, ServiceEvent> ServiceRemovedSignal;
+
 	sem_t added_component_sem;
 	sem_t removed_component_sem;
 
-	//afList<OrocosComponentRemoteService> services;
-    std::map<std::string, OrocosComponentRemoteService> services;
+	afList<ServiceDescription> services;
 	sem_t services_sem;
 
 	bool started;
 
 	afAvahiClient* client;
 	afServiceBrowser* browser;
-	OrocosComponentLocalService* localserv;
-
-	bool configured;
-	struct Configuration conf;
+	
+	ServicePublisher* localserv;
+	ServiceConfiguration localConfiguration_;
 
 };
 

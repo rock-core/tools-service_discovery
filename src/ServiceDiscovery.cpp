@@ -1,19 +1,15 @@
 #include "ServiceDiscovery.h"
 
-namespace dfki 
-{ 
-namespace communication 
-{
+namespace dfki { namespace communication {
 
 static afLoggingWrapper logger ("ServiceDiscovery");
 
-ServiceDiscovery::ServiceDiscovery() : conf("", "", "")
+ServiceDiscovery::ServiceDiscovery() 
 {
 	client = NULL;
 	localserv = NULL;
 	browser = NULL;
 	started = false;
-	configured = false;	
 
 	if (
 			sem_init(&services_sem,0,1) == -1
@@ -33,45 +29,27 @@ ServiceDiscovery::~ServiceDiscovery()
 	stop();
 }
 
-void ServiceDiscovery::start()
+void ServiceDiscovery::start(const ServiceConfiguration& conf)
 {
+	localConfiguration_ = conf;
+
 	if (started) {
 		throw already_started;
 	}
 	
-	if (!configured) {
-		throw not_configured;
-	}
-	
 	client = new afAvahiClient();
-	browser = new afServiceBrowser(client, conf.avahi_type);
+	browser = new afServiceBrowser(client, conf.getType());
+
 	browser->serviceAddedConnect(sigc::mem_fun(this, &ServiceDiscovery::addedService));
 	browser->serviceRemovedConnect(sigc::mem_fun(this, &ServiceDiscovery::removedService));
-	
-	localserv = new OrocosComponentLocalService(client, conf.name, conf.avahi_type, conf.avahi_port, conf.IOR, conf.stringlist, conf.ttl);
+
+	localserv = new ServicePublisher(client, conf);
 	
 	client->dispatch();
 	
 	//TODO: make it resistant to client failures
 	started = true;
 	
-}
-
-void ServiceDiscovery::configure(const struct Configuration& configuration) {
-	conf = configuration;
-	configured = true;
-}
-
-std::vector<std::string> ServiceDiscovery::getServiceNames()
-{
-    std::vector<std::string> names;
-    std::map<std::string, OrocosComponentRemoteService>::iterator it;
-    sem_wait(&services_sem);
-    for (it = services.begin() ; it != services.end() ; it++) {
-	    names.push_back(it->first);
-	}
-    sem_post(&services_sem);
-    return names;
 }
 
 void ServiceDiscovery::stop()
@@ -83,7 +61,6 @@ void ServiceDiscovery::stop()
 		delete localserv;
 		localserv = NULL;
 	}
-	
 	
 	if (browser) {
 		delete browser;
@@ -103,69 +80,94 @@ void ServiceDiscovery::stop()
 	started = false;
 }
 
-void ServiceDiscovery::addedService(afRemoteService rms)
+//TODO: ServiceEvent should be afRemoteService and ServiceDescription
+void ServiceDiscovery::addedService(const afRemoteService& service)
 {
-	try {
-		OrocosComponentRemoteService orms(rms);
-
-        // If the name of the service is unknown, it will be added and 
-        // the signal will be omitted.
-        if(services.find(rms.getName()) == services.end()) // Not found.
-        {
-            sem_wait(&services_sem);
-			services.insert(std::pair<std::string, OrocosComponentRemoteService>
-                    (rms.getName(), orms));
+	ServiceEvent event(service);
+	ServiceDescription foundServiceDescription = event.getServiceDescription();
+	if (! (localConfiguration_.getServiceDescription() == foundServiceDescription) )
+	{
+			sem_wait(&services_sem);
+			services.push_back( foundServiceDescription );
 			sem_post(&services_sem);
 			sem_wait(&added_component_sem);
-			OrocosComponentAddedSignal.emit(orms);
+
+			ServiceAddedSignal.emit( event );
+
 			sem_post(&added_component_sem);
-        }
-	} catch(OCSException e) {
-		logger.log(WARN, "Failed to create orocos component service from remote service object");
 	}
 }
 
-void ServiceDiscovery::removedService(afRemoteService rms)
+void ServiceDiscovery::removedService(const afRemoteService& service)
 {
-	try {
-		OrocosComponentRemoteService orms(rms);	
-		if (services.find(rms.getName()) != services.end()) {
-			sem_wait(&removed_component_sem);
-			OrocosComponentRemovedSignal.emit(orms);
-			sem_post(&removed_component_sem);
-			sem_wait(&services_sem);
-			services.erase(orms.getName());
-			sem_post(&services_sem);
-		}
-	} catch(OCSException e) {
-		
+	ServiceEvent event(service);
+	ServiceDescription serviceDescription = event.getServiceDescription(); 
+
+	afList<ServiceDescription>::iterator it = services.find(serviceDescription);
+
+	if (it != services.end())	
+	{
+		sem_wait(&removed_component_sem);
+		ServiceRemovedSignal.emit( event );
+		sem_post(&removed_component_sem);
+		sem_wait(&services_sem);
+		services.erase(it);
+		sem_post(&services_sem);
 	}
 
 }
 
-std::vector<OrocosComponentRemoteService> ServiceDiscovery::findServices(SearchPattern pattern)
+std::vector<std::string> ServiceDiscovery::getServiceNames()
 {
-	std::vector<OrocosComponentRemoteService> res;
-	std::map<std::string, OrocosComponentRemoteService>::iterator it;
+	std::vector<std::string> names;
+	afList<ServiceDescription>::iterator it;
 	sem_wait(&services_sem);
 	for (it = services.begin() ; it != services.end() ; it++) {
+		names.push_back(it->getName());
+	}
+	sem_post(&services_sem);
+	return names;
+}
+
+
+std::vector<ServiceDescription> ServiceDiscovery::findServices(SearchPattern pattern)
+{
+	std::vector<ServiceDescription> res;
+	afList<ServiceDescription>::iterator it;
+	sem_wait(&services_sem);
+	for (it = services.begin() ; it != services.end() ; it++) {
+
 		size_t found;
-		if (pattern.name != "") {
-			found = it->second.getName().find(pattern.name);
-			if (found != std::string::npos) {
-				res.push_back(it->second);
+		ServiceDescription description = *it;
+
+		if (pattern.name == description.getName())
+		{
+			res.push_back(description);
+			return res;
+		}
+		
+		std::string descriptionItem = description.getDescription(pattern.label);
+		if( descriptionItem != "") 
+		{
+			if(descriptionItem.find(pattern.txt))
+			{
+				res.push_back(description);
 				continue;
 			}
-		}
-		if (pattern.txt != "") {
-			std::list<std::string>::iterator its;
-			std::list<std::string> strlst = it->second.getStringList();
-			for (its = strlst.begin() ; its != strlst.end() ; its++) {
-				found = its->find(pattern.txt);
-				if (found != std::string::npos) {
-					res.push_back(it->second);
-					break;
-				}			
+
+		} else if(pattern.txt != "") {
+
+			std::vector<std::string> labels = description.getLabels();
+			int labelsSize = labels.size();
+
+			for(int i = 0; i < labelsSize; i++)
+			{
+				std::string descriptionItem = description.getDescription(pattern.label);
+				if(descriptionItem.find(pattern.txt))
+				{
+					res.push_back(description);
+					continue;
+				}
 			}
 		}
 	}
@@ -173,5 +175,4 @@ std::vector<OrocosComponentRemoteService> ServiceDiscovery::findServices(SearchP
 	return res;
 }
 
-} // namespace communication
-} // namespace dfki
+}}
