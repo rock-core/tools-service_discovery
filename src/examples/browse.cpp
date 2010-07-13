@@ -5,6 +5,7 @@
  
 #include <stdlib.h>
 #include <iostream>
+#include <cmath>
 #include "../ServiceDiscovery.h"
 
 using namespace dfki::communication;
@@ -33,6 +34,7 @@ int main(int argc, char** argv)
 	service.start(conf);
 	sleep(150);
 
+	return 0;
 /*	//create a client with default constructor with threaded poll
 	dfki::communication::afAvahiClient client;
 	

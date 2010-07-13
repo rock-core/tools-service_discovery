@@ -92,8 +92,8 @@ void ServiceDescription::setDescription(const std::string& label, const std::str
 	}
 
 	// Based on size how much bytes does the description consume
-	int requiredNumberOfEntries = ceil( descriptionsSize_/(mDNSMaxRecordSize - label.size()) );
-	requiredNumberOfEntries++;
+	int requiredNumberOfEntries = ceil( (double)descriptionsSize_/(double)(mDNSMaxRecordSize - label.size()) );
+
 	int currentPayloadSize = descriptionsSize_ + requiredNumberOfEntries*mDNSMaxRecordSize;
 
 	if( currentPayloadSize > mDNSMaxPayloadSize)
