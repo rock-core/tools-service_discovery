@@ -9,6 +9,7 @@
  <!-- Dependencies are resolved via osdep file in the autoproj configuration -->
   <rosdep name="avahi" />
   <rosdep name="sigc" />
+  <rosdep name="log4cxx" />
   <versioncontrol type="git" url="" />
   <export>
     <cpp cflags="" lflags="-lavahi-client" />
