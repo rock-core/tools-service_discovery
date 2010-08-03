@@ -8,8 +8,6 @@ set(PROJECT_VERSION 1.0)
 set(PROJECT_DESCRIPTION "Service discovery based on AVAHI")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
-include(CommonSetup)
-#include(FindAVAHI)
 
 # Include headers within source
 # If you create subdirectories within source include headers with subdirectory, i.e. 
@@ -30,8 +28,8 @@ include_directories(${PROJECT_SOURCE_DIR}/src)
 include(FindPkgConfig)
 pkg_check_modules(SIGC++ "sigc++-2.0")
 pkg_check_modules(LOG4CXX "liblog4cxx")
-pkg_check_modules(AVAHI_CLIENT "avahi-client")
-pkg_check_modules(AVAHI_CORE "avahi-core")
+pkg_check_modules(AVAHICLIENT "avahi-client")
+pkg_check_modules(AVAHICORE "avahi-core")
 
 include_directories(${SIGC++_INCLUDE_DIRS})
 link_directories(${SIGC++_LIBRARY_DIRS})
@@ -39,12 +37,16 @@ link_directories(${SIGC++_LIBRARY_DIRS})
 include_directories(${LOG4CXX_INCLUDE_DIRS})
 link_directories(${LOG4CXX_LIBRARY_DIRS})
 
-include_directories(${AVAHI_CLIENT_INCLUDE_DIRS})
-link_directories(${AVAHI_CLIENT_LIBRARY_DIRS})
+include_directories(${AVAHICLIENT_INCLUDE_DIRS})
+link_directories(${AVAHICLIENT_LIBRARY_DIRS})
 
-include_directories(${AVAHI_CORE_INCLUDE_DIRS})
-link_directories(${AVAHI_CORE_LIBRARY_DIRS})
-#FIND AVAHI
+include_directories(${AVAHICORE_INCLUDE_DIRS})
+link_directories(${AVAHICORE_LIBRARY_DIRS})
+
+# Using the quotation marks to get the ';' as field separator for string lists 
+set(MY_CFLAGS "-I${SIGC++_INCLUDE_DIRS} -I${AVAHICLIENT_INCLUDE_DIRS} -I${AVAHICORE_INCLUDE_DIRS}")
+string(REGEX REPLACE "-I " "" MY_CFLAGS "${MY_CFLAGS}" )
+string(REGEX REPLACE ";" " -I" THIS_PKG_CFLAGS "${MY_CFLAGS}")
 
 #TODO: not checked for version: avahi version used: 0.6.25
 # find_package(AVAHI REQUIRED)
@@ -53,8 +55,9 @@ link_directories(${AVAHI_CORE_LIBRARY_DIRS})
 # find_package(Log4Cxx REQUIRED)
 
 ### Update external libraries that are available
-set(EXTERNAL_LIBS ${Boost_LIBRARIES} ${SIGC++_LIBRARIES} ${LOG4CXX_LIBRARIES} ${AVAHI_CLIENT_LIBRARIES} ${AVAHI_CORE_LIBRARIES} )
+set(EXTERNAL_LIBS ${Boost_LIBRARIES} ${SIGC++_LIBRARIES} ${LOG4CXX_LIBRARIES} ${AVAHICLIENT_LIBRARIES} ${AVAHICORE_LIBRARIES} )
 
+include(CommonSetup)
 # Process CMakeLists.txt in the following subdirectory
 add_subdirectory(src)
 
