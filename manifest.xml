@@ -1,0 +1,9 @@
+<package>
+     <description brief="Ruby extension for an avahi based service discovery">
+	Ruby extension for an avahi based ServiceDiscovery
+     </description>
+     <author>Thomas Roehr/thomas.roehr@dfki.de</author>
+     <license>GPL v2 or later</license>
+     <depend package="framework/service-discovery" />
+     <depend package="rice" \>	
+<package>
