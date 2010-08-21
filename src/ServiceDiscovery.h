@@ -23,21 +23,34 @@ enum SDException {
  * @brief
  * A wrapper class for the avahi service discovery
  * @verbatim
- * void callbackFunction()
+ * namespace dc = dfki::communication;
+ * void removeCallback(dc::ServiceEvent e)
  * {
+ * 
  *    // what to perform when component has been added
+ *    dc::ServiceDescription sd = e.getServiceDescription();
+ *
+ *    std::string serviceName = sd.getName();
+ *    std::string labelData = sd.getDescription("my-label");
+ *    ...
+ * }
+ * void addCallback(dc::ServiceEvent e)
+ * {
+ *   // what to perform when a component has been added
  * }
  * std::string someServiceData;
  * ServiceDiscovery::ServiceDiscovery;
- * ServiceDiscovery::Configuration conf(someServiceData, "ModuleA", "_module._tcp");
- * service.addedComponentConnect(signc::mem_fun(*this, &callbackFunction));
- * service.configure(conf);
- * service.start();
+ * std::string serviceName = "ModuleA";
+ * std::string serviceType = "_module._tcp"
+ * ServiceDiscovery::Configuration conf(someName, serviceType);
+ * conf.setDescription("my-label","data-associated-with-label");
+ * service.addedComponentConnect(signc::mem_fun(*this, &addCallback));
+ * service.removeComponentConnect(signc::mem_fin(*this, &removeCallback));
+ * service.start(conf);
  *
  * std::vector<ServiceDescription>
- * service.findServices(
+ * service.findServices(SearchPattern("my-component-name"));
  * 
- * service.start();
  * @endverbatim
  */
 class ServiceDiscovery : public sigc::trackable
