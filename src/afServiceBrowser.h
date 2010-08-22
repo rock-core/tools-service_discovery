@@ -104,18 +104,34 @@ public:
 	 * the browser will keep the service resolver object upon this amount of failed attempts
 	 */
 	int serviceResolveTryCount;
-
+	
+	/**
+	 * Class to browse existing services given a avahi client and a type to browse
+	 * \param client
+	 * \param type
+         */
 	afServiceBrowser(
 			afAvahiClient *client,
 			std::string type);
+	/**
+	 * Browser for existing services, given specific avahi definitions
+	 * \param client Reference to avahi client
+	 * \param interface AvahiIfIndex interface, // In most cases pass AVAHI_IF_UNSPEC here 
+	 * \param protocol AvahiProtocol protocol, // In most cases pass AVAHI_PROTO_UNSPEC here
+	 * \param type  A service type such as "_http._tcp" 
+	 * \param domain A domain to browse in. In most cases you want to pass NULL here for the default domain (usually ".local")
+	 * \param flags
+	 * \param data
+         */
 	afServiceBrowser(
-			afAvahiClient *client,
-			AvahiIfIndex interface, /**< In most cases pass AVAHI_IF_UNSPEC here */
-			AvahiProtocol protocol, /**< In most cases pass AVAHI_PROTO_UNSPEC here */
-			std::string type,  /**< A service type such as "_http._tcp" */
-			std::string domain, /**< A domain to browse in. In most cases you want to pass NULL here for the default domain (usually ".local") */
+			afAvahiClient* client,
+			AvahiIfIndex interface, // In most cases pass AVAHI_IF_UNSPEC here 
+			AvahiProtocol protocol, // In most cases pass AVAHI_PROTO_UNSPEC here
+			std::string type,  // A service type such as "_http._tcp" 
+			std::string domain, // A domain to browse in. In most cases you want to pass NULL here for the default domain (usually ".local")
 			AvahiLookupFlags flags,
-			void*);
+			void* data);
+
 	virtual ~afServiceBrowser();
 
 	/** generic signal for a browser event */
