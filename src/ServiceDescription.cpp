@@ -15,9 +15,15 @@ ServiceDescription::ServiceDescription()
 {
 }
 
+
+ServiceDescription::ServiceDescription(const std::string& servicename) : name_(servicename)
+{
+}
+
 ServiceDescription::~ServiceDescription()
 {
 }
+
 
 std::string ServiceDescription::getName() const
 {

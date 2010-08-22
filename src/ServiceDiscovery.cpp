@@ -85,6 +85,7 @@ void ServiceDiscovery::addedService(const afRemoteService& service)
 {
 	ServiceEvent event(service);
 	ServiceDescription foundServiceDescription = event.getServiceDescription();
+
 	if (! (localConfiguration_.getServiceDescription() == foundServiceDescription) )
 	{
 			sem_wait(&services_sem);
@@ -139,6 +140,11 @@ std::vector<ServiceDescription> ServiceDiscovery::findServices(SearchPattern pat
 
 		size_t found;
 		ServiceDescription description = *it;
+		if(pattern.name == "")
+		{
+			res.push_back(description);
+			continue;
+		}
 
 		if (pattern.name == description.getName())
 		{

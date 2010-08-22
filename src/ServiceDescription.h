@@ -37,7 +37,7 @@ class ServiceDescription
 		void setRawDescriptions(const std::list<std::string>& descriptions);
 
 	public:
-		ServiceDescription(const std::string& name, const std::string& type);
+		ServiceDescription(const std::string& servicename);
 
 		virtual ~ServiceDescription();
 
