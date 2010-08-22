@@ -13,16 +13,27 @@ namespace dc = dfki::communication;
 
 typedef std::vector<dc::ServiceDescription> ServiceList;
 
+// Define the data types for the ruby objects here
 Data_Type<dc::ServiceDescription> rb_cServiceDescription;
 Data_Type<ServiceList> serviceList;
 
 namespace wrap
 {
+
+/**
+* Wrapper class for service discovery, so that we have an easier interface configuration
+* Maybe we should even cleanup the ServiceDiscover interface itself, so that we don't need this wrapper
+*/
 class ServiceDiscovery
 {
 	dc::ServiceDiscovery discovery_;
 	dc::ServiceConfiguration configuration_;
 public:
+	/**
+	 * \brief ServiceDiscovery with a certain service name and service type
+         * \param name Name of service
+         * \param type Such as _rimres._tcp
+         */
 	ServiceDiscovery(const std::string& name, const std::string& type): discovery_(), configuration_(name, type, 12000)
 	{
 	}
@@ -47,6 +58,10 @@ public:
 		discovery_.start(configuration_);
 	}
 
+	/**
+	 * Search for services
+	 * TODO: Improve the pattern search of the underlying service-discovery library
+         */
 	std::vector<dc::ServiceDescription> findServices(const std::string& name)
 	{
 		return discovery_.findServices(dc::ServiceDiscovery::SearchPattern(name));
@@ -71,6 +86,9 @@ Array wrap_getLabels(Object description)
 	return labelArray;
 }
 
+/**
+* Making sure ruby can convert a list of service to an array of ServiceDescription objects
+*/
 template<>
 Object to_ruby<ServiceList>(const ServiceList& services)
 {
@@ -89,6 +107,7 @@ extern "C"
 void Init_ServiceDiscovery()
 {
 
+ // Defining the ruby object 'ServiceDescription'
  rb_cServiceDescription = define_class<dc::ServiceDescription>("ServiceDescription")
 	.define_constructor(Constructor<dc::ServiceDescription, const std::string&>())
 	.define_method("getName", &dc::ServiceDescription::getName)
@@ -96,7 +115,8 @@ void Init_ServiceDiscovery()
 	.define_method("getDescription", &dc::ServiceDescription::getDescription)
 	.define_method("getLabels", &wrap_getLabels)
 	;
-
+ 
+ // Defining the ruby object 'ServiceDiscovery'
  rb_cServiceDiscovery = define_class<wrap::ServiceDiscovery>("ServiceDiscovery")
 	// constructor (name, servicetype)
 	.define_constructor(Constructor<wrap::ServiceDiscovery, const std::string&, const std::string&>())
