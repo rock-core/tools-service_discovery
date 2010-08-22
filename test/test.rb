@@ -48,7 +48,9 @@ class ServiceDiscoveryTest < Test::Unit::TestCase
 			puts "Running services: "
 			services = sd.findServices("")
 			services.each do |service|
+				content = service.getDescription "test-label"
 				puts "#{service.getName}"
+				puts "label content: #{content}"
 			end
 			sleep 2
 		end
