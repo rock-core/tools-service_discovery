@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <service-discovery/ServiceDiscovery.h>
+#include <service-discovery/ServiceDescription.h>
 
 using namespace Rice;
 namespace dc = dfki::communication;
@@ -12,6 +13,7 @@ namespace dc = dfki::communication;
 
 typedef std::vector<dc::ServiceDescription> ServiceList;
 
+Data_Type<dc::ServiceDescription> rb_cServiceDescription;
 Data_Type<ServiceList> serviceList;
 
 namespace wrap
@@ -54,7 +56,6 @@ public:
 }
 
 Data_Type<wrap::ServiceDiscovery> rb_cServiceDiscovery;
-Data_Type<dc::ServiceDescription> rb_cServiceDescription;
 
 Array wrap_getLabels(Object description)
 {
@@ -89,7 +90,7 @@ void Init_ServiceDiscovery()
 {
 
  rb_cServiceDescription = define_class<dc::ServiceDescription>("ServiceDescription")
-	.define_constructor(Constructor<dc::ServiceDescription, const std::string&, const std::string&, int >())
+	.define_constructor(Constructor<dc::ServiceDescription, const std::string&>())
 	.define_method("setDescription", &dc::ServiceDescription::setDescription)
 	.define_method("getDescription", &dc::ServiceDescription::getDescription)
 	.define_method("getLabels", &wrap_getLabels)
