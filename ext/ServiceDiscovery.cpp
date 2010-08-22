@@ -91,6 +91,7 @@ void Init_ServiceDiscovery()
 
  rb_cServiceDescription = define_class<dc::ServiceDescription>("ServiceDescription")
 	.define_constructor(Constructor<dc::ServiceDescription, const std::string&>())
+	.define_method("getName", &dc::ServiceDescription::getName)
 	.define_method("setDescription", &dc::ServiceDescription::setDescription)
 	.define_method("getDescription", &dc::ServiceDescription::getDescription)
 	.define_method("getLabels", &wrap_getLabels)

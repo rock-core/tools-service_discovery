@@ -28,7 +28,7 @@ class ServiceDiscoveryTest < Test::Unit::TestCase
 
 	def test_ServiceDiscoveryInterfaces
 		name = "my-service"
-		type = "_http._tcp"
+		type = "_rimres._tcp"
 		sd = ServiceDiscovery.new(name, type)
 
 		label = "my-label"
@@ -38,23 +38,21 @@ class ServiceDiscoveryTest < Test::Unit::TestCase
 		
 		assert_equal(description, retrievedDescription)
 
-
 		services = sd.findServices(name)
 		emptyList = []
 		assert_equal(emptyList, services)
 
 		sd.start
 
-		puts "Running services: "
-#		while true do
+		while true do
+			puts "Running services: "
+			services = sd.findServices("")
 			services.each do |service|
 				puts "#{service.getName}"
 			end
-#			sleep 2
+			sleep 2
+		end
 		puts "--- End of List"
-		
-		
-#		end
 	end
 
 end # Class end
