@@ -5,5 +5,5 @@
      <author>Thomas Roehr/thomas.roehr@dfki.de</author>
      <license>GPL v2 or later</license>
      <depend package="framework/service-discovery" />
-     <depend package="rice" \>	
+     <depend package="rice" />	
 <package>

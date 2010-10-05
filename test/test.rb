@@ -52,9 +52,10 @@ class ServiceDiscoveryTest < Test::Unit::TestCase
 				puts "#{service.getName}"
 				puts "label content: #{content}"
 			end
+
+			puts "--- End of List"
 			sleep 2
 		end
-		puts "--- End of List"
 	end
 
 end # Class end
