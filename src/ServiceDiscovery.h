@@ -89,12 +89,44 @@ public:
 		std::string label;
 		std::string txt;
 	};
+
+  /**
+   * Abstract base class for ServicePattern. Provides a simple interface for
+   * searching via specifice service patterns (position, type, group, state, etc.)
+   */
+  struct ServicePattern {
+    virtual bool matchDescription(const ServiceDescription& service) const = 0;
+  };
+
+  struct PropertyPattern : public ServicePattern {
+    PropertyPattern() : label("*"), description("*") {}
+    PropertyPattern(std::string label, std::string description)
+     : label(label), description(description) {}
+    ~PropertyPattern() {}
+
+    bool matchDescription(const ServiceDescription& service) const;
+
+   private:
+    std::string label, description;
+  };
+
+  struct PositionPattern : public ServicePattern {
+    PositionPattern(int x, int y, int z, double distance) 
+      : x(x), y(y), z(z), distance(distance) {}
+    ~PositionPattern() {}
+
+    bool matchDescription(const ServiceDescription& servie) const;
+
+   private:
+    int x, y, z;    
+    double distance;
+  };
 		
 	std::vector<ServiceDescription> findServices(SearchPattern pattern);
 
+  std::vector<ServiceDescription> findServices(const ServicePattern& pattern);
 	
 	std::vector<std::string> getServiceNames();
-
 
 	void addedComponentConnect(const sigc::slot<void, ServiceEvent>& slot) {
 		sem_wait(&added_component_sem);

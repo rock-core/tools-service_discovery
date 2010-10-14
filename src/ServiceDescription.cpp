@@ -84,7 +84,7 @@ void ServiceDescription::setDescription(const std::string& label, const std::str
 	// safety margin for description we use max 2000 bytes
 	// http://files.multicastdns.org/draft-cheshire-dnsext-multicastdns.txt
 	// page 41
-	descriptionsSize_ = description.size();
+	int descriptionsSize = description.size();
 
 	// +1 for the equal sign
 	int labelSize = label.size() + 1;
@@ -98,19 +98,18 @@ void ServiceDescription::setDescription(const std::string& label, const std::str
 	}
 
 	// Based on size how much bytes does the description consume
-	int requiredNumberOfEntries = ceil( (double)descriptionsSize_/(double)(mDNSMaxRecordSize - label.size()) );
+	int requiredNumberOfEntries = ceil( static_cast<double>(descriptionsSize) / static_cast<double>(mDNSMaxRecordSize - label.size()) );
 
-	int currentPayloadSize = descriptionsSize_ + requiredNumberOfEntries*mDNSMaxRecordSize;
+	int currentPayloadSize = descriptionsSize + requiredNumberOfEntries * mDNSMaxRecordSize;
 
 	if( currentPayloadSize > mDNSMaxPayloadSize)
 	{
 		logger.log(FATAL, "Size of descriptions exceeds maximum payload size: %d vs. maximum %d", currentPayloadSize, mDNSMaxPayloadSize);
 	}
 
-
 	std::list<std::string>::iterator it;	
-	// copy over
-	std::list<std::string> tmpDescriptions = descriptions_;
+
+	std::list<std::string> tmpDescriptions;
 
 	// positive selection of items
 	// leave out items with the same label

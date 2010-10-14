@@ -1,5 +1,7 @@
 #include "ServiceDiscovery.h"
 
+#include <cmath>
+
 namespace dfki { namespace communication {
 
 static afLoggingWrapper logger ("ServiceDiscovery");
@@ -146,7 +148,7 @@ std::vector<ServiceDescription> ServiceDiscovery::findServices(SearchPattern pat
 			continue;
 		}
 
-		if (pattern.name == description.getName())
+		if(pattern.name == description.getName())
 		{
 			res.push_back(description);
 			return res;
@@ -179,6 +181,89 @@ std::vector<ServiceDescription> ServiceDiscovery::findServices(SearchPattern pat
 	}
 	sem_post(&services_sem);
 	return res;
+}
+
+std::vector<ServiceDescription> ServiceDiscovery::findServices(const ServicePattern& pattern) 
+{
+  std::vector<ServiceDescription> result;
+  afList<ServiceDescription>::iterator it;
+  sem_wait(&services_sem);
+
+	for (it = services.begin(); it != services.end(); it++) {
+    ServiceDescription description = *it;
+
+    if( pattern.matchDescription(description) )
+      result.push_back(description);
+	}
+
+	sem_post(&services_sem);
+	return result;
+}
+
+bool ServiceDiscovery::PositionPattern::matchDescription(const ServiceDescription& service) const
+{
+  std::string position = service.getDescription("position");
+
+  if(position.empty())
+    return false;
+
+  // Parse position into coordinate buffer via STL
+  int coordinate[3];
+
+  size_t begin = 0, comma;
+  std::string str;
+
+  for(int i = 0; i < 3; i++)
+  {
+    comma = position.find(",", begin);
+
+    if(comma == std::string::npos && i != 2)
+      return false;
+
+    if(i == 2)
+      str = position.substr(begin);
+    else
+      str = position.substr(begin, comma - begin);
+
+    begin = comma + 1;    
+
+    coordinate[i] = atoi(str.c_str());
+
+    if(coordinate[i] == 0 && str != "0")
+      return false;
+  }
+
+  // calculate euclidean distance between two points
+  int dx = coordinate[0] - this->x;
+  int dy = coordinate[1] - this->y;
+  int dz = coordinate[2] - this->z;
+  
+  return sqrt(dx * dx + dy * dy + dz * dz) <= this->distance;
+}
+
+bool ServiceDiscovery::PropertyPattern::matchDescription(const ServiceDescription& service) const
+{
+  if(label == "*") {
+    std::vector<std::string>::iterator it;
+    std::vector<std::string> labellist = service.getLabels();
+
+    for(it = labellist.begin(); it != labellist.end(); it++) {
+      std::string desc = service.getDescription(*it);
+
+      if(desc.find(description) != std::string::npos)
+        return true;
+    }
+
+    // label = "*", description = "*" should return all found services    
+    return (description == "*");
+  }
+
+  std::string desc = service.getDescription(label);
+
+  if(desc.empty())
+    return false;
+
+  return (description == "*") || desc.find(description) != std::string::npos;
 }
 
 }}

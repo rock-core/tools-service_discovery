@@ -27,7 +27,7 @@ class ServiceDescription
 		std::list<std::string> descriptions_;
 		std::vector<std::string> labels_;
 
-		uint32_t descriptionsSize_;
+		// uint32_t descriptionsSize_;
 
 		static const uint32_t mDNSMaxRecordSize;
 		static const uint32_t mDNSMaxPayloadSize;
@@ -72,7 +72,6 @@ class ServiceDescription
 		std::list<std::string> getRawDescriptions() const;
 
 		std::vector<std::string> getLabels() const;
-
 };
 
 
