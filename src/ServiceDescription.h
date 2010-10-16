@@ -23,6 +23,10 @@ class ServiceDescription
 	protected: 
 		// Identifying name		
 		std::string name_;
+		std::string type_;
+		std::string protocol_;
+		std::string domain_;
+		int interfaceIndex_;
 
 		std::list<std::string> descriptions_;
 		std::vector<std::string> labels_;
@@ -72,6 +76,22 @@ class ServiceDescription
 		std::list<std::string> getRawDescriptions() const;
 
 		std::vector<std::string> getLabels() const;
+
+		void setType(const std::string& type);
+		
+		std::string getType() const;
+		
+		void setProtocol(const std::string& domain);
+		
+		std::string getProtocol() const;
+
+		void setDomain(const std::string& domain);
+		
+		std::string getDomain() const;
+		
+		void setInterfaceIndex(int interfaceIndex);
+		
+		int getInterfaceIndex() const;
 
 };
 

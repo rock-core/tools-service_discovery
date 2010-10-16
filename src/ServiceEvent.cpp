@@ -5,7 +5,11 @@ namespace dfki { namespace communication {
 ServiceEvent::ServiceEvent(const afRemoteService& service)
 {
 	serviceDescription_.setName(service.getName());
+	serviceDescription_.setType(service.getType());
+	serviceDescription_.setProtocol(service.getProtocolString());
+	serviceDescription_.setDomain(service.getDomain());
 	serviceDescription_.setRawDescriptions(service.getStringList());
+	serviceDescription_.setInterfaceIndex(service.getInterface());
 }
 
 ServiceEvent::ServiceEvent(const ServiceDescription& description)
