@@ -200,15 +200,16 @@ void afServiceBrowser::browseCallback(AvahiServiceBrowser *sb, AvahiIfIndex inte
             break;
 
         // if browser finds a new service
+        // since avahi annouces on various interface such as eth0, wlan0, pan0
+        // a service event for every individual service is thrown
         case AVAHI_BROWSER_NEW:
-        	logger.log(INFO, "New service detected");
+        	logger.log(INFO, "New service %s of type %s detected in domain %s: interface #%d ", name, type, domain, interface);
         	
         	ResolveData *tdata;
         	tdata = new ResolveData();
         	tdata->sb = asb;
         	tdata->count = 0;
         	
-//            cerr << "BROWSER found new service:" << name << "of type:" << type << "in domain:" << domain;
             // try to resolve the new found service. If resolver object cannot be created, throw an error
             if (!(avahi_service_resolver_new(client, interface, protocol, name, type, domain, AVAHI_PROTO_UNSPEC, AvahiLookupFlags (0), resolveCallback, tdata)))
             {

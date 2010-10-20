@@ -60,5 +60,6 @@ set(EXTERNAL_LIBS ${Boost_LIBRARIES} ${SIGC++_LIBRARIES} ${LOG4CXX_LIBRARIES} ${
 include(CommonSetup)
 # Process CMakeLists.txt in the following subdirectory
 add_subdirectory(src)
+add_subdirectory(test)
 
 

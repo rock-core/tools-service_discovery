@@ -175,6 +175,47 @@ std::vector<std::string> ServiceDescription::getLabels() const
 	return labels_;
 }
 
+void ServiceDescription::setType(const std::string& type)
+{
+	type_ = type;
+}
+
+
+std::string ServiceDescription::getType() const
+{
+	return type_;
+}
+
+void ServiceDescription::setProtocol(const std::string& protocol)
+{
+	protocol_ = protocol;
+}
+
+std::string ServiceDescription::getProtocol() const
+{
+	return protocol_;
+}
+
+void ServiceDescription::setDomain(const std::string& domain)
+{
+
+}
+
+std::string ServiceDescription::getDomain() const
+{
+	return domain_;
+}
+
+void ServiceDescription::setInterfaceIndex(int interfaceIndex)
+{
+	interfaceIndex_ = interfaceIndex;
+}
+
+int ServiceDescription::getInterfaceIndex() const
+{
+	return interfaceIndex_;
+}
+
 
 }}
 

@@ -42,7 +42,6 @@ set(SOURCES
     afThreadPoll.cpp
     afLoggingWrapper.cpp
     afConfigurator.cpp
-    OrocosComponentService.cpp
     ServiceDiscovery.cpp
     ServiceDescription.cpp 
     ServiceEvent.cpp
@@ -50,24 +49,6 @@ set(SOURCES
     ServicePublisher.cpp
     ServicePattern.cpp
 )
-
-#set(HEADERS
-#    afAvahiFramework.h
-#    afAvahiClient.h
-#    afList.h
-#    afLocalService.h
-#    afPoll.h
-#    afRemoteService.h
-#    afService.h
-#    afServiceBase.h
-#    afServiceBrowser.h
-#    afSimplePoll.h
-#    afThreadPoll.h
-#)
-
-
-#include_directories(${AVAHI_INCLUDES})
-#set(LIBRARIES ${AVAHI_LIBRARIES})
 
 #add_executable(testavahi-framework testmain.cpp ${SOURCES})
 #target_link_libraries(testavahi-framework ${LIBRARIES})
