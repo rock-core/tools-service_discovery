@@ -48,6 +48,7 @@ set(SOURCES
     ServiceEvent.cpp
     ServiceConfiguration.cpp
     ServicePublisher.cpp
+    ServicePattern.cpp
 )
 
 #set(HEADERS

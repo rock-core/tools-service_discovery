@@ -136,7 +136,7 @@ void ServiceDescription::setDescription(const std::string& label, const std::str
 	descriptions_ = std::list<std::string>();
 
 	// add Label to labels
-	if(! (int) count(labels_.begin(), labels_.end(), label))
+	if(! static_cast<int>(count(labels_.begin(), labels_.end(), label)))
 		labels_.push_back(label);	
 
 	descriptions_ = tmpDescriptions;
