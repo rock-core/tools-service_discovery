@@ -21,15 +21,15 @@ struct ServiceLandscape
     ServiceConfiguration power1 = createConfiguration("Power1");
     ServiceConfiguration find = createConfiguration("FindService");
     
-    com1.setDescription("position", "1,0,0");
-    com2.setDescription("position", "0,1,0");
-    com3.setDescription("position", "0,0,1");
-    power1.setDescription("position", "2,0,1");
+    com1.setDescription("location", "1,0,0");
+    com2.setDescription("location", "0,1,0");
+    com3.setDescription("location", "0,0,1");
+    power1.setDescription("location", "2,0,1");
 
-    com1.setDescription("type", "communication");
-    com2.setDescription("type", "communication");
-    com3.setDescription("type", "communication");
-    power1.setDescription("type", "power");
+    com1.setDescription("payload", "1:-1,0:communication");
+    com2.setDescription("payload", "2:-1,0:communication");
+    com3.setDescription("payload", "3:-1,0:communication");
+    power1.setDescription("payload", "4:1:0:power");
 
     com1.setDescription("flags", pattern::castFlags(pattern::BUSY));
     com2.setDescription("flags", pattern::castFlags(pattern::READY));
@@ -116,25 +116,27 @@ BOOST_AUTO_TEST_CASE( findServices )
   // --------------------------------------------------------------------------
 
   // Find a specific property 
-  result = watcher->findServices(PropertyPattern("type", "com")); 
+  result = watcher->findServices(PropertyPattern("payload", "com")); 
 
   BOOST_REQUIRE_EQUAL(3, result.size());
 
+  /*
   for(int i = 0; i < 3; i++)
     BOOST_CHECK_EQUAL("communication", result[i].getDescription("type") );
+  */
 
-  result = watcher->findServices(PropertyPattern("position", "0,0,1"));
+  result = watcher->findServices(PropertyPattern("location", "0,0,1"));
   
   BOOST_REQUIRE_EQUAL(1, result.size());
   
   BOOST_CHECK_EQUAL("Com3", result[0].getName());
 
   // Find a specific description/label via wildcards
-  result = watcher->findServices(PropertyPattern("*", "com"));
+  result = watcher->findServices(PropertyPattern("*", "communication"));
 
   BOOST_REQUIRE_EQUAL(3, result.size());
 
-  result = watcher->findServices(PropertyPattern("position", "*"));
+  result = watcher->findServices(PropertyPattern("location"));
 
   BOOST_CHECK_EQUAL(4, result.size());
 
@@ -156,7 +158,7 @@ BOOST_AUTO_TEST_CASE( findServices )
   // --------------------------------------------------------------------------
 
   MultiPattern multi;
-  PropertyPattern p("type", "com");
+  PropertyPattern p("payload", "communication");
   FlagPattern f(pattern::READY);
   multi << p << f;
 

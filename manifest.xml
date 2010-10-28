@@ -10,6 +10,7 @@
   <rosdep name="avahi" />
   <rosdep name="sigc" />
   <rosdep name="log4cxx" />
+  <rosdep name="boost" />
   <versioncontrol type="git" url="" />
   <export>
     <cpp cflags="" lflags="-lavahi-client" />

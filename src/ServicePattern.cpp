@@ -1,13 +1,13 @@
 #include "ServicePattern.h"
+
 #include <sstream>
 #include <cmath>
 #include <iostream>
 
 namespace dfki { namespace communication {
-
 // ----------------------------------------------------------------------------
 
-std::string pattern::castFlags(int flags)
+std::string pattern::castFlags(pattern::Flags flags)
 {
   std::stringstream oss;
   oss << flags;
@@ -18,7 +18,7 @@ std::string pattern::castFlags(int flags)
 
 bool PositionPattern::matchDescription(const ServiceDescription& service) const
 {
-  std::string position = service.getDescription("position");
+  std::string position = service.getDescription("location");
 
   if(position.empty())
     return false;
@@ -68,20 +68,16 @@ bool PropertyPattern::matchDescription(const ServiceDescription& service) const
     for(it = labellist.begin(); it != labellist.end(); it++) {
       std::string desc = service.getDescription(*it);
 
-      if(desc.find(description) != std::string::npos)
+      if(regex_search(desc, expression))
         return true;
     }
 
-    // label = "*", description = "*" should return all found services    
-    return (description == "*");
+    return false;
   }
 
   std::string desc = service.getDescription(label);
 
-  if(desc.empty())
-    return false;
-
-  return (description == "*") || desc.find(description) != std::string::npos;
+  return !desc.empty() && regex_search(desc, expression);
 }
 
 // ----------------------------------------------------------------------------
@@ -108,10 +104,8 @@ bool MultiPattern::matchDescription(const ServiceDescription& service) const
   std::vector<const ServicePattern*>::const_iterator it;
   
   for(it = patterns.begin(); it != patterns.end(); it++) {
-    if( (*it)->matchDescription(service) == false ) {
-      std::cout << "non matching description in multiple" << std::endl;
+    if( (*it)->matchDescription(service) == false )
       return false;
-    }
   }
 
   return true;

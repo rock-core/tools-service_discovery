@@ -62,9 +62,12 @@ class ServiceDescription
 	
 		/**
 		* Set a description field (identified by a label) associated with this service.
-		* Note that the description should be as 
-		* brief as possible for performance reasons,
-		* since a low level protocol mDNS needs to handle the data
+		* Note that the description should be as brief as possible for performance 
+    * reasons, since a low level protocol mDNS needs to handle the data.
+    *
+    * This method can be used several times for adding different label/descriptions 
+    * to this service. It's also possible to overwrite/update a specific label with
+    * another description.
 		* \param label Label of description
 		* \param description Description
 		*/	
