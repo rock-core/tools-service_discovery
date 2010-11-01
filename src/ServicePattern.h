@@ -66,8 +66,9 @@ struct ServicePattern {
  * 
  * If label = "*", PropertyPattern will search in each description.
  */
+
 struct PropertyPattern : public ServicePattern {
-  PropertyPattern(std::string label = "*", std::string expression = ".*")
+  PropertyPattern(const std::string& label = "*", const std::string& expression = ".*")
    : label(label), expression(expression, boost::regex::extended) {}
 
   ~PropertyPattern() {}
@@ -78,6 +79,13 @@ struct PropertyPattern : public ServicePattern {
   std::string label;
   boost::regex expression;
 };
+
+/**
+ * \brief Factory methods for generating regular-expression based PropertyPatterns.
+ */
+namespace pattern {
+  std::string hasAuthority(int authority);
+}
 
 // ----------------------------------------------------------------------------
 
@@ -147,7 +155,23 @@ struct MultiPattern : public ServicePattern {
   }
 
   private:
-    std::vector<const ServicePattern*> patterns;
+    std::vector<const ServicePattern*> patterns;    
+};
+
+// ----------------------------------------------------------------------------
+
+/**
+ * \brief Filtering services by its authority (based on the remote property)
+ */
+struct AuthorityPattern : public ServicePattern {
+  AuthorityPattern(int authority, bool maximum) : authority(authority), max(maximum) {}  
+  ~AuthorityPattern() {}
+
+  bool matchDescription(const ServiceDescription& service) const;
+
+ private:
+  int authority;
+  bool max;
 };
 
 }}

@@ -111,4 +111,22 @@ bool MultiPattern::matchDescription(const ServiceDescription& service) const
   return true;
 }
 
+bool AuthorityPattern::matchDescription(const ServiceDescription& service) const
+{
+  std::string desc = service.getDescription("remote");
+
+  if(desc.empty())
+    return false;
+
+  size_t position = desc.find_last_of(":");
+  std::string authStr = desc.substr(position);
+
+  int a = atoi(desc.substr(position).c_str());
+
+  if(a == 0 && authStr != "0")
+    return false;
+
+  return max ? authority <= a : authority >= a;
+}
+
 }}

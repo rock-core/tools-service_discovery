@@ -168,19 +168,11 @@ BOOST_AUTO_TEST_CASE( findServices )
   result = watcher->findServices(multi);
 
   BOOST_REQUIRE_EQUAL(2, result.size());
+
 }
 
 // ----------------------------------------------------------------------------
 
-/*
-BOOST_AUTO_TEST_CASE( findSpecificServicesWithMultipleFlags )
-{
-  vector<ServiceDescription> result;
-
-
-  BOOST_REQUIRE(true);
-}
-*/
 
 BOOST_AUTO_TEST_SUITE_END()
 
