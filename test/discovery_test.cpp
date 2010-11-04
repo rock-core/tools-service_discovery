@@ -26,10 +26,15 @@ struct ServiceLandscape
     com3.setDescription("location", "0,0,1");
     power1.setDescription("location", "2,0,1");
 
-    com1.setDescription("payload", "1:-1,0:communication");
-    com2.setDescription("payload", "2:-1,0:communication");
-    com3.setDescription("payload", "3:-1,0:communication");
-    power1.setDescription("payload", "4:1:0:power");
+    com1.setDescription("service", "1,-1,0:communication");
+    com2.setDescription("service", "2,-1,0:dfki::robot::communication");
+    com3.setDescription("service", "3,-1,0:communication");
+    power1.setDescription("service", "4,1,0:dfki::power");
+
+    com1.setDescription("remote", "none:50");
+    com2.setDescription("remote", "none:50");
+    com3.setDescription("remote", "none:75");
+    power1.setDescription("remote", "none:100");
 
     com1.setDescription("flags", pattern::castFlags(pattern::BUSY));
     com2.setDescription("flags", pattern::castFlags(pattern::READY));
@@ -116,7 +121,7 @@ BOOST_AUTO_TEST_CASE( findServices )
   // --------------------------------------------------------------------------
 
   // Find a specific property 
-  result = watcher->findServices(PropertyPattern("payload", "com")); 
+  result = watcher->findServices(PropertyPattern("service", "com")); 
 
   BOOST_REQUIRE_EQUAL(3, result.size());
 
@@ -154,11 +159,34 @@ BOOST_AUTO_TEST_CASE( findServices )
   }
 
   // --------------------------------------------------------------------------
+  // FIND ALL SERVICES MATCHING AN AUTHORITY
+  // --------------------------------------------------------------------------
+    
+  result = watcher->findServices(AuthorityPattern(100));
+  
+  BOOST_REQUIRE_EQUAL(1, result.size());
+  BOOST_CHECK(result[0].getName() == "Power1");
+
+  // --------------------------------------------------------------------------
+  // FIND ALL SERVICES WITHIN A SPECIFIC NAMESPACE
+  // --------------------------------------------------------------------------
+
+  result = watcher->findServices(PropertyPattern(), "dfki");
+
+  BOOST_REQUIRE_EQUAL(2, result.size());
+
+  result = watcher->findServices(PropertyPattern(), "dfki::robot");
+  
+  BOOST_REQUIRE_EQUAL(1, result.size());
+  
+  BOOST_CHECK(result[0].getName() == "Com2");
+
+  // --------------------------------------------------------------------------
   // FIND ALL SERVICES MATCHING A MULTIPLE PATTERNS
   // --------------------------------------------------------------------------
 
   MultiPattern multi;
-  PropertyPattern p("payload", "communication");
+  PropertyPattern p("service", "communication");
   FlagPattern f(pattern::READY);
   multi << p << f;
 

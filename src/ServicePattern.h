@@ -164,14 +164,14 @@ struct MultiPattern : public ServicePattern {
  * \brief Filtering services by its authority (based on the remote property)
  */
 struct AuthorityPattern : public ServicePattern {
-  AuthorityPattern(int authority, bool maximum) : authority(authority), max(maximum) {}  
+  AuthorityPattern(int authority, bool atleast = true) : authority(authority), atleast(atleast) {}  
   ~AuthorityPattern() {}
 
   bool matchDescription(const ServiceDescription& service) const;
 
  private:
   int authority;
-  bool max;
+  bool atleast;
 };
 
 }}

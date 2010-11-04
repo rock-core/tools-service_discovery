@@ -111,6 +111,8 @@ bool MultiPattern::matchDescription(const ServiceDescription& service) const
   return true;
 }
 
+// ---------------------------------------------------------------------------- 
+
 bool AuthorityPattern::matchDescription(const ServiceDescription& service) const
 {
   std::string desc = service.getDescription("remote");
@@ -118,15 +120,17 @@ bool AuthorityPattern::matchDescription(const ServiceDescription& service) const
   if(desc.empty())
     return false;
 
+  // last colon is a separator for authority rate to the other remote attributes
   size_t position = desc.find_last_of(":");
   std::string authStr = desc.substr(position);
 
-  int a = atoi(desc.substr(position).c_str());
+  // position + 1 => erase colon from substring
+  int a = atoi(desc.substr(position + 1).c_str());
 
   if(a == 0 && authStr != "0")
     return false;
 
-  return max ? authority <= a : authority >= a;
+  return atleast ? authority <= a : authority >= a;
 }
 
 }}

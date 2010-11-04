@@ -92,7 +92,8 @@ public:
 		
 	std::vector<ServiceDescription> findServices(SearchPattern pattern);
 
-  std::vector<ServiceDescription> findServices(const ServicePattern& pattern);
+  std::vector<ServiceDescription> findServices(const ServicePattern& pattern, 
+      std::string name_space = "*");
 	
 	std::vector<std::string> getServiceNames();
 

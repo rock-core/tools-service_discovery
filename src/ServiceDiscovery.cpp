@@ -181,7 +181,8 @@ std::vector<ServiceDescription> ServiceDiscovery::findServices(SearchPattern pat
 	return res;
 }
 
-std::vector<ServiceDescription> ServiceDiscovery::findServices(const ServicePattern& pattern) 
+std::vector<ServiceDescription> ServiceDiscovery::findServices(const ServicePattern& pattern,         
+    std::string name_space)
 {
   std::vector<ServiceDescription> result;
   afList<ServiceDescription>::iterator it;
@@ -189,9 +190,14 @@ std::vector<ServiceDescription> ServiceDiscovery::findServices(const ServicePatt
 
 	for (it = services.begin(); it != services.end(); it++) {
     ServiceDescription description = *it;
-
-    if( pattern.matchDescription(description) )
+    std::string serviceprop = description.getDescription("service");
+  
+    size_t namespace_begin = serviceprop.find_first_of(":") + 1;
+    
+    if((name_space == "*" || serviceprop.compare(namespace_begin, name_space.size(), name_space) == 0) 
+        && pattern.matchDescription(description) ) {
       result.push_back(description);
+    }
 	}
 
 	sem_post(&services_sem);
