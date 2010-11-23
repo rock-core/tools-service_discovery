@@ -8,6 +8,7 @@ set(PROJECT_VERSION 1.0)
 set(PROJECT_DESCRIPTION "Service discovery based on AVAHI")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
+include(CommonSetup)
 
 # Include headers within source
 # If you create subdirectories within source include headers with subdirectory, i.e. 
@@ -45,7 +46,11 @@ link_directories(${AVAHICORE_LIBRARY_DIRS})
 
 # Using the quotation marks to get the ';' as field separator for string lists 
 list(APPEND MY_CFLAGS ${SIGC++_INCLUDE_DIRS} ${AVAHICLIENT_INCLUDE_DIRS} ${AVAHICORE_INCLUDE_DIRS})
+message(${MY_CFLAGS})
 string(REGEX REPLACE ";" " -I" THIS_PKG_CFLAGS "${MY_CFLAGS}")
+message(${THIS_PKG_CFLAGS})
+set(THIS_PKG_CFLAGS "-I${THIS_PKG_CFLAGS}")
+message(${THIS_PKG_CFLAGS})
 
 #TODO: not checked for version: avahi version used: 0.6.25
 # find_package(AVAHI REQUIRED)
@@ -56,9 +61,10 @@ string(REGEX REPLACE ";" " -I" THIS_PKG_CFLAGS "${MY_CFLAGS}")
 ### Update external libraries that are available
 set(EXTERNAL_LIBS ${Boost_LIBRARIES} ${SIGC++_LIBRARIES} ${LOG4CXX_LIBRARIES} ${AVAHICLIENT_LIBRARIES} ${AVAHICORE_LIBRARIES} )
 
-include(CommonSetup)
 # Process CMakeLists.txt in the following subdirectory
 add_subdirectory(src)
 add_subdirectory(test)
+
+include(PostSetup)
 
 
