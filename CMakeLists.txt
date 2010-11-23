@@ -26,10 +26,10 @@ find_package(Boost REQUIRED COMPONENTS regex)
 include_directories(${Boost_INCLUDE_DIRS})
 
 include(FindPkgConfig)
-pkg_check_modules(SIGC++ "sigc++-2.0")
-pkg_check_modules(LOG4CXX "liblog4cxx")
-pkg_check_modules(AVAHICLIENT "avahi-client")
-pkg_check_modules(AVAHICORE "avahi-core")
+pkg_check_modules(SIGC++ REQUIRED "sigc++-2.0")
+pkg_check_modules(LOG4CXX REQUIRED "liblog4cxx")
+pkg_check_modules(AVAHICLIENT REQUIRED "avahi-client")
+pkg_check_modules(AVAHICORE REQUIRED "avahi-core")
 
 include_directories(${SIGC++_INCLUDE_DIRS})
 link_directories(${SIGC++_LIBRARY_DIRS})
@@ -44,8 +44,7 @@ include_directories(${AVAHICORE_INCLUDE_DIRS})
 link_directories(${AVAHICORE_LIBRARY_DIRS})
 
 # Using the quotation marks to get the ';' as field separator for string lists 
-set(MY_CFLAGS "-I${SIGC++_INCLUDE_DIRS} -I${AVAHICLIENT_INCLUDE_DIRS} -I${AVAHICORE_INCLUDE_DIRS}")
-string(REGEX REPLACE "-I " "" MY_CFLAGS "${MY_CFLAGS}" )
+list(APPEND MY_CFLAGS ${SIGC++_INCLUDE_DIRS} ${AVAHICLIENT_INCLUDE_DIRS} ${AVAHICORE_INCLUDE_DIRS})
 string(REGEX REPLACE ";" " -I" THIS_PKG_CFLAGS "${MY_CFLAGS}")
 
 #TODO: not checked for version: avahi version used: 0.6.25
