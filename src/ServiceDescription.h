@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-namespace dfki { namespace communication {
+namespace rock { namespace communication {
 
 class ServiceEvent;
 

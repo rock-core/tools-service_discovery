@@ -7,7 +7,7 @@
 
 #include "afPoll.h"
 
-namespace  dfki {namespace communication {
+namespace  rock {namespace communication {
 
 afPoll::afPoll() {
 	// TODO Auto-generated constructor stub

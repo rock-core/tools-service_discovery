@@ -7,7 +7,7 @@
 #include <vector>
 #include "ServiceDescription.h"
 
-namespace dfki { namespace communication {
+namespace rock { namespace communication {
 
 class ServicePublisher;
 class ServiceDiscovery;

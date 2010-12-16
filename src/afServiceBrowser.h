@@ -8,7 +8,7 @@
 #ifndef AFSERVICEBROWSER_H_
 #define AFSERVICEBROWSER_H_
 
-namespace dfki {
+namespace rock {
 namespace communication {
 
 struct ResolveData;
@@ -31,7 +31,7 @@ class afServiceBrowser;
 
 #include "ServiceDescription.h"
 
-namespace dfki {
+namespace rock {
 namespace communication {
 
 /**

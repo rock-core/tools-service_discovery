@@ -10,7 +10,7 @@
 
 #define DEFAULT_POLL afThreadPoll
 
-namespace dfki {
+namespace rock {
 namespace communication {
 
 class afAvahiClient;
@@ -31,7 +31,7 @@ class afAvahiClient;
 #include "afLoggingWrapper.h"
 //#include "afServiceBrowser.h"
 
-namespace dfki {
+namespace rock {
 namespace communication {
 
 /**

@@ -8,7 +8,7 @@
 #include "afService.h"
 
 
-namespace dfki { namespace communication {
+namespace rock { namespace communication {
 
 AvahiStringList* afService::getTxt(std::list<std::string> lst)
 {

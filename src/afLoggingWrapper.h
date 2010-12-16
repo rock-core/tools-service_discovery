@@ -1,7 +1,7 @@
 /*
  * @file LoggingWrapper.h
  * @author Marlon Meyer, mmeyer@tzi
- * @author Thomas Roehr, thomas.roehr@dfki.de
+ * @author Thomas Roehr, thomas.roehr@rock.de
  *
  * @brief Logging class currently based on log4cpp -- future logging should take advantage of log4cxx, which is closer to the 
  * log4j implementation and more current
@@ -31,7 +31,7 @@
 
 using namespace std;
 
-namespace dfki { namespace communication {
+namespace rock { namespace communication {
 
 	enum Priority	{ FATAL, ERROR, WARN, INFO, DEBUG
 //	, TRACE, NOTSET 

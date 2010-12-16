@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 using namespace std;
-using namespace dfki::communication;
+using namespace rock::communication;
 
 void addedComponent(ServiceDescription service)
 {

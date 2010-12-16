@@ -4,7 +4,7 @@
 #include "../afAvahiFramework.h"
 
 
-namespace dc = dfki::communication;
+namespace dc = rock::communication;
 
 int main (int argc, char const* argv[])
 {

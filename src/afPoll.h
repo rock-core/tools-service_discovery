@@ -11,7 +11,7 @@
 #include <avahi-common/watch.h>
 #include <avahi-common/error.h>
 
-namespace dfki {
+namespace rock {
 namespace communication {
 
 /**

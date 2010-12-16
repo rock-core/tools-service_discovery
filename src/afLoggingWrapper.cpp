@@ -2,8 +2,8 @@
  * @file afLoggingWrapper.cpp
  *
  * @author Marlon Meyer, mmeyer@tzi.de
- * @author Thomas Roehr, thomas.roehr@dfki.de
- * @author Darko Makreshanski, darko.makreshanski@dfki.de
+ * @author Thomas Roehr, thomas.roehr@rock.de
+ * @author Darko Makreshanski, darko.makreshanski@rock.de
  *
  * @brief A logging wrapper that currently used log4cxx and allows remote logging to the 
  * control center when the asyncerror process is set
@@ -13,7 +13,7 @@
 #include "afConfigurator.h"
 #include <iostream>
 
-namespace dfki { namespace communication {
+namespace rock { namespace communication {
 
 
 	afLoggingWrapper::afLoggingWrapper(std::string classname) : classname_(classname)

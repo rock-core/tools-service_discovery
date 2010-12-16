@@ -2,7 +2,7 @@
 
 #include "afConfigurator.h"
 
-namespace dfki { namespace communication {
+namespace rock { namespace communication {
 
 afConfigurator * afConfigurator::instance = NULL;
 

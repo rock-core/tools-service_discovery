@@ -13,7 +13,7 @@
 #include <list>
 #include <iostream>
 
-namespace dfki { namespace communication {
+namespace rock { namespace communication {
 
 class afService;
 class afAvahiClient;
@@ -23,7 +23,7 @@ class afAvahiClient;
 #include "afServiceBase.h"
 
 
-namespace dfki {
+namespace rock {
 namespace communication {
 
 class afService : public afServiceBase {

@@ -14,7 +14,7 @@
 #include <iostream>
 #include "afAvahiClient.h"
 
-namespace dfki {
+namespace rock {
 namespace communication {
 
 

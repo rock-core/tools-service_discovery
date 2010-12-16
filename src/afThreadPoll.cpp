@@ -8,7 +8,7 @@
 #include "afThreadPoll.h"
 
 
-namespace dfki { namespace communication {
+namespace rock { namespace communication {
 
 
 afThreadPoll::afThreadPoll() {

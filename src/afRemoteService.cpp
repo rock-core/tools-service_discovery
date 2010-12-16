@@ -8,7 +8,7 @@
 #include "afRemoteService.h"
 #include <iostream>
 
-namespace dfki { namespace communication {
+namespace rock { namespace communication {
 
 static afLoggingWrapper logger("afRemoteService");
 

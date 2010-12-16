@@ -8,13 +8,13 @@
 #include <cmath>
 #include "../ServiceDiscovery.h"
 
-using namespace dfki::communication;
+using namespace rock::communication;
 
 /*void testAdded (ServiceEvent rms) {
 	std::cout << " -=- TESTING SIGNAL: ADDED SERVICE: " << rms.getName() << std::endl;
 }
 
-void testRemoved (dfki::communication::afRemoteService rms) {
+void testRemoved (rock::communication::afRemoteService rms) {
 	std::cout << " -=- TESTING SIGNAL: REMOVED SERVICE: " << rms.getName() << std::endl;
 }
 */
@@ -36,10 +36,10 @@ int main(int argc, char** argv)
 
 	return 0;
 /*	//create a client with default constructor with threaded poll
-	dfki::communication::afAvahiClient client;
+	rock::communication::afAvahiClient client;
 	
 	//create a service browser
-	dfki::communication::afServiceBrowser sbrowser(&client, "_rimres._tcp");
+	rock::communication::afServiceBrowser sbrowser(&client, "_rimres._tcp");
 
 	//connect a callback to the service added signal. Method can also be a class member. Look at sigc++ api
 	sbrowser.serviceAddedConnect(sigc::ptr_fun(testAdded));
@@ -50,7 +50,7 @@ int main(int argc, char** argv)
 	//publish a sample service to test the callbacks
 	std::list<std::string> strlst;
 	strlst.push_back("service_year=1999");
-	dfki::communication::afLocalService serv(&client, "MyTestService", "_rimres._tcp", 10000, strlst);
+	rock::communication::afLocalService serv(&client, "MyTestService", "_rimres._tcp", 10000, strlst);
 	
 	//run the main event loop (in this case in a different thread because default poll is afThreadPoll, so it program will continue normal execution)
 	client.dispatch();
@@ -59,8 +59,8 @@ int main(int argc, char** argv)
 	
 	//print services
 	std::cout << "PRINTING SERVICES:\n";
-	dfki::communication::afList<dfki::communication::afRemoteService> services = sbrowser.getServices();
-	dfki::communication::afList<dfki::communication::afRemoteService>::iterator it;
+	rock::communication::afList<rock::communication::afRemoteService> services = sbrowser.getServices();
+	rock::communication::afList<rock::communication::afRemoteService>::iterator it;
 	for (it = services.begin() ; it != services.end() ; it++) {
 		std::cout << "     SERVICE: " << (*it).getName() << " " << (*it).getType() << " " << (*it).getInterface() << std::endl;
 	}
@@ -69,9 +69,9 @@ int main(int argc, char** argv)
 	sleep(2);
 	
 	//unpublish the service and check for the signal. first must lock the object to prevent concurrency issues
-	((dfki::communication::afThreadPoll*)client.getPoll())->lock();
+	((rock::communication::afThreadPoll*)client.getPoll())->lock();
 	serv.unpublish();
-	((dfki::communication::afThreadPoll*)client.getPoll())->unlock();
+	((rock::communication::afThreadPoll*)client.getPoll())->unlock();
 	
 	sleep(2);
 	

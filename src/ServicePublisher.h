@@ -7,7 +7,7 @@
 #include "afLocalService.h"
 #include "ServiceConfiguration.h"
 
-namespace dfki { namespace communication {
+namespace rock { namespace communication {
 
 class ServicePublisher : public afLocalService
 {

@@ -11,7 +11,7 @@
 #include "ServicePublisher.h"
 #include "ServicePattern.h"
 
-namespace dfki { namespace communication {
+namespace rock { namespace communication {
 
 enum SDException {
 	already_started,
@@ -23,7 +23,7 @@ enum SDException {
  * @brief
  * A wrapper class for the avahi service discovery
  * @verbatim
- * namespace dc = dfki::communication;
+ * namespace dc = rock::communication;
  * void removeCallback(dc::ServiceEvent e)
  * {
  * 

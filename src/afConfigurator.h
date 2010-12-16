@@ -6,7 +6,7 @@
 #include <log4cxx/propertyconfigurator.h>
 #include <log4cxx/helpers/properties.h>
 
-namespace dfki { namespace communication {
+namespace rock { namespace communication {
 
 class afConfigurator
 {

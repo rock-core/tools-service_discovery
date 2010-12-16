@@ -2,7 +2,7 @@
  * A C++ object oriented framework for Avahi
  *
  *  Created on: April, 7 2010
- *      Author: Darko Makreshanski <darko.makreshanski@dfki.de>
+ *      Author: Darko Makreshanski <darko.makreshanski@rock.de>
  */
 
 

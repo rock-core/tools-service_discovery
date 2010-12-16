@@ -12,7 +12,7 @@
 #include <avahi-common/simple-watch.h>
 #include <iostream>
 
-namespace dfki {
+namespace rock {
 namespace communication {
 
 

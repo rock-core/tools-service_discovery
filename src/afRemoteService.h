@@ -8,7 +8,7 @@
 #ifndef AFREMOTESERVICE_H_
 #define AFREMOTESERVICE_H_
 
-namespace dfki {
+namespace rock {
 namespace communication {
 
 class afRemoteService;
@@ -31,7 +31,7 @@ struct ResolveData;
 //	AvahiLookupResultFlags,
 //	void*> afAvahiRemoteServiceSlot;
 
-namespace dfki {
+namespace rock {
 namespace communication {
 
 /**

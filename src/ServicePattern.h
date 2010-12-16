@@ -14,7 +14,7 @@
 #include <boost/regex.hpp>
 #include "ServiceConfiguration.h"
 
-namespace dfki { namespace communication {
+namespace rock { namespace communication {
 
 namespace pattern {
 

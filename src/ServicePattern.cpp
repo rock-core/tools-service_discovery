@@ -4,7 +4,7 @@
 #include <cmath>
 #include <iostream>
 
-namespace dfki { namespace communication {
+namespace rock { namespace communication {
 // ----------------------------------------------------------------------------
 
 std::string pattern::castFlags(pattern::Flags flags)

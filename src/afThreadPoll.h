@@ -11,7 +11,7 @@
 #include "afPoll.h"
 #include <avahi-common/thread-watch.h>
 
-namespace dfki {
+namespace rock {
 namespace communication {
 
 /**

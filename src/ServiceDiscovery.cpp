@@ -1,6 +1,6 @@
 #include "ServiceDiscovery.h"
 
-namespace dfki { namespace communication {
+namespace rock { namespace communication {
 
 static afLoggingWrapper logger ("ServiceDiscovery");
 

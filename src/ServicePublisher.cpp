@@ -1,6 +1,6 @@
 #include "ServicePublisher.h"
 
-namespace dfki { namespace communication {
+namespace rock { namespace communication {
 
 ServicePublisher::ServicePublisher(afAvahiClient* client, const ServiceConfiguration& sc) : afLocalService(client, sc.getName(), sc.getType(), (uint16_t) sc.getPort(), sc.getServiceDescription().getRawDescriptions(), (uint32_t) sc.getTTL(), sc.getPublishMode())
 {

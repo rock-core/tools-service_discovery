@@ -1,6 +1,6 @@
 #include "ServiceEvent.h"
 
-namespace dfki { namespace communication {
+namespace rock { namespace communication {
 
 ServiceEvent::ServiceEvent(const afRemoteService& service)
 {

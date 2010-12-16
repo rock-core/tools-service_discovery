@@ -7,7 +7,7 @@
 
 #include "afSimplePoll.h"
 
-namespace dfki { namespace communication {
+namespace rock { namespace communication {
 
 afSimplePoll::afSimplePoll() {
 	poll = avahi_simple_poll_new();

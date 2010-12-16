@@ -4,7 +4,7 @@
 #include "afRemoteService.h"
 #include "ServiceDescription.h"
 
-namespace dfki { namespace communication {
+namespace rock { namespace communication {
 
 /**
 * \class ServiceEvent

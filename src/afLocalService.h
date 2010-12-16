@@ -15,7 +15,7 @@
 #include <string>
 #include <iostream>
 
-namespace dfki {
+namespace rock {
 namespace communication {
 
 /**
