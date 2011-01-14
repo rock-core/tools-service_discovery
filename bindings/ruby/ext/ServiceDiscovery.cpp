@@ -8,7 +8,7 @@
 #include <service-discovery/ServiceDescription.h>
 
 using namespace Rice;
-namespace dc = dfki::communication;
+namespace dc = rock::communication;
 
 
 typedef std::vector<dc::ServiceDescription> ServiceList;

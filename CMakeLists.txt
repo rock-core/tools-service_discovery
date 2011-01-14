@@ -65,6 +65,8 @@ set(EXTERNAL_LIBS ${Boost_LIBRARIES} ${SIGC++_LIBRARIES} ${LOG4CXX_LIBRARIES} ${
 add_subdirectory(src)
 add_subdirectory(test)
 
+add_subdirectory(bindings/ruby)
+
 include(PostSetup)
 
 
