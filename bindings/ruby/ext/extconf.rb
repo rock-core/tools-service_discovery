@@ -4,7 +4,7 @@ require 'rubygems'
 gem 'rice', '>= 1.3.2'
 
 require 'mkmf-rice'
-extension_name = 'ServiceDiscovery'
+extension_name = 'servicediscovery_ruby'
 #Set all dependencies here
 dependencies = [ 'service-discovery' ]
 

@@ -1,4 +1,4 @@
-require '../lib/ServiceDiscovery'
+require 'servicediscovery_ruby'
 require 'test/unit'
 
 name = "test-service"

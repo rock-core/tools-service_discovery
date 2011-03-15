@@ -5,7 +5,7 @@ find_package(Gem COMPONENTS rice)
 include_directories(${GEM_INCLUDE_DIRS})
 
 ##### Begin of customization
-set(_pkgconfig_name service-discovery-ruby)
+set(_pkgconfig_name servicediscovery_ruby)
 set(_extension_name servicediscovery_ruby)
 set(RUBY_SOURCES 
 	ext/ServiceDiscovery.cpp

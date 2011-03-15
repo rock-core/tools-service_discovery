@@ -103,8 +103,9 @@ Object to_ruby<ServiceList>(const ServiceList& services)
 }
 
 // Initialise ServiceDiscovery
+// The name of the library is required as init
 extern "C"
-void Init_ServiceDiscovery()
+void Init_servicediscovery_ruby()
 {
 
  // Defining the ruby object 'ServiceDescription'
