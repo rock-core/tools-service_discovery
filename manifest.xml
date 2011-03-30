@@ -11,6 +11,7 @@
   <rosdep name="sigc" />
   <rosdep name="log4cxx" />
   <rosdep name="boost" />
+  <depend package="rice" />
   <versioncontrol type="git" url="" />
   <export>
     <cpp cflags="" lflags="-lavahi-client" />
