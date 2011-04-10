@@ -8,9 +8,9 @@
 // *      Author: darko
 // */
 
-//#include "afAvahiClient.h"
-//#include "afServiceBrowser.h"
-//#include "afLocalService.h"
+//#include "AvahiClient.h"
+//#include "ServiceBrowser.h"
+//#include "LocalService.h"
 //#include <string>
 //#include <iostream>
 //#include <sigc++/sigc++.h>
@@ -21,21 +21,21 @@
 
 //using namespace std;
 
-//afAvahiClient avahiclient;
+//AvahiClient avahiclient;
 
 //void handleSIGINT(int sig) {
 //	cout << ".CAUGHT SIG " << sig << endl;
 //	avahiclient.stop();
 //}
 
-//void testCallback (afServiceBrowser* browser,
+//void testCallback (ServiceBrowser* browser,
 //    AvahiBrowserEvent event,
-//	afRemoteService *service,
+//	RemoteService *service,
 //	void* data) {
 //	cout << "testCallback" << endl;
 //}
 
-//void testAdded (afRemoteService* rms) {
+//void testAdded (RemoteService* rms) {
 //	cout << " - TESTING SIGNAL: ADDEDD SERVICE: " << rms->getName() << endl;
 //}
 
@@ -44,14 +44,14 @@
 ////	assert(avahiclient.getAvahiClient());
 //	signal(SIGTERM, handleSIGINT);
 //	signal(SIGINT, handleSIGINT);
-//	afServiceBrowser sbrowser(&avahiclient, "_rimres._tcp");
-//	sbrowser.afServiceAdded.connect(sigc::ptr_fun(testAdded));
-////	sbrowser.afServiceBrowserSignal.connect(sigc::ptr_fun(testCallback));
+//	ServiceBrowser sbrowser(&avahiclient, "_rimres._tcp");
+//	sbrowser.ServiceAdded.connect(sigc::ptr_fun(testAdded));
+////	sbrowser.ServiceBrowserSignal.connect(sigc::ptr_fun(testCallback));
 
 //	list<string> txt;
 //	txt.push_back("darko=makreshanski");
 //	txt.push_back("dd=makreshanski");
-//	afLocalService service(&avahiclient, "darkoaftest", "_rimres._tcp", 12000, txt);
+//	LocalService service(&avahiclient, "darkotest", "_rimres._tcp", 12000, txt);
 
 //	avahiclient.dispatch();
 

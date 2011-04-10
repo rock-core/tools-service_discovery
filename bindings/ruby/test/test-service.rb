@@ -1,13 +1,22 @@
 require 'servicediscovery_ruby'
 require 'test/unit'
 
+include Avahi
+
 name = "test-service"
-type = "_test._tcp"
+type = "_xgrid._tcp"
 sd = ServiceDiscovery.new(name, type)
-sd.setDescription("IOR","your-ior")
-sd.start
+sd.set_description("IOR","your-ior")
+#sd.start
+sd.listen_on(["_xgrid._tcp"])
 while true do
-	sleep 0.5
+        puts "Search"
+        services = sd.find_services("rlb-xserve")
+
+        services.each do |desc|
+                puts desc.get_name
+        end
+	sleep 5
 end
 
 

@@ -30,24 +30,21 @@
 #)
  
 set(SOURCES
-    afAvahiClient.cpp
-    afList.cpp
-    afLocalService.cpp
-    afPoll.cpp
-    afRemoteService.cpp
-    afService.cpp
-    afServiceBase.cpp
-    afServiceBrowser.cpp
-    afSimplePoll.cpp
-    afThreadPoll.cpp
-    afLoggingWrapper.cpp
-    afConfigurator.cpp
-    ServiceDiscovery.cpp
-    ServiceDescription.cpp 
-    ServiceEvent.cpp
-    ServiceConfiguration.cpp
-    ServicePublisher.cpp
-    ServicePattern.cpp
+    client.cpp
+    local_service.cpp
+    remote_service.cpp
+    service.cpp
+    service_base.cpp
+    service_browser.cpp
+    simple_poll.cpp
+    thread_poll.cpp
+    logging.cpp
+    service_discovery.cpp
+    service_description.cpp 
+    service_event.cpp
+    service_configuration.cpp
+    service_publisher.cpp
+    service_pattern.cpp
 )
 
 #add_executable(testavahi-framework testmain.cpp ${SOURCES})

@@ -9,7 +9,7 @@
  <!-- Dependencies are resolved via osdep file in the autoproj configuration -->
   <rosdep name="avahi" />
   <rosdep name="sigc" />
-  <rosdep name="log4cxx" />
+  <rosdep name="log4cpp" />
   <rosdep name="boost" />
   <depend package="rice" />
   <versioncontrol type="git" url="" />

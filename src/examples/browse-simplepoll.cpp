@@ -6,18 +6,18 @@
 #include <csignal>
 #include <stdlib.h>
 #include <iostream>
-#include "../afAvahiFramework.h"
+#include <service_discovery/service_discovery.h>
  
 //create a client with simple poll
-rock::communication::afSimplePoll simplepoll;
-rock::communication::afAvahiClient client(&simplepoll, (AvahiClientFlags) 0);
+servicediscovery::SimplePoll simplepoll;
+servicediscovery::Client client(&simplepoll, (AvahiClientFlags) 0);
  
 void handleSIGINT(int sig) {
 	std::cout << ".CAUGHT SIG " << sig << std::endl;
 	client.stop();
 } 
  
-void testAdded (rock::communication::afRemoteService rms) {
+void testAdded (servicediscovery::RemoteService rms) {
 	std::cout << " -=- TESTING SIGNAL: ADDED SERVICE: " << rms.getName() << std::endl;
 }
 
@@ -29,7 +29,7 @@ int main(int argc, char** argv)
 	signal(SIGINT, handleSIGINT);
 	
 	//create a service browser
-	rock::communication::afServiceBrowser sbrowser(&client, "_rimres._tcp");
+	servicediscovery::ServiceBrowser sbrowser(&client, "_rimres._tcp");
 
 	//connect a callback to the service added signal. Method can also be a class member. Look at sigc++ api
 	sbrowser.serviceAddedConnect(sigc::ptr_fun(testAdded));
@@ -37,7 +37,7 @@ int main(int argc, char** argv)
 	//publish a sample service to test the callbacks
 	std::list<std::string> strlst;
 	strlst.push_back("service_year=1999");
-	rock::communication::afLocalService serv(&client, "MyLocalService", "_rimres._tcp", 10000, strlst);
+	servicediscovery::LocalService serv(&client, "MyLocalService", "_rimres._tcp", 10000, strlst);
 	
 	//run the main event loop
 	client.dispatch();

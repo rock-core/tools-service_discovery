@@ -4,11 +4,11 @@
 #include "rice/Array.hpp"
 
 #include <vector>
-#include <service-discovery/ServiceDiscovery.h>
-#include <service-discovery/ServiceDescription.h>
+#include <service-discovery/service_discovery.h>
+#include <service-discovery/service_description.h>
 
 using namespace Rice;
-namespace dc = rock::communication;
+namespace dc = servicediscovery;
 
 
 typedef std::vector<dc::ServiceDescription> ServiceList;
@@ -16,6 +16,25 @@ typedef std::vector<dc::ServiceDescription> ServiceList;
 // Define the data types for the ruby objects here
 Data_Type<dc::ServiceDescription> rb_cServiceDescription;
 Data_Type<ServiceList> serviceList;
+
+static Module rb_mServiceDiscovery;
+
+template<>
+std::vector<std::string> from_ruby< std::vector<std::string> >(Object types)
+{
+        Array typeList(types);
+        std::vector<std::string> result;
+        result.reserve(typeList.size());
+        
+        Array::iterator it = typeList.begin();
+        for(; it != typeList.end(); ++it)
+        {
+                result.push_back(from_ruby<std::string>(*it));
+        }
+        
+
+        return result;
+}
 
 namespace wrap
 {
@@ -60,12 +79,23 @@ public:
 
 	/**
 	 * Search for services
+         * To retrieve all call with an empty string 
 	 * TODO: Improve the pattern search of the underlying service-discovery library
          */
 	std::vector<dc::ServiceDescription> findServices(const std::string& name)
 	{
 		return discovery_.findServices(dc::ServiceDiscovery::SearchPattern(name));
 	}
+
+	std::vector<std::string> getAllServices()
+	{
+		return discovery_.getServiceNames();
+	}
+
+        void listenOn(std::vector<std::string> types)
+        {
+                discovery_.listenOn(types);
+        }
 };
 
 }
@@ -102,30 +132,34 @@ Object to_ruby<ServiceList>(const ServiceList& services)
 	return serviceList;
 }
 
+
 // Initialise ServiceDiscovery
 // The name of the library is required as init
 extern "C"
 void Init_servicediscovery_ruby()
 {
+ 
+ rb_mServiceDiscovery = define_module("Avahi");
 
  // Defining the ruby object 'ServiceDescription'
- rb_cServiceDescription = define_class<dc::ServiceDescription>("ServiceDescription")
+ rb_cServiceDescription = define_class_under<dc::ServiceDescription>(rb_mServiceDiscovery, "ServiceDescription")
 	.define_constructor(Constructor<dc::ServiceDescription, const std::string&>())
-	.define_method("getName", &dc::ServiceDescription::getName)
-	.define_method("setDescription", &dc::ServiceDescription::setDescription)
-	.define_method("getDescription", &dc::ServiceDescription::getDescription)
-	.define_method("getLabels", &wrap_getLabels)
+	.define_method("get_name", &dc::ServiceDescription::getName)
+	.define_method("set_description", &dc::ServiceDescription::setDescription)
+	.define_method("get_description", &dc::ServiceDescription::getDescription)
+	.define_method("get_labels", &wrap_getLabels)
 	;
  
  // Defining the ruby object 'ServiceDiscovery'
- rb_cServiceDiscovery = define_class<wrap::ServiceDiscovery>("ServiceDiscovery")
+ rb_cServiceDiscovery = define_class_under<wrap::ServiceDiscovery>(rb_mServiceDiscovery, "ServiceDiscovery")
 	// constructor (name, servicetype)
 	.define_constructor(Constructor<wrap::ServiceDiscovery, const std::string&, const std::string&>())
-	.define_method("setDescription",&wrap::ServiceDiscovery::setDescription)
-	.define_method("getDescription",&wrap::ServiceDiscovery::getDescription)
+	.define_method("set_description",&wrap::ServiceDiscovery::setDescription)
+	.define_method("get_description",&wrap::ServiceDiscovery::getDescription)
 	.define_method("start", &wrap::ServiceDiscovery::start)
-	.define_method("findServices", &wrap::ServiceDiscovery::findServices)
-	;
-
+	.define_method("listen_on", &wrap::ServiceDiscovery::listenOn)
+	.define_method("find_services", &wrap::ServiceDiscovery::findServices)
+	.define_method("get_all_services", &wrap::ServiceDiscovery::getAllServices)
+        ;
 }
 

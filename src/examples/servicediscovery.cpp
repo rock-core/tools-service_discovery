@@ -1,9 +1,9 @@
 
-#include "../ServiceDiscovery.h"
+#include <service_discovery/service_discovery.h>
 #include <stdlib.h>
 
 using namespace std;
-using namespace rock::communication;
+using namespace servicediscovery;
 
 void addedComponent(ServiceDescription service)
 {
