@@ -1,106 +1,56 @@
 /*
- * mClient.cpp
- *
- *  Created on: Mar 17, 2010
- *      Author: darko
+ * \file client.cpp
+ * \author darko.makreshanski@dfki.de
+ * \author thomas.roehr@dfki.de
  */
 
-#include <iostream>
-#include <cassert>
-
 #include <service_discovery/client.h>
-#include <avahi-common/thread-watch.h>
 
 namespace servicediscovery { 
 
 static LoggingWrapper logger("Client");
 
-AvahiClient* Client::getAvahiClient() {
-	return mClient;
-}
+AvahiThreadedPoll* Client::msPoll = 0;
+AvahiClient* Client::msAvahiClient = 0;
 
 Client::Client() {
-	mPoll = new DEFAULT_POLL();
-	mLocallyAllocated = true;
+
+        msPoll = avahi_threaded_poll_new();
 
 	int error;
-
-	//the following creation of avahi mClient will fail if the avahi daemon is not available, 
+	//the following creation of avahi msAvahiClient will fail if the avahi daemon is not available, 
 	//this can be changed by setting a AVAHI_CLIENT_NO_FAIL as a flag
-	mClient = avahi_client_new( mPoll->getAvahiPoll(), (AvahiClientFlags) 0, &Client::stateUpdateCallback, NULL, &error);
+	msAvahiClient = avahi_client_new( avahi_threaded_poll_get(msPoll), (AvahiClientFlags) 0, &Client::stateUpdateCallback, NULL, &error);
 
-	//if creation of mClient is not immediately successful throw error 
-	if (!mClient) {
+	// If creation of msAvahiClient is not immediately successful throw error 
+	if (!msAvahiClient) {
 	    logger.log(FATAL, "Failed to create client: %s" , avahi_strerror(error));
             throw 0; //TODO: do sth else
 	}
+
+        avahi_threaded_poll_start(msPoll);
 }
 
-Client::Client(Poll *poll, AvahiClientFlags flags)
+AvahiClient* Client::getAvahiClient()
 {
-	this->mPoll = dynamic_cast<DEFAULT_POLL*>(poll);
-        assert(this->mPoll);
-
-	mLocallyAllocated = false;
-	int error;
-
-        // poll hast to be already started
-        lock();
-	mClient = avahi_client_new(mPoll->getAvahiPoll(), flags, NULL, NULL, &error);
-        unlock();
-
-	//if creation of mClient is not immediately successful throw error 
-	if (!mClient) {
-		logger.log(FATAL, "Failed to create mClient: %s" , avahi_strerror(error));
-        throw 0; //TODO: do sth else
-	}
+    return msAvahiClient;
 }
 
 Client::~Client() {
-	logger.log(DEBUG, "Destructing mClient");
-	if (mClient) {
-		avahi_client_free(mClient);
-                mClient = NULL;
-	}
-	if (mPoll && mLocallyAllocated) {
-		delete mPoll;
-	}
-}
-
-void Client::dispatch() {
-	logger.log(DEBUG, "Dispatching mClient");
-	mPoll->dispatch();
-}
-
-void Client::stop() {
-	logger.log(DEBUG, "Stopping mClient");
-	mPoll->stop();
-} 
-
-
-Poll* Client::getPoll() {
-    return mPoll;
+        avahi_threaded_poll_stop(msPoll);
+	avahi_client_free(msAvahiClient);
+        avahi_threaded_poll_free(msPoll);
 }
 
 void Client::lock() {
-        #ifdef DEFAULT_THREAD_POLL
-        logger.log(INFO, "Client lock");
-        AvahiThreadedPoll* poll = mPoll->getAvahiThreadedPoll();
-        assert(poll);
-        avahi_threaded_poll_lock(poll);
-        #endif
+        avahi_threaded_poll_lock(msPoll);
 }
 
 void Client::unlock() {
-        #ifdef DEFAULT_THREAD_POLL
-        logger.log(INFO, "Client unlock");
-        AvahiThreadedPoll* poll = mPoll->getAvahiThreadedPoll();
-        assert(poll);
-        avahi_threaded_poll_unlock(poll);
-        #endif
+        avahi_threaded_poll_unlock(msPoll);
 }
 
-void Client::stateUpdateCallback(AvahiClient* mClient, AvahiClientState state, void* userdata) {
+void Client::stateUpdateCallback(AvahiClient* avahiClient, AvahiClientState state, void* userdata) {
 //    logger.log(INFO," Clientstate: %d\n", state);
 }
 

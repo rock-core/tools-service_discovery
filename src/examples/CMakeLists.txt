@@ -1,7 +1,6 @@
 set(EXAMPLES
     browse
     browse-publish-update
-    browse-simplepoll
     publish
     servicediscovery
     logging

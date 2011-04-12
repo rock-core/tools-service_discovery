@@ -36,8 +36,6 @@ set(SOURCES
     service.cpp
     service_base.cpp
     service_browser.cpp
-    simple_poll.cpp
-    thread_poll.cpp
     logging.cpp
     service_discovery.cpp
     service_description.cpp 

@@ -140,8 +140,6 @@ private:
         //
         // Map service type such as _myservice._tcp to a corresponding browser
 	std::map<std::string, ServiceBrowser*> mBrowsers;
-        // Use a single client
-	static Client* msClient;
 
         // There can be only a single local service and a single
         // local configuration	

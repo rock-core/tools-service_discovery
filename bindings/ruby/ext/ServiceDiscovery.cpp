@@ -185,7 +185,7 @@ void Init_servicediscovery_ruby()
 	.define_method("set_description",&wrap::ServiceDiscovery::setDescription)
 	.define_method("get_description",&wrap::ServiceDiscovery::getDescription)
 	.define_method("publish", &wrap::ServiceDiscovery::publish, (Arg("name"), Arg("type")) )
-	.define_method("listen_on", &wrap::ServiceDiscovery::listenOn, (Arg("domain list")) )
+	.define_method("listen_on", &wrap::ServiceDiscovery::listenOn, (Arg("domain list") = std::vector<std::string>()) )
 	.define_method("find_services", &wrap::ServiceDiscovery::findServices, (Arg("servicename")) )
 	.define_method("get_all_services", &wrap::ServiceDiscovery::getAllServices)
         ;

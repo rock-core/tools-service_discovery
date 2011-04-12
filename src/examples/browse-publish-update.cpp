@@ -21,12 +21,11 @@ void testAdded (servicediscovery::RemoteService rms) {
  
 int main(int argc, char** argv)
 {
-	
 	//create a client with default constructor with threaded poll
-	servicediscovery::Client client;
+	servicediscovery::Client* client = servicediscovery::Client::getInstance();
 	
 	//create a service browser
-	servicediscovery::ServiceBrowser sbrowser(&client, "_rimres._tcp");
+	servicediscovery::ServiceBrowser sbrowser(client, "_rimres._tcp");
 
 	//connect a callback to the service added signal. Method can also be a class member. Look at sigc++ api
 	sbrowser.serviceAddedConnect(sigc::ptr_fun(testAdded));
@@ -34,19 +33,16 @@ int main(int argc, char** argv)
 	//publish a sample service to test the callbacks
 	std::list<std::string> strlst;
 	strlst.push_back("service_year=1999");
-	servicediscovery::LocalService serv(&client, "MyTestService", "_rimres._tcp", 10000, strlst);
-	
-	//run the main event loop (in this case in a different thread because default poll is ThreadPoll, so it program will continue normal execution)
-	client.dispatch();
+	servicediscovery::LocalService serv(client, "MyTestService", "_rimres._tcp", 10000, strlst);
 	
 	sleep(5);
 	
 	//update the signal txt record
-	client.lock();
+	client->lock();
 	strlst.push_back("somethingelse=10");
 	std::cout << "Updating string list\n";
 	serv.updateStringList(strlst);
-	client.unlock();
+	client->unlock();
 	
 	sleep(5);
 	
@@ -61,8 +57,4 @@ int main(int argc, char** argv)
 	std::cout << "FINISHED PRINTING SERVICES.\n";
 
 	sleep(5);
-		
-	//stop main loop. not really needed if nothing is done terwards
-	client.stop();	
-	
 }

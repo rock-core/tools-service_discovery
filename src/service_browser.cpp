@@ -233,7 +233,7 @@ void ServiceBrowser::browseCallback(AvahiServiceBrowser *sb, AvahiIfIndex interf
 
         // if browser finds a service removal event
         case AVAHI_BROWSER_REMOVE:
-        	logger.log(INFO, "Removing service: %d %s %s %s", interface, name, type, domain);
+        	logger.log(INFO, "Trying to remove service: %d %s %s %s", interface, name, type, domain);
         	{
 				bool removed = false;
 				std::string sname(name);
@@ -257,7 +257,7 @@ void ServiceBrowser::browseCallback(AvahiServiceBrowser *sb, AvahiIfIndex interf
 					}
 				}
 				sem_post(asb->getServicesSem());
-				logger.log(INFO, ( (removed) ? "Service removed" : "Service not removed"));
+				logger.log(INFO, ( (removed) ? "Service removed: %s" : "Service not removed: %s"), sname.c_str());
         	}
 
             break;

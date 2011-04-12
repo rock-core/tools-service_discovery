@@ -23,9 +23,10 @@
 #include <iostream>
 #include <cassert>
 
-#include <service_discovery/simple_poll.h>
-#include <service_discovery/thread_poll.h>
+#include <avahi-common/error.h>
+#include <avahi-common/thread-watch.h>
 #include <service_discovery/logging.h>
+#include <service_discovery/singleton.h>
 
 namespace servicediscovery {
 
@@ -33,49 +34,36 @@ namespace servicediscovery {
  * @brief
  * Client represent the core class since every avahi program must set up a client that will be connected to the avahi-daemon
  */
-class Client {
-private:
-	/**
-	 * the correspondent Client instance from the avahi C api
-	 */
-	AvahiClient* mClient;
-	/**
-	 * every avahi client program must enter in a poll loop to speak to the avahi-daemon and receive asynchronous messages
-	 */
-        DEFAULT_POLL* mPoll; 
-	
-	bool mLocallyAllocated;
+class Client : public Singleton<Client> 
+{
+        friend class Singleton<Client>;
 
-        static void stateUpdateCallback(AvahiClient* client, AvahiClientState state, void* userdata);
-
-
-public:
+protected:
 	/**
 	 * Default constructor with default Poll and no flags
 	 */
 	Client();
+private:
+	/**
+	 * the correspondent Client instance from the avahi C api
+	 */
+	static AvahiClient* msAvahiClient;
 
 	/**
-	 * Constructor with custom poll and flags
+	 * Every avahi client program must enter in a poll loop to speak to the avahi-daemon and receive asynchronous messages
+         * we will use a single poll instance
 	 */
-	Client(Poll *poll, AvahiClientFlags flags);
+        static AvahiThreadedPoll* msPoll; 
+	
+        static void stateUpdateCallback(AvahiClient* client, AvahiClientState state, void* userdata);
 
+
+public:
 	virtual ~Client();
 
-	/**
-	 * enter main loop
-	 */
-	void dispatch();
-	/**
-	 * exit main loop
-	 */
-	void stop();
-	
-	Poll* getPoll();
+        static AvahiClient* getAvahiClient();
 
-	AvahiClient* getAvahiClient();
-
-        void lock();
+        static void lock();
 
         void unlock();
 
