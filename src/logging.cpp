@@ -43,20 +43,21 @@ void LoggingWrapper::configure(Priority priority)
         case FATAL: level = log4cpp::Priority::CRIT; break;
     }
     
+    log4cpp::Category& rootCategory = log4cpp::Category::getInstance("");
+
     if(!configured) 
     {
-        log4cpp::Category& rootCategory = log4cpp::Category::getInstance("");
         //log4cpp::BasicConfigurator::configure();
-
         log4cpp::Appender *appender = new log4cpp::OstreamAppender("console", &std::cout);
         log4cpp::PatternLayout* layout = new log4cpp::PatternLayout(); 
         layout->setConversionPattern("[%d] [%p] - %m %n");
         appender->setLayout(layout);
 
         rootCategory.setAppender(appender); 
-        rootCategory.setPriority(level);
     }
 
+    // Allow priority changes
+    rootCategory.setPriority(level);
     configured = true;
 }
 

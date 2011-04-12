@@ -4,6 +4,9 @@
 #include "rice/Array.hpp"
 
 #include <vector>
+#include <stdexcept>
+#include <boost/algorithm/string.hpp>
+#include <service_discovery/logging.h>
 #include <service_discovery/service_discovery.h>
 #include <service_discovery/service_description.h>
 
@@ -21,7 +24,7 @@ Data_Type<ServiceList> serviceList;
 static Module rb_mServiceDiscovery;
 
 template<>
-std::vector<std::string> from_ruby< std::vector<std::string> >(Object types)
+StringList from_ruby<StringList>(Object types)
 {
         Array typeList(types);
         std::vector<std::string> result;
@@ -32,7 +35,6 @@ std::vector<std::string> from_ruby< std::vector<std::string> >(Object types)
         {
                 result.push_back(from_ruby<std::string>(*it));
         }
-        
 
         return result;
 }
@@ -130,6 +132,27 @@ public:
 
 Data_Type<wrap::ServiceDiscovery> rb_cServiceDiscovery;
 
+// WORKAROUND: should actually use from_ruby<StringList>(domains) here, 
+// but using that within minitest fails with 
+// TypeError: wrong argument type Array (expected Data)
+void wrap_listenOn(Object self, Object domains)
+{
+        Data_Object<wrap::ServiceDiscovery> sd(self, rb_cServiceDiscovery);
+
+        Array typeList(domains);
+        std::vector<std::string> types;
+        types.reserve(typeList.size());
+        
+        Array::iterator it = typeList.begin();
+        for(; it != typeList.end(); ++it)
+        {
+                types.push_back(from_ruby<std::string>(*it));
+        }
+
+        sd->listenOn(types);
+}
+
+
 Array wrap_getLabels(Object description)
 {
 	Data_Object<dc::ServiceDescription> sd(description, rb_cServiceDescription);
@@ -142,6 +165,32 @@ Array wrap_getLabels(Object description)
 	}
 
 	return labelArray;
+}
+
+/**
+* Set the internal log level
+*/
+void set_log_level(const std::string& level)
+{
+    std::string logLevel = level;
+    boost::to_lower(logLevel);
+    {
+        using namespace servicediscovery;
+
+        if(logLevel == "info")
+            LoggingWrapper::configure(INFO);
+        else if(logLevel == "debug")
+            LoggingWrapper::configure(DEBUG);
+        else if(logLevel == "warn")
+            LoggingWrapper::configure(WARN);
+        else if(logLevel == "error")
+            LoggingWrapper::configure(ERROR);
+        else if(logLevel == "fatal")
+            LoggingWrapper::configure(FATAL);
+        else 
+            throw std::runtime_error("Unknown log level. Use one of: info, debug, warn, error or fatal");
+    }
+
 }
 
 /**
@@ -166,10 +215,12 @@ Object to_ruby<ServiceList>(const ServiceList& services)
 extern "C"
 void Init_servicediscovery_ruby()
 {
- 
- rb_mServiceDiscovery = define_module("Avahi");
 
- // Defining the ruby object 'ServiceDescription'
+ // Define module Avahi 
+ rb_mServiceDiscovery = define_module("Avahi")
+        .define_singleton_method("set_log_level", &set_log_level);
+
+ // Defining the ruby class 'ServiceDescription'
  rb_cServiceDescription = define_class_under<dc::ServiceDescription>(rb_mServiceDiscovery, "ServiceDescription")
 	.define_constructor(Constructor<dc::ServiceDescription, const std::string&>())
 	.define_method("get_name", &dc::ServiceDescription::getName)
@@ -178,14 +229,14 @@ void Init_servicediscovery_ruby()
 	.define_method("get_labels", &wrap_getLabels)
 	;
  
- // Defining the ruby object 'ServiceDiscovery'
+ // Defining the ruby class 'ServiceDiscovery'
  rb_cServiceDiscovery = define_class_under<wrap::ServiceDiscovery>(rb_mServiceDiscovery, "ServiceDiscovery")
 	// constructor (name, servicetype)
 	.define_constructor(Constructor<wrap::ServiceDiscovery>())
 	.define_method("set_description",&wrap::ServiceDiscovery::setDescription)
 	.define_method("get_description",&wrap::ServiceDiscovery::getDescription)
 	.define_method("publish", &wrap::ServiceDiscovery::publish, (Arg("name"), Arg("type")) )
-	.define_method("listen_on", &wrap::ServiceDiscovery::listenOn, (Arg("domain list") = std::vector<std::string>()) )
+	.define_method("listen_on", wrap_listenOn, (Arg("domain list")) ) //&wrap::ServiceDiscovery::listenOn, (Arg("domain list")) )
 	.define_method("find_services", &wrap::ServiceDiscovery::findServices, (Arg("servicename")) )
 	.define_method("get_all_services", &wrap::ServiceDiscovery::getAllServices)
         ;

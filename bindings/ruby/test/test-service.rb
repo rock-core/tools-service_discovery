@@ -6,6 +6,8 @@ include Avahi
 name = "test-service"
 type = "_rimres._tcp"
 sd = ServiceDiscovery.new
+
+Avahi.set_log_level("asdfj")
 sd.set_description("IOR","your-ior")
 sd.publish(name, type)
 sd.listen_on(["_xgrid._tcp"])
