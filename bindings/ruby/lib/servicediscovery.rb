@@ -1,0 +1,1 @@
+require 'servicediscovery/core.rb'
