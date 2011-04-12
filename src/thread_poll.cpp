@@ -11,7 +11,7 @@
 namespace servicediscovery {
 
 
-ThreadPoll::ThreadPoll() {
+ThreadPoll::ThreadPoll() : poll(0) {
 	poll = avahi_threaded_poll_new();
 }
 
@@ -35,6 +35,9 @@ const AvahiPoll* ThreadPoll::getAvahiPoll() {
 	return avahi_threaded_poll_get(poll);
 }
 
+AvahiThreadedPoll* ThreadPoll::getAvahiThreadedPoll() {
+        return poll;
+}
 
 } // end namepace servicediscovery
 

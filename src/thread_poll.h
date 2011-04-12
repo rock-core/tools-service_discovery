@@ -35,17 +35,8 @@ public:
 	void stop();
 
 	const AvahiPoll* getAvahiPoll();
-	
-	/**
-	 * upon dispatching you must make sure to synchronize access to the poll and other related objects, thus lock and unlock are provided
-	 */
-	void lock() {avahi_threaded_poll_lock(poll);}
 
-	/**
-	 * counterpart to lock
-	 */
-	void unlock() {avahi_threaded_poll_unlock(poll);}
-	
+	AvahiThreadedPoll* getAvahiThreadedPoll();
 };
 
 

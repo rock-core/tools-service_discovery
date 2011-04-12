@@ -8,13 +8,13 @@
 #ifndef _SERVICE_DISCOVERY_AVAHICLIENT_H_
 #define _SERVICE_DISCOVERY_AVAHICLIENT_H_
 
+#define DEFAULT_THREAD_POLL
+
+#ifdef DEFAULT_THREAD_POLL
 #define DEFAULT_POLL ThreadPoll
-
-namespace servicediscovery {
-
-class Client;
-		
-}
+#else
+#define DEFAULT_POLL SimplePoll
+#endif
 
 #include <avahi-client/client.h>
 #include <sigc++/sigc++.h>
@@ -38,30 +38,29 @@ private:
 	/**
 	 * the correspondent Client instance from the avahi C api
 	 */
-	AvahiClient *client;
+	AvahiClient* mClient;
 	/**
 	 * every avahi client program must enter in a poll loop to speak to the avahi-daemon and receive asynchronous messages
 	 */
-	Poll *poll;
+        DEFAULT_POLL* mPoll; 
 	
-	bool locallyAllocated;
+	bool mLocallyAllocated;
+
+        static void stateUpdateCallback(AvahiClient* client, AvahiClientState state, void* userdata);
+
 
 public:
 	/**
-	 * default constructor with default Poll and no flags
+	 * Default constructor with default Poll and no flags
 	 */
 	Client();
-	/**
-	 * constructor with custom poll and flags
-	 */
-	Client(Poll *poll, AvahiClientFlags flags);
-	virtual ~Client();
 
 	/**
-	 * signal for asynchronous message on a client state change.
-	 * currently not functional TODO implement this
+	 * Constructor with custom poll and flags
 	 */
-	sigc::signal<void, Client*, AvahiClientState, void*> ClientStateChanged;
+	Client(Poll *poll, AvahiClientFlags flags);
+
+	virtual ~Client();
 
 	/**
 	 * enter main loop
@@ -72,9 +71,14 @@ public:
 	 */
 	void stop();
 	
-	Poll* getPoll() {return poll;}
+	Poll* getPoll();
 
 	AvahiClient* getAvahiClient();
+
+        void lock();
+
+        void unlock();
+
 
 };
 

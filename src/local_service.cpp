@@ -13,7 +13,9 @@ static LoggingWrapper logger("LocalService");
 
 LocalService::~LocalService() {
 	if (group) {
+                getClient()->lock();
 		avahi_entry_group_free(group);
+                getClient()->unlock();
 	}
 }
 
@@ -71,9 +73,11 @@ int LocalService::publish()
 	}
 
 	
+        getClient()->lock();
 #ifdef __CUSTOM_TTL__
 	if (!(group = avahi_entry_group_new_custom_ttl(getClient()->getAvahiClient(), entry_group_callback, this, ttl))) {
 #else
+
 /*  !!!!!!!!!!!!!!!!!!!!!!!!!!!! merge conflict here please solve !!!!!!!!!!!!!!!!!!!!!!!!!!	
 	
 	HEAD:src/LocalService.cpp
@@ -85,12 +89,15 @@ int LocalService::publish()
 	if (!(group = avahi_entry_group_new(getClient()->getAvahiClient(), entry_group_callback, this))) {
 #endif	
 		logger.log(FATAL, "Publish - Failed to create entry group: %s", avahi_strerror(avahi_client_errno(getClient()->getAvahiClient())));
+                getClient()->unlock();
         return -3;
     }
+        getClient()->unlock();
    
 	int ret;
         ServiceConfiguration config = getConfiguration();
 
+        getClient()->lock();
 	if ((ret = avahi_entry_group_add_service_strlst(
 				group,
 				config.getInterfaceIndex(),
@@ -103,16 +110,22 @@ int LocalService::publish()
 				getPort(),
 				getTxt())) < 0) {
 
+                getClient()->unlock();
+
 		logger.log(FATAL, "Failed to add service to the entry group: %s", avahi_strerror(ret));
 		unpublish();
 		return -4;
-	}
-	
+	} 
+        getClient()->unlock();
+
+        getClient()->lock();
     if ((ret = avahi_entry_group_commit(group)) < 0) {
+        getClient()->unlock();
     	logger.log(FATAL, "Failed to commit entry group: %s", avahi_strerror(ret));
     	unpublish();
     	return -5;
     }
+    getClient()->unlock();
     
     return 0;
 
@@ -121,8 +134,10 @@ int LocalService::publish()
 void LocalService::unpublish()
 {
 	if (group) {
+                getClient()->lock();
 		avahi_entry_group_free(group);
 		group = NULL;
+                getClient()->unlock();
 	}
 }
 
@@ -161,6 +176,7 @@ int LocalService::updateStringList(std::list<std::string> listn) {
         ServiceConfiguration config = getConfiguration();
 
 	int res;
+        getClient()->lock();
 	if ((res = avahi_entry_group_update_service_txt_strlst(
 				group,
 				config.getInterfaceIndex(),
@@ -170,9 +186,11 @@ int LocalService::updateStringList(std::list<std::string> listn) {
 				config.getType().c_str(),
 				config.getDomain().c_str(),
 				list)) < 0) {
+                getClient()->unlock();
 		logger.log(FATAL, "updateStringList - Failed to update txt records: %s", avahi_strerror(res));
 		return -2;
 	}
+        getClient()->unlock();
 	
 	Service::setTxt(list);
 	stringlist = listn;

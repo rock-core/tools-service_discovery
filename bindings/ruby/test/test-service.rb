@@ -4,19 +4,19 @@ require 'test/unit'
 include Avahi
 
 name = "test-service"
-type = "_xgrid._tcp"
-sd = ServiceDiscovery.new(name, type)
+type = "_rimres._tcp"
+sd = ServiceDiscovery.new
 sd.set_description("IOR","your-ior")
-#sd.start
+sd.publish(name, type)
 sd.listen_on(["_xgrid._tcp"])
+puts "Listen: "
 while true do
-        puts "Search"
-        services = sd.find_services("rlb-xserve")
+        services = sd.get_all_services
 
-        services.each do |desc|
-                puts desc.get_name
+        services.each do |name|
+                puts name 
         end
-	sleep 5
+        sleep 1
 end
 
 

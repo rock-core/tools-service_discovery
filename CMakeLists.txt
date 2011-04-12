@@ -8,6 +8,7 @@ set(PROJECT_VERSION 1.0)
 set(PROJECT_DESCRIPTION "Service discovery based on AVAHI")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
+set(CMAKE_BUILD_TYPE Debug)
 include(CommonSetup)
 
 # Include headers within source

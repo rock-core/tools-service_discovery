@@ -4,26 +4,26 @@ namespace servicediscovery {
 
 ServiceEvent::ServiceEvent(const RemoteService& service)
 {
-	serviceDescription_ = service.getConfiguration();
+	serviceConfiguration_ = service.getConfiguration();
 }
 
-ServiceEvent::ServiceEvent(const ServiceDescription& description)
+ServiceEvent::ServiceEvent(const ServiceConfiguration& config)
 {
-	serviceDescription_ = description;
+	serviceConfiguration_ = config;
 }
 
 ServiceEvent::~ServiceEvent()
 {
 }
 
-const ServiceDescription& ServiceEvent::getServiceDescription() const
+const ServiceDescription& ServiceEvent::getServiceConfiguration() const
 {
-	return serviceDescription_;
+	return serviceConfiguration_;
 }
 
 bool ServiceEvent::operator==(const ServiceEvent& other) const
 {
-	if( this->getServiceDescription() == other.getServiceDescription())
+	if( this->getServiceConfiguration() == other.getServiceConfiguration())
 		return true;
 	
 	else false;

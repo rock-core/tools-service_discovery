@@ -1,15 +1,17 @@
 #include "service_discovery.h"
+#include <boost/timer.hpp>
+#include <stdexcept>
 
 namespace servicediscovery {
 
 static LoggingWrapper logger ("ServiceDiscovery");
 
-ServiceDiscovery::ServiceDiscovery() 
+Client* ServiceDiscovery::msClient = 0;
+
+ServiceDiscovery::ServiceDiscovery()
 {
-	client = NULL;
-	localserv = NULL;
-	started = false;
-        mode = NONE;
+	mLocalService = NULL;
+        mMode = NONE;
 
 	if (
 			sem_init(&services_sem,0,1) == -1
@@ -26,92 +28,122 @@ ServiceDiscovery::ServiceDiscovery()
 
 ServiceDiscovery::~ServiceDiscovery()
 {
+        logger.log(INFO, "ServiceDiscovery Deconstruct");
 	stop();
 }
 
 void ServiceDiscovery::start(const ServiceConfiguration& conf)
 {
-	localConfiguration = conf;
 
-	if (started) {
-		throw already_started;
-	}
+        mMode = PUBLISH;
+	mLocalConfiguration = conf;
+
+        logger.log(INFO, "Servicediscovery start");
+        Client* client;
+        if(!msClient)
+        {
+            client = new Client();	
+            client->dispatch();
+        }
+        
+        // Register browser if it does not exist yet for this type    
+        std::map<std::string, ServiceBrowser*>::const_iterator browserIt;
+        browserIt = mBrowsers.find(conf.getType());
+        if( browserIt == mBrowsers.end())
+        {
+            // Register browser
+            logger.log(INFO, "Creating service browser for %s", conf.getType().c_str());
+            ServiceBrowser* browser = new ServiceBrowser(client, conf.getType());
+            browser->serviceAddedConnect(sigc::mem_fun(this, &ServiceDiscovery::addedService));
+            browser->serviceRemovedConnect(sigc::mem_fun(this, &ServiceDiscovery::removedService));
+            mBrowsers[conf.getType()] = browser;
+        }
+
+        logger.log(INFO, "Creating local service %s", conf.getName().c_str());
+	mLocalService = new LocalService(client, conf.getName(), conf.getType(), conf.getPort(), conf.getServiceDescription().getRawDescriptions(), conf.getTTL(), true);
+
+        // making sure it the service is seen before proceeding 
+        logger.log(INFO, "Waiting for local service: %s", conf.getName().c_str());
+        boost::timer timer;	
+        while(!mPublished)
+        {
+            if(!mPublished && timer.elapsed_min() > 10)
+            {
+                logger.log(FATAL, "Timout reached: resolution of local service failed\n");
+                throw std::runtime_error("Timeout reached: resolution of local service failed\n");
+            } else if(mPublished)
+            {
+                break;
+            }
+
+            sleep(0.1);
+        }
 	
-	client = new Client();
-        ServiceBrowser* browser = new ServiceBrowser(client, conf.getType());
-
-	browser->serviceAddedConnect(sigc::mem_fun(this, &ServiceDiscovery::addedService));
-	browser->serviceRemovedConnect(sigc::mem_fun(this, &ServiceDiscovery::removedService));
-
-	browsers.push_back(browser);
-	localserv = new ServicePublisher(client, conf);
-	
-	client->dispatch();
-	
-	//TODO: make it resistant to client failures
-	started = true;
-
-        mode = PUBLISH;
+        logger.log(INFO, "Local service %s started", conf.getName().c_str());
 }
 
 void ServiceDiscovery::listenOn(const std::vector<std::string>& types)
 {
-    if(!started)
+    if(mMode == NONE)
+        mMode = LISTEN_ONLY;
+
+    if(!msClient)
     {
-        client = new Client();
+            msClient = new Client();
+            msClient->dispatch();
     }
 
     std::vector<std::string>::const_iterator it;
     for(it = types.begin(); it != types.end(); it++)
     {
-        ServiceBrowser* browser = new ServiceBrowser(client, *it);
-        browser->serviceAddedConnect(sigc::mem_fun(this, &ServiceDiscovery::addedService));
-        browser->serviceRemovedConnect(sigc::mem_fun(this, &ServiceDiscovery::removedService));
-        browsers.push_back(browser);
-    }
+        std::map<std::string, ServiceBrowser*>::const_iterator browserIt;
+        browserIt = mBrowsers.find(*it);
+        if( browserIt == mBrowsers.end())
+        {
+            logger.log(INFO, "Adding service browser for domain: %s\n",it->c_str());
 
-    if(!started)
-    {
-	client->dispatch();
-	//TODO: make it resistant to client failures
-	started = true;
+            ServiceBrowser* browser = new ServiceBrowser(msClient, *it);
+            
+            browser->serviceAddedConnect(sigc::mem_fun(this, &ServiceDiscovery::addedService));
+            browser->serviceRemovedConnect(sigc::mem_fun(this, &ServiceDiscovery::removedService));
+            mBrowsers[*it] = browser;
+        }
     }
-
-    if(mode == NONE)
-        mode = LISTEN_ONLY;
 }
 
 void ServiceDiscovery::stop()
 {
-	if (client)
-		client->stop();
+        if(msClient)
+            msClient->stop();
 
 	sem_wait(&services_sem);
-	services.clear();
+	mServices.clear();
 	sem_post(&services_sem);
 
-        std::vector<ServiceBrowser*>::iterator it;
-        for(it = browsers.begin(); it != browsers.end(); it++)
+        // delete all mBrowsers
+        std::map<std::string, ServiceBrowser*>::iterator it;
+        for(it = mBrowsers.begin(); it != mBrowsers.end(); it++)
         {
-                if(*it)
+                if(it->second)
                 {
-                    delete *it;
-                    *it = NULL;
+                    delete it->second;
+                    it->second = NULL;
                 }
 
 	}
 
-	if (localserv) {
-		delete localserv;
-		localserv = NULL;
+	if (mLocalService) {
+		delete mLocalService;
+		mLocalService = NULL;
 	}
-	
-	if (client) {
-		delete client;
-		client = NULL;		
-	}
-	
-	started = false;
+
+        // delete all clients	
+        if(msClient)
+        {
+                delete msClient;
+                msClient = NULL;
+        }
+
 }
 
 //TODO: ServiceEvent should be RemoteService and ServiceDescription
@@ -119,42 +151,45 @@ void ServiceDiscovery::addedService(const RemoteService& service)
 {
 
 	ServiceEvent event(service);
-	ServiceDescription foundServiceDescription = event.getServiceDescription();
+        ServiceConfiguration remoteConfig = service.getConfiguration();
 
-	if (mode == LISTEN_ONLY || (localConfiguration.getServiceDescription() != foundServiceDescription) )
+        if ( mMode == PUBLISH && mLocalConfiguration.getName() == remoteConfig.getName() && mLocalConfiguration.getType() == remoteConfig.getType())
 	{
-			sem_wait(&services_sem);
-			services.push_back( foundServiceDescription );
-			sem_post(&services_sem);
+            logger.log(INFO, "Service mPublished: %s\n", service.getName().c_str());
+            mPublished = true;
+        }
 
-			sem_wait(&added_component_sem);
-			ServiceAddedSignal.emit( event );
-			sem_post(&added_component_sem);
+	sem_wait(&services_sem);
+	mServices.push_back( service.getConfiguration() );
+	sem_post(&services_sem);
 
-                        logger.log(INFO, "Added service %s\n", service.getName().c_str());
-	}
+	sem_wait(&added_component_sem);
+	ServiceAddedSignal.emit( event );
+	sem_post(&added_component_sem);
+
+        logger.log(INFO, "Added service %s with type %s\n", service.getName().c_str(), service.getConfiguration().getType().c_str());
+
 }
 
 void ServiceDiscovery::removedService(const RemoteService& service)
 {
 	ServiceEvent event(service);
-	ServiceDescription serviceDescription = event.getServiceDescription(); 
+	ServiceDescription serviceDescription = event.getServiceConfiguration(); 
 
 	sem_wait(&services_sem);
-	List<ServiceDescription>::iterator it = services.find(serviceDescription);
+	List<ServiceDescription>::iterator it = mServices.find(serviceDescription);
 
-	if (it != services.end())	
+	if (it != mServices.end())	
 	{
 	        sem_wait(&removed_component_sem);
 		ServiceRemovedSignal.emit( event );
 		sem_post(&removed_component_sem);
 
-		services.erase(it);
+		mServices.erase(it);
                 logger.log(INFO, "Removed service %s\n", service.getName().c_str());
 	}
 
 	sem_post(&services_sem);
-
 }
 
 std::vector<std::string> ServiceDiscovery::getServiceNames()
@@ -162,7 +197,7 @@ std::vector<std::string> ServiceDiscovery::getServiceNames()
 	std::vector<std::string> names;
 	List<ServiceDescription>::iterator it;
 	sem_wait(&services_sem);
-	for (it = services.begin() ; it != services.end() ; it++) {
+	for (it = mServices.begin() ; it != mServices.end() ; it++) {
 		names.push_back(it->getName());
 	}
 	sem_post(&services_sem);
@@ -175,7 +210,7 @@ std::vector<ServiceDescription> ServiceDiscovery::findServices(SearchPattern pat
 	std::vector<ServiceDescription> res;
 	List<ServiceDescription>::iterator it;
 	sem_wait(&services_sem);
-	for (it = services.begin() ; it != services.end() ; it++) {
+	for (it = mServices.begin() ; it != mServices.end() ; it++) {
 
 		size_t found;
 		ServiceDescription description = *it;
@@ -227,7 +262,7 @@ std::vector<ServiceDescription> ServiceDiscovery::findServices(const ServicePatt
   List<ServiceDescription>::iterator it;
   sem_wait(&services_sem);
 
-	for (it = services.begin(); it != services.end(); it++) {
+	for (it = mServices.begin(); it != mServices.end(); it++) {
     ServiceDescription description = *it;
     std::string serviceprop = description.getDescription("service");
   

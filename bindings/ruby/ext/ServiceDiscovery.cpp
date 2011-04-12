@@ -4,14 +4,15 @@
 #include "rice/Array.hpp"
 
 #include <vector>
-#include <service-discovery/service_discovery.h>
-#include <service-discovery/service_description.h>
+#include <service_discovery/service_discovery.h>
+#include <service_discovery/service_description.h>
 
 using namespace Rice;
 namespace dc = servicediscovery;
 
 
 typedef std::vector<dc::ServiceDescription> ServiceList;
+typedef std::vector<std::string> StringList;
 
 // Define the data types for the ruby objects here
 Data_Type<dc::ServiceDescription> rb_cServiceDescription;
@@ -36,6 +37,19 @@ std::vector<std::string> from_ruby< std::vector<std::string> >(Object types)
         return result;
 }
 
+template<>
+Object to_ruby<StringList>(const StringList& list)
+{
+        Array array;
+        StringList::const_iterator it = list.begin();
+        for(; it != list.end(); it++)
+        {
+                array.push(*it);
+        }
+
+        return array;
+}
+
 namespace wrap
 {
 
@@ -53,7 +67,7 @@ public:
          * \param name Name of service
          * \param type Such as _rimres._tcp
          */
-	ServiceDiscovery(const std::string& name, const std::string& type): discovery_(), configuration_(name, type, 12000)
+	ServiceDiscovery() : discovery_(), configuration_()
 	{
 	}
 
@@ -72,10 +86,28 @@ public:
 		return configuration_.getDescription(label);
 	}
 
-	void start() 
+        /**
+        * Publish service with service name and a type such as _mydomain._tcp
+        * \param name Name
+        * \param type Service type such as _mydomain._tcp
+        */
+	void publish(const std::string& name, const std::string& type)
 	{
+                configuration_.setName(name);
+                configuration_.setType(type);
+                configuration_.setPort(12000);
+
 		discovery_.start(configuration_);
 	}
+
+        /**
+        * Listen for additional types such as _additional._tcp
+        *
+        */
+        void listenOn(std::vector<std::string> types)
+        {
+                discovery_.listenOn(types);
+        }
 
 	/**
 	 * Search for services
@@ -92,10 +124,6 @@ public:
 		return discovery_.getServiceNames();
 	}
 
-        void listenOn(std::vector<std::string> types)
-        {
-                discovery_.listenOn(types);
-        }
 };
 
 }
@@ -145,20 +173,20 @@ void Init_servicediscovery_ruby()
  rb_cServiceDescription = define_class_under<dc::ServiceDescription>(rb_mServiceDiscovery, "ServiceDescription")
 	.define_constructor(Constructor<dc::ServiceDescription, const std::string&>())
 	.define_method("get_name", &dc::ServiceDescription::getName)
-	.define_method("set_description", &dc::ServiceDescription::setDescription)
-	.define_method("get_description", &dc::ServiceDescription::getDescription)
+	.define_method("set_description", &dc::ServiceDescription::setDescription, (Arg("label"), Arg("description")))
+	.define_method("get_description", &dc::ServiceDescription::getDescription, (Arg("label")))
 	.define_method("get_labels", &wrap_getLabels)
 	;
  
  // Defining the ruby object 'ServiceDiscovery'
  rb_cServiceDiscovery = define_class_under<wrap::ServiceDiscovery>(rb_mServiceDiscovery, "ServiceDiscovery")
 	// constructor (name, servicetype)
-	.define_constructor(Constructor<wrap::ServiceDiscovery, const std::string&, const std::string&>())
+	.define_constructor(Constructor<wrap::ServiceDiscovery>())
 	.define_method("set_description",&wrap::ServiceDiscovery::setDescription)
 	.define_method("get_description",&wrap::ServiceDiscovery::getDescription)
-	.define_method("start", &wrap::ServiceDiscovery::start)
-	.define_method("listen_on", &wrap::ServiceDiscovery::listenOn)
-	.define_method("find_services", &wrap::ServiceDiscovery::findServices)
+	.define_method("publish", &wrap::ServiceDiscovery::publish, (Arg("name"), Arg("type")) )
+	.define_method("listen_on", &wrap::ServiceDiscovery::listenOn, (Arg("domain list")) )
+	.define_method("find_services", &wrap::ServiceDiscovery::findServices, (Arg("servicename")) )
 	.define_method("get_all_services", &wrap::ServiceDiscovery::getAllServices)
         ;
 }

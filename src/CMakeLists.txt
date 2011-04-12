@@ -43,7 +43,6 @@ set(SOURCES
     service_description.cpp 
     service_event.cpp
     service_configuration.cpp
-    service_publisher.cpp
     service_pattern.cpp
 )
 

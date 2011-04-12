@@ -24,19 +24,23 @@ int main (int argc, char const* argv[])
 	ServiceDiscovery servdesc;
 	ServiceConfiguration conf("SampleComponent","_rimres._tcp");
 	conf.setDescription("IOR",IOR);
+	servdesc.start(conf);
 
 	ServiceDiscovery servdesc2;
 	ServiceConfiguration conf2("SampleComponent2" ,"_rimres._tcp");
 	conf.setDescription("IOR", IOR);
-
-	servdesc.start(conf);
-	
-	sleep(3);
 	servdesc2.start(conf2);
+
+        std::vector<std::string> types;
+        types.push_back("_xgrid._tcp");
+        servdesc.listenOn(types);
 	
 	sleep(5);
-	std::vector<ServiceDescription> servs =  servdesc.findServices(ServiceDiscovery::SearchPattern("Sample"));
-	std::cout << " - Found services: " << servs.size() << std::endl;
+	std::vector<ServiceDescription> services =  servdesc.findServices(ServiceDiscovery::SearchPattern(""));
+	std::cout << " - Found services: " << std::endl;
+        std::vector<ServiceDescription>::iterator it = services.begin();
+        for(;it != services.end(); it++)
+            std::cout << it->getName() << std::endl;
 		
 	servdesc.stop();	
 	

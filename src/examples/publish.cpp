@@ -26,11 +26,11 @@ int main(int argc, char** argv)
 	
 	sleep(10);
 	
-	((servicediscovery::ThreadPoll*) client.getPoll())->lock();
+	client.lock();
 	strlst.push_back("somethingelse=10");
 	cout << "Updating string list\n";
 	serv.updateStringList(strlst);
-	((servicediscovery::ThreadPoll*) client.getPoll())->unlock();
+	client.unlock();
 
 	sleep(10);
 

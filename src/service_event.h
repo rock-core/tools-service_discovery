@@ -11,7 +11,7 @@ namespace servicediscovery {
 */
 class ServiceEvent 
 {
-	ServiceDescription serviceDescription_;
+	ServiceConfiguration serviceConfiguration_;
 
 	public:
 		/**
@@ -22,16 +22,16 @@ class ServiceEvent
 		
 		/**
                  * Constructor for a service event 
-		 * \param description ServiceDescription
+		 * \param description ServiceConfig
                  */
-		ServiceEvent(const ServiceDescription& description);
+		ServiceEvent(const ServiceConfiguration& config);
 
 		virtual ~ServiceEvent();
 
 		/**
 		 * Retrieve service description from service event
 		 */
-		const ServiceDescription& getServiceDescription() const;
+		const ServiceDescription& getServiceConfiguration() const;
 
 		bool operator==(const ServiceEvent&) const;
 

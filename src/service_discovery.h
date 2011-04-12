@@ -7,8 +7,8 @@
 #include <service_discovery/client.h>
 #include <service_discovery/service_browser.h>
 #include <service_discovery/service_event.h>
-#include <service_discovery/service_publisher.h>
 #include <service_discovery/service_pattern.h>
+#include <service_discovery/local_service.h>
 
 namespace servicediscovery { 
 
@@ -112,7 +112,7 @@ public:
 
 private:
 
-        enum Mode { NONE = 0, LISTEN_ONLY, PUBLISH };
+        enum Mode { NONE = 0, LISTEN_ONLY = 1, PUBLISH = 2};
 
 	/**
 	* Added service
@@ -130,20 +130,25 @@ private:
 	sem_t added_component_sem;
 	sem_t removed_component_sem;
 
-	List<ServiceDescription> services;
+	List<ServiceDescription> mServices;
 	sem_t services_sem;
 
-	bool started;
+        bool mPublished;
 
-	Client* client;
-	std::vector<ServiceBrowser*> browsers;
+        // Seems to allow better thread safety and handling of the dbus if 
+        // every browser is started with the same client object
+        //
+        // Map service type such as _myservice._tcp to a corresponding browser
+	std::map<std::string, ServiceBrowser*> mBrowsers;
+        // Use a single client
+	static Client* msClient;
 
-        // There can be only a single publisher and a single
+        // There can be only a single local service and a single
         // local configuration	
-	ServicePublisher* localserv;
-	ServiceConfiguration localConfiguration;
+	LocalService* mLocalService;
+	ServiceConfiguration mLocalConfiguration;
 
-        Mode mode;
+        Mode mMode;
 
 };
 

@@ -20,7 +20,6 @@ class ServiceDiscovery;
 class ServiceConfiguration : public ServiceDescription
 {
 	// To access the normal constructor
-	friend class ServicePublisher;
 	friend class ServiceDiscovery;
 
 	private:

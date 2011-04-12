@@ -19,7 +19,7 @@ void testRemoved (servicediscovery::afRemoteService rms) {
 }
 */
 void callbackFunction (ServiceEvent rms) {
-	std::cout << " -=- TESTING SIGNAL: ADDED SERVICE: " << rms.getServiceDescription().getName() << std::endl;
+	std::cout << " -=- TESTING SIGNAL: ADDED SERVICE: " << rms.getServiceConfiguration().getName() << std::endl;
 }
 
  

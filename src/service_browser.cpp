@@ -6,12 +6,14 @@
  */
 
 #include "service_browser.h"
+#include "client.h"
 
 namespace servicediscovery {
 
 static LoggingWrapper logger("ServiceBrowser");
 
 void ServiceBrowser::bootstrap() {
+        client->lock();
 	browser = avahi_service_browser_new(
 				client->getAvahiClient(),
 				interface,
@@ -21,6 +23,8 @@ void ServiceBrowser::bootstrap() {
 				flags,
 				browseCallback,
 				this);
+        client->unlock();
+
 	if (!browser) {
 		logger.log(FATAL, "Failed to create avahi service browser: %s", avahi_strerror(avahi_client_errno(client->getAvahiClient())));
 		throw 0; //TODO improve this
@@ -82,6 +86,7 @@ void freeAfRemoteService(RemoteService srv) {
 }
 
 ServiceBrowser::~ServiceBrowser() {
+        client->lock();
 	List<RemoteService>::iterator it;
 	//free service resolvers
 	sem_wait(&services_sem);
@@ -91,10 +96,11 @@ ServiceBrowser::~ServiceBrowser() {
 	sem_post(&services_sem);
 
 	if (browser)
-        {
+        {       
 		avahi_service_browser_free(browser);
                 browser = NULL;
         }
+        client->unlock();
 }
 
 //void printls(list<RemoteService> ls) {
@@ -197,7 +203,7 @@ void ServiceBrowser::resolveCallback(AvahiServiceResolver *sr, AvahiIfIndex inte
 void ServiceBrowser::browseCallback(AvahiServiceBrowser *sb, AvahiIfIndex interface, AvahiProtocol protocol, AvahiBrowserEvent event, const char *name, const char *type, const char *domain, AvahiLookupResultFlags flags, void *userdata)
 {
 
-	AvahiClient* client = avahi_service_browser_get_client(sb);
+    AvahiClient* client = avahi_service_browser_get_client(sb);
     ServiceBrowser *asb = (ServiceBrowser*) userdata;
 
 	switch (event)
