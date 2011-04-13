@@ -217,8 +217,7 @@ void Init_servicediscovery_ruby()
 {
 
  // Define module Avahi 
- rb_mServiceDiscovery = define_module("Avahi")
-        .define_singleton_method("set_log_level", &set_log_level);
+ rb_mServiceDiscovery = define_module("Avahi");
 
  // Defining the ruby class 'ServiceDescription'
  rb_cServiceDescription = define_class_under<dc::ServiceDescription>(rb_mServiceDiscovery, "ServiceDescription")
@@ -231,10 +230,11 @@ void Init_servicediscovery_ruby()
  
  // Defining the ruby class 'ServiceDiscovery'
  rb_cServiceDiscovery = define_class_under<wrap::ServiceDiscovery>(rb_mServiceDiscovery, "ServiceDiscovery")
+        .define_singleton_method("set_log_level", &set_log_level, (Arg("log_level")))
 	// constructor (name, servicetype)
 	.define_constructor(Constructor<wrap::ServiceDiscovery>())
-	.define_method("set_description",&wrap::ServiceDiscovery::setDescription)
-	.define_method("get_description",&wrap::ServiceDiscovery::getDescription)
+	.define_method("set_description",&wrap::ServiceDiscovery::setDescription, (Arg("label"), Arg("content")))
+	.define_method("get_description",&wrap::ServiceDiscovery::getDescription, (Arg("label")))
 	.define_method("publish", &wrap::ServiceDiscovery::publish, (Arg("name"), Arg("type")) )
 	.define_method("listen_on", wrap_listenOn, (Arg("domain list")) ) //&wrap::ServiceDiscovery::listenOn, (Arg("domain list")) )
 	.define_method("find_services", &wrap::ServiceDiscovery::findServices, (Arg("servicename")) )
