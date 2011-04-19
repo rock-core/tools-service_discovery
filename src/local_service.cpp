@@ -9,8 +9,6 @@
 
 namespace servicediscovery { 
 
-static LoggingWrapper logger("LocalService");
-
 LocalService::~LocalService() {
 	if (group) {
                 getClient()->lock();
@@ -62,13 +60,13 @@ int LocalService::publish()
 {
 
 	if (!getClient()) {
-		logger.log(FATAL, "Publish - client pointer is NULL");
+		LOG_FATAL("Publish - client pointer is NULL");
 		return -1;
 	}
 
 
 	if (group) {
-		logger.log(WARN, "Publish - entry group pointer is not null. Service is already published?");
+		LOG_WARN("Publish - entry group pointer is not null. Service is already published?");
 		return -2;
 	}
 
@@ -83,12 +81,12 @@ int LocalService::publish()
 	HEAD:src/LocalService.cpp
 	std::cerr << "INFO: avahi API is not patched for custom TTL\n";
 
-	logger.log(WARN, "Publish - Avahi API is not patched for custom TTL");
+	LOG_WARN("Publish - Avahi API is not patched for custom TTL");
 	b8bdb878597d120f139eaaaa4fc13d6c3c527b4d:src/LocalService.cpp
 	*/
 	if (!(group = avahi_entry_group_new(getClient()->getAvahiClient(), entry_group_callback, this))) {
 #endif	
-		logger.log(FATAL, "Publish - Failed to create entry group: %s", avahi_strerror(avahi_client_errno(getClient()->getAvahiClient())));
+		LOG_FATAL("Publish - Failed to create entry group: %s", avahi_strerror(avahi_client_errno(getClient()->getAvahiClient())));
                 getClient()->unlock();
         return -3;
     }
@@ -112,7 +110,7 @@ int LocalService::publish()
 
                 getClient()->unlock();
 
-		logger.log(FATAL, "Failed to add service to the entry group: %s", avahi_strerror(ret));
+		LOG_FATAL("Failed to add service to the entry group: %s", avahi_strerror(ret));
 		unpublish();
 		return -4;
 	} 
@@ -121,7 +119,7 @@ int LocalService::publish()
         getClient()->lock();
     if ((ret = avahi_entry_group_commit(group)) < 0) {
         getClient()->unlock();
-    	logger.log(FATAL, "Failed to commit entry group: %s", avahi_strerror(ret));
+    	LOG_FATAL("Failed to commit entry group: %s", avahi_strerror(ret));
     	unpublish();
     	return -5;
     }
@@ -147,16 +145,16 @@ void LocalService::entry_group_callback(AvahiEntryGroup *g, AvahiEntryGroupState
     ServiceConfiguration config = ls->getConfiguration();
     switch (state) {
         case AVAHI_ENTRY_GROUP_ESTABLISHED :
-        	logger.log(INFO, "Entry group callback - Service %s is established", config.getName().c_str());
+        	LOG_INFO("Entry group callback - Service %s is established", config.getName().c_str());
             break;
 
         case AVAHI_ENTRY_GROUP_COLLISION : {
-        	logger.log(FATAL, "Entry group callback - Service collision for %s/%s", config.getType().c_str(), config.getName().c_str());
+        	LOG_FATAL("Entry group callback - Service collision for %s/%s", config.getType().c_str(), config.getName().c_str());
             break;
         }
 
         case AVAHI_ENTRY_GROUP_FAILURE :
-        	logger.log(FATAL, "Entry group callback - Entry group failed for service %s, reason: %s", config.getName().c_str(), avahi_strerror(avahi_client_errno(avahi_entry_group_get_client(g))));
+        	LOG_FATAL("Entry group callback - Entry group failed for service %s, reason: %s", config.getName().c_str(), avahi_strerror(avahi_client_errno(avahi_entry_group_get_client(g))));
             break;
 
         case AVAHI_ENTRY_GROUP_UNCOMMITED:
@@ -167,7 +165,7 @@ void LocalService::entry_group_callback(AvahiEntryGroup *g, AvahiEntryGroupState
 
 int LocalService::updateStringList(std::list<std::string> listn) {
 	if (!group) {
-		logger.log(FATAL, "updateStringList - Entry group not found for updating string list");
+		LOG_FATAL("updateStringList - Entry group not found for updating string list");
 		return -1;
 	}
 	
@@ -187,7 +185,7 @@ int LocalService::updateStringList(std::list<std::string> listn) {
 				config.getDomain().c_str(),
 				list)) < 0) {
                 getClient()->unlock();
-		logger.log(FATAL, "updateStringList - Failed to update txt records: %s", avahi_strerror(res));
+		LOG_FATAL("updateStringList - Failed to update txt records: %s", avahi_strerror(res));
 		return -2;
 	}
         getClient()->unlock();

@@ -1,10 +1,8 @@
 #include "service_description.h"
 #include <cmath>
-#include <service_discovery/logging.h>
+#include <base/logging.h>
 
 namespace servicediscovery {
-
-static LoggingWrapper logger("ServiceDescription");
 
 // Maximum size a mDNS record can store per entry
 const uint32_t ServiceDescription::mDNSMaxRecordSize = 200;
@@ -107,10 +105,10 @@ void ServiceDescription::setDescription(const std::string& label, const std::str
 	int labelSize = label.size() + 1;
 	if( labelSize > 100 )
 	{
-		logger.log(WARN, "Size of label is larger than 100 bytes. Description payload of less than 100 bytes.");
+		LOG_WARN("Size of label is larger than 100 bytes. Description payload of less than 100 bytes.");
 	} else if (labelSize >= 200)
 	{
-		logger.log(FATAL, "Size of label exceeds maximum payload size");
+		LOG_FATAL("Size of label exceeds maximum payload size");
 		return;
 	}
 
@@ -121,7 +119,7 @@ void ServiceDescription::setDescription(const std::string& label, const std::str
 
 	if( currentPayloadSize > mDNSMaxPayloadSize)
 	{
-		logger.log(FATAL, "Size of descriptions exceeds maximum payload size: %d vs. maximum %d", currentPayloadSize, mDNSMaxPayloadSize);
+		LOG_FATAL("Size of descriptions exceeds maximum payload size: %d vs. maximum %d", currentPayloadSize, mDNSMaxPayloadSize);
 	}
 
 	std::list<std::string>::iterator it;	

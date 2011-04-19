@@ -10,8 +10,6 @@
 
 namespace servicediscovery {
 
-static LoggingWrapper logger("ServiceBrowser");
-
 void ServiceBrowser::bootstrap() {
         client->lock();
 	browser = avahi_service_browser_new(
@@ -26,7 +24,7 @@ void ServiceBrowser::bootstrap() {
         client->unlock();
 
 	if (!browser) {
-		logger.log(FATAL, "Failed to create avahi service browser: %s", avahi_strerror(avahi_client_errno(client->getAvahiClient())));
+		LOG_FATAL("Failed to create avahi service browser: %s", avahi_strerror(avahi_client_errno(client->getAvahiClient())));
 		throw 0; //TODO improve this
 	}
 	if (
@@ -36,7 +34,7 @@ void ServiceBrowser::bootstrap() {
 				||
 			sem_init(&service_removed_sem,0,1) == -1
 		) {
-		logger.log(FATAL, "Semaphore initialization failed");
+		LOG_FATAL("Semaphore initialization failed");
 		throw 1;
 	}
 
@@ -121,19 +119,19 @@ void ServiceBrowser::resolveCallback(AvahiServiceResolver *sr, AvahiIfIndex inte
     {
         // if found service cannot be resolved, throw an error
         case AVAHI_RESOLVER_FAILURE:
-        	logger.log(WARN, "Resolver failed to resolve service %s of type %s on interface %d. Error: %s", 
+        	LOG_WARN("Resolver failed to resolve service %s of type %s on interface %d. Error: %s", 
         						name, 
         						type, 
         						interface,
         						avahi_strerror(avahi_client_errno(avahi_service_resolver_get_client(sr))));
             if (data->count >= sb->serviceResolveTryCount) {
             	//TODO: it seems that it doesn't make more attempts'
-            	logger.log(WARN, "Failed attempts to resolve this service has exceeded the limit. Service resolver object freed");
+            	LOG_WARN("Failed attempts to resolve this service has exceeded the limit. Service resolver object freed");
             	delete data;
 	            avahi_service_resolver_free(sr);
             } else {
             	data->count = data->count + 1;
-            	logger.log(WARN, "Failed attempt %d out of %d", data->count, sb->serviceResolveTryCount);
+            	LOG_WARN("Failed attempt %d out of %d", data->count, sb->serviceResolveTryCount);
             }
             break;
 
@@ -160,7 +158,7 @@ void ServiceBrowser::resolveCallback(AvahiServiceResolver *sr, AvahiIfIndex inte
             RemoteService rms(sb, interface, protocol, sname, stype, sdomain, strlist, port, shost, *address, sr, new sigc::signal<void, RemoteService>());
             rms.resolveData = data;
             ServiceConfiguration remoteConfig = rms.getConfiguration();
-            logger.log(INFO, "Service resolved: %d %d %s %s %s", remoteConfig.getInterfaceIndex(), remoteConfig.getProtocol(), remoteConfig.getName().c_str(), remoteConfig.getType().c_str(), remoteConfig.getDomain().c_str());
+            LOG_INFO("Service resolved: %d %d %s %s %s", remoteConfig.getInterfaceIndex(), remoteConfig.getProtocol(), remoteConfig.getName().c_str(), remoteConfig.getType().c_str(), remoteConfig.getDomain().c_str());
 			
 			sem_wait(sb->getServicesSem());
             if (sb->getInternalServices()->find(rms) == sb->getInternalServices()->end()) {
@@ -171,7 +169,7 @@ void ServiceBrowser::resolveCallback(AvahiServiceResolver *sr, AvahiIfIndex inte
 				srv = sb->getInternalServices()->find(rms);
 				if (srv != sb->getInternalServices()->end()) {
 
-					logger.log(INFO, "Service already in DB, but txt records have changed");
+					LOG_INFO("Service already in DB, but txt records have changed");
 					(*srv).emitSignal();
 					
 				} else {
@@ -179,14 +177,14 @@ void ServiceBrowser::resolveCallback(AvahiServiceResolver *sr, AvahiIfIndex inte
 					rms.dontCheckTXT = false;
 		        	sb->getInternalServices()->push_back(rms);
 
-		        	logger.log(INFO, "Service added to DB. Signal sent to %d slots", sb->ServiceAdded.size());
+		        	LOG_INFO("Service added to DB. Signal sent to %d slots", sb->ServiceAdded.size());
 	            	sb->serviceAddedEmit(rms);
 		
 				}
 
             } else {
 
-            	logger.log(INFO, "Service not added (already in DB)");
+            	LOG_INFO("Service not added (already in DB)");
             }
 			sem_post(sb->getServicesSem());
 
@@ -210,14 +208,14 @@ void ServiceBrowser::browseCallback(AvahiServiceBrowser *sb, AvahiIfIndex interf
     {
         // if browser failure occurs, throw an error
         case AVAHI_BROWSER_FAILURE:
-        	logger.log(FATAL, "Browser failed. Error: %s", avahi_strerror(avahi_client_errno(client)));
+        	LOG_FATAL("Browser failed. Error: %s", avahi_strerror(avahi_client_errno(client)));
             break;
 
         // if browser finds a new service
         // since avahi annouces on various interface such as eth0, wlan0, pan0
         // a service event for every individual service is thrown
         case AVAHI_BROWSER_NEW:
-        	logger.log(INFO, "New service %s of type %s detected in domain %s: interface #%d ", name, type, domain, interface);
+        	LOG_INFO("New service %s of type %s detected in domain %s: interface #%d ", name, type, domain, interface);
         	
         	ResolveData *tdata;
         	tdata = new ResolveData();
@@ -227,13 +225,13 @@ void ServiceBrowser::browseCallback(AvahiServiceBrowser *sb, AvahiIfIndex interf
             // try to resolve the new found service. If resolver object cannot be created, throw an error
             if (!(avahi_service_resolver_new(client, interface, protocol, name, type, domain, AVAHI_PROTO_UNSPEC, AvahiLookupFlags (0), resolveCallback, tdata)))
             {
-            	logger.log(FATAL, "Failed to create service resolver object for: %s. Error: ", name, avahi_strerror(avahi_client_errno(client)));
+            	LOG_FATAL("Failed to create service resolver object for: %s. Error: ", name, avahi_strerror(avahi_client_errno(client)));
             }
             break;
 
         // if browser finds a service removal event
         case AVAHI_BROWSER_REMOVE:
-        	logger.log(INFO, "Trying to remove service: %d %s %s %s", interface, name, type, domain);
+        	LOG_INFO("Trying to remove service: %d %s %s %s", interface, name, type, domain);
         	{
 				bool removed = false;
 				std::string sname(name);
@@ -257,17 +255,24 @@ void ServiceBrowser::browseCallback(AvahiServiceBrowser *sb, AvahiIfIndex interf
 					}
 				}
 				sem_post(asb->getServicesSem());
-				logger.log(INFO, ( (removed) ? "Service removed: %s" : "Service not removed: %s"), sname.c_str());
+
+                                if(removed)
+                                {
+                                    LOG_INFO("Service removed: %s", sname.c_str());
+                                } else {
+                                    LOG_INFO("Service not removed: %s", sname.c_str());
+                                }
+
         	}
 
             break;
 
         case AVAHI_BROWSER_ALL_FOR_NOW:
-        	logger.log(INFO, "ALL_FOR_NOW");
+        	LOG_INFO("ALL_FOR_NOW");
             break;
 
         case AVAHI_BROWSER_CACHE_EXHAUSTED:
-        	logger.log(INFO, "CACHE_EXHAUSTED");
+        	LOG_INFO("CACHE_EXHAUSTED");
             break;
     }
 }

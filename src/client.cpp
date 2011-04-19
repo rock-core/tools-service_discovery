@@ -8,8 +8,6 @@
 
 namespace servicediscovery { 
 
-static LoggingWrapper logger("Client");
-
 AvahiThreadedPoll* Client::msPoll = 0;
 AvahiClient* Client::msAvahiClient = 0;
 
@@ -24,7 +22,7 @@ Client::Client() {
 
 	// If creation of msAvahiClient is not immediately successful throw error 
 	if (!msAvahiClient) {
-	    logger.log(FATAL, "Failed to create client: %s" , avahi_strerror(error));
+	    LOG_FATAL("Failed to create client: %s" , avahi_strerror(error));
             throw 0; //TODO: do sth else
 	}
 
@@ -51,7 +49,7 @@ void Client::unlock() {
 }
 
 void Client::stateUpdateCallback(AvahiClient* avahiClient, AvahiClientState state, void* userdata) {
-//    logger.log(INFO," Clientstate: %d\n", state);
+//    LOG_INFO(" Clientstate: %d\n", state);
 }
 
 } // end namespace servicediscovery

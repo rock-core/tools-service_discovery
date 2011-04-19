@@ -7,7 +7,6 @@ name = "test-service"
 type = "_rimres._tcp"
 sd = ServiceDiscovery.new
 
-ServiceDiscovery.set_log_level(:INFO)
 sd.set_description("IOR","your-ior")
 sd.publish(name, type)
 sd.listen_on(["_xgrid._tcp"])

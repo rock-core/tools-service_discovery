@@ -10,8 +10,6 @@
 
 namespace servicediscovery { 
 
-static LoggingWrapper logger("RemoteService");
-
 RemoteService::RemoteService(
 			ServiceBrowser *browser,
 			AvahiIfIndex interf,
@@ -34,7 +32,7 @@ RemoteService::RemoteService(
 	this->RemoteServiceSignal = RemoteServiceSignal;
 
 	if (sem_init(&RMS_sem,0,1) == -1) {
-		logger.log(FATAL, "Semaphore initialization failed");
+		LOG_FATAL("Semaphore initialization failed");
 		throw 1;
 	}
 	
@@ -43,7 +41,7 @@ RemoteService::RemoteService(
 RemoteService::~RemoteService() {
 
 	if (sem_destroy(&RMS_sem) == -1) {
-		logger.log(WARN, "Semaphore destruction failed");
+		LOG_WARN("Semaphore destruction failed");
 	}
 }
 

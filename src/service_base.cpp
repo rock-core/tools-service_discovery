@@ -9,8 +9,6 @@
 
 namespace servicediscovery {
 
-static LoggingWrapper logger("ServiceBase");
-
 ServiceBase::ServiceBase(
 			Client *client,
 			AvahiIfIndex interf,

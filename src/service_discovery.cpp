@@ -4,8 +4,6 @@
 
 namespace servicediscovery {
 
-static LoggingWrapper logger ("ServiceDiscovery");
-
 ServiceDiscovery::ServiceDiscovery()
 {
 	mLocalService = NULL;
@@ -18,7 +16,7 @@ ServiceDiscovery::ServiceDiscovery()
 			||
 		sem_init(&removed_component_sem,0,1) == -1
 	) {
-		logger.log(FATAL, "Semaphore initialization failed");
+		LOG_FATAL("Semaphore initialization failed");
 		throw 1;
 	}
 	
@@ -41,14 +39,14 @@ void ServiceDiscovery::start(const ServiceConfiguration& conf)
         if( mBrowsers.count(conf.getType()) == 0)
         {
             // Register browser
-            logger.log(INFO, "Adding service browser for type: %s", conf.getType().c_str());
+            LOG_INFO("Adding service browser for type: %s", conf.getType().c_str());
             ServiceBrowser* browser = new ServiceBrowser(client, conf.getType());
             browser->serviceAddedConnect(sigc::mem_fun(this, &ServiceDiscovery::addedService));
             browser->serviceRemovedConnect(sigc::mem_fun(this, &ServiceDiscovery::removedService));
             mBrowsers[conf.getType()] = browser;
         }
 
-        logger.log(INFO, "Creating local service %s", conf.getName().c_str());
+        LOG_INFO("Creating local service %s", conf.getName().c_str());
 	mLocalService = new LocalService(client, conf.getName(), conf.getType(), conf.getPort(), conf.getServiceDescription().getRawDescriptions(), conf.getTTL(), true);
 
         // making sure it the service is seen before proceeding 
@@ -57,7 +55,7 @@ void ServiceDiscovery::start(const ServiceConfiguration& conf)
         {
             if(!mPublished && timer.elapsed_min() > 10)
             {
-                logger.log(FATAL, "Timout reached: resolution of local service failed\n");
+                LOG_FATAL("Timout reached: resolution of local service failed");
                 throw std::runtime_error("Timeout reached: resolution of local service failed\n");
             } else if(mPublished)
             {
@@ -67,7 +65,7 @@ void ServiceDiscovery::start(const ServiceConfiguration& conf)
             sleep(0.1);
         }
 	
-        logger.log(INFO, "Local service %s started", conf.getName().c_str());
+        LOG_INFO("Local service %s started", conf.getName().c_str());
 }
 
 void ServiceDiscovery::listenOn(const std::vector<std::string>& types)
@@ -84,7 +82,7 @@ void ServiceDiscovery::listenOn(const std::vector<std::string>& types)
         browserIt = mBrowsers.find(*it);
         if( browserIt == mBrowsers.end())
         {
-            logger.log(INFO, "Adding service browser for type: %s\n",it->c_str());
+            LOG_INFO("Adding service browser for type: %s",it->c_str());
 
             ServiceBrowser* browser = new ServiceBrowser(client, *it);
             
@@ -129,7 +127,7 @@ void ServiceDiscovery::addedService(const RemoteService& service)
 
         if ( mMode == PUBLISH && mLocalConfiguration.getName() == remoteConfig.getName() && mLocalConfiguration.getType() == remoteConfig.getType())
 	{
-            logger.log(INFO, "Service published: %s\n", service.getName().c_str());
+            LOG_INFO("Service published: %s", service.getName().c_str());
             mPublished = true;
         }
 
@@ -157,7 +155,7 @@ void ServiceDiscovery::removedService(const RemoteService& service)
 		sem_post(&removed_component_sem);
 
 		mServices.erase(it);
-                logger.log(INFO, "Removed service %s\n", service.getName().c_str());
+                LOG_INFO("Removed service %s", service.getName().c_str());
 	}
 
 	sem_post(&services_sem);

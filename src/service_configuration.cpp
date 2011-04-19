@@ -1,9 +1,7 @@
 #include "service_configuration.h"
-#include <service_discovery/logging.h>
+#include <base/logging.h>
 
 namespace servicediscovery { 
-
-static LoggingWrapper logger("ServiceConfiguration");
 
 const uint16_t ServiceConfiguration::defaultPort_ = 12000; 
 

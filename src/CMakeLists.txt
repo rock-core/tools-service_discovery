@@ -36,7 +36,6 @@ set(SOURCES
     service.cpp
     service_base.cpp
     service_browser.cpp
-    logging.cpp
     service_discovery.cpp
     service_description.cpp 
     service_event.cpp

@@ -6,7 +6,7 @@
 #include <vector>
 #include <stdexcept>
 #include <boost/algorithm/string.hpp>
-#include <service_discovery/logging.h>
+#include <base/logging.h>
 #include <service_discovery/service_discovery.h>
 #include <service_discovery/service_description.h>
 
@@ -168,32 +168,6 @@ Array wrap_getLabels(Object description)
 }
 
 /**
-* Set the internal log level
-*/
-void set_log_level(const std::string& level)
-{
-    std::string logLevel = level;
-    boost::to_lower(logLevel);
-    {
-        using namespace servicediscovery;
-
-        if(logLevel == "info")
-            LoggingWrapper::configure(INFO);
-        else if(logLevel == "debug")
-            LoggingWrapper::configure(DEBUG);
-        else if(logLevel == "warn")
-            LoggingWrapper::configure(WARN);
-        else if(logLevel == "error")
-            LoggingWrapper::configure(ERROR);
-        else if(logLevel == "fatal")
-            LoggingWrapper::configure(FATAL);
-        else 
-            throw std::runtime_error("Unknown log level. Use one of: info, debug, warn, error or fatal");
-    }
-
-}
-
-/**
 * Making sure ruby can convert a list of service to an array of ServiceDescription objects
 */
 template<>
@@ -230,7 +204,6 @@ void Init_servicediscovery_ruby()
  
  // Defining the ruby class 'ServiceDiscovery'
  rb_cServiceDiscovery = define_class_under<wrap::ServiceDiscovery>(rb_mServiceDiscovery, "ServiceDiscovery")
-        .define_singleton_method("set_log_level", &set_log_level, (Arg("log_level")))
 	// constructor (name, servicetype)
 	.define_constructor(Constructor<wrap::ServiceDiscovery>())
 	.define_method("set_description",&wrap::ServiceDiscovery::setDescription, (Arg("label"), Arg("content")))

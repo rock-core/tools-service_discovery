@@ -25,8 +25,8 @@
 
 #include <avahi-common/error.h>
 #include <avahi-common/thread-watch.h>
-#include <service_discovery/logging.h>
-#include <service_discovery/singleton.h>
+#include <base/logging.h>
+#include <base/singleton.h>
 
 namespace servicediscovery {
 
@@ -34,9 +34,9 @@ namespace servicediscovery {
  * @brief
  * Client represent the core class since every avahi program must set up a client that will be connected to the avahi-daemon
  */
-class Client : public Singleton<Client> 
+class Client : public base::Singleton<Client> 
 {
-        friend class Singleton<Client>;
+        friend class base::Singleton<Client>;
 
 protected:
 	/**

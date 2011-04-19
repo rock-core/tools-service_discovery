@@ -10,6 +10,7 @@ set(PROJECT_DESCRIPTION "Service discovery based on AVAHI")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 set(CMAKE_BUILD_TYPE Debug)
 include(CommonSetup)
+add_definitions(-DBASE_LOG_NAMESPACE=${PROJECT_NAME})
 
 # Include headers within source
 # If you create subdirectories within source include headers with subdirectory, i.e. 
@@ -29,15 +30,16 @@ include_directories(${Boost_INCLUDE_DIRS})
 
 include(FindPkgConfig)
 pkg_check_modules(SIGC++ REQUIRED "sigc++-2.0")
-pkg_check_modules(LOG4CPP REQUIRED "log4cpp")
+pkg_check_modules(BASE REQUIRED "base-lib")
 pkg_check_modules(AVAHICLIENT REQUIRED "avahi-client")
 pkg_check_modules(AVAHICORE REQUIRED "avahi-core")
 
 include_directories(${SIGC++_INCLUDE_DIRS})
 link_directories(${SIGC++_LIBRARY_DIRS})
 
-include_directories(${LOG4CPP_INCLUDE_DIRS})
-link_directories(${LOG4CPP_LIBRARY_DIRS})
+include_directories(${BASE_INCLUDE_DIRS})
+message("BASE DIR ${BASE_INCLUDE_DIRS}")
+link_directories(${BASE_LIBRARY_DIRS})
 
 include_directories(${AVAHICLIENT_INCLUDE_DIRS})
 link_directories(${AVAHICLIENT_LIBRARY_DIRS})
@@ -54,7 +56,7 @@ set(THIS_PKG_CFLAGS "-I${THIS_PKG_CFLAGS}")
 message(${THIS_PKG_CFLAGS})
 
 ### Update external libraries that are available
-set(EXTERNAL_LIBS ${Boost_LIBRARIES} ${SIGC++_LIBRARIES} ${LOG4CPP_LIBRARIES} ${AVAHICLIENT_LIBRARIES} ${AVAHICORE_LIBRARIES} )
+set(EXTERNAL_LIBS ${Boost_LIBRARIES} ${SIGC++_LIBRARIES} ${BASE_LIBRARIES} ${AVAHICLIENT_LIBRARIES} ${AVAHICORE_LIBRARIES} )
 
 # Process CMakeLists.txt in the following subdirectory
 add_subdirectory(src)
