@@ -16,7 +16,7 @@ ServiceEvent::~ServiceEvent()
 {
 }
 
-const ServiceDescription& ServiceEvent::getServiceConfiguration() const
+const ServiceConfiguration& ServiceEvent::getServiceConfiguration() const
 {
 	return serviceConfiguration_;
 }

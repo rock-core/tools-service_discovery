@@ -31,7 +31,7 @@ class ServiceEvent
 		/**
 		 * Retrieve service description from service event
 		 */
-		const ServiceDescription& getServiceConfiguration() const;
+		const ServiceConfiguration& getServiceConfiguration() const;
 
 		bool operator==(const ServiceEvent&) const;
 
