@@ -31,6 +31,8 @@ Service::Service(const Service& serv) : ServiceBase((const ServiceBase&) serv)
 	//create avahistringlist from a list<string>
 	//this is done to prevent using the same instance of avahistringlist on object copy and then deleting it on the destruction of the object
 	this->txt = Service::getTxt(serv.getStringList());
+        this->configuration_.setRawDescriptions(stringlist);
+
 	this->port = serv.getPort();
 	this->dontCheckTXT = serv.dontCheckTXT;
 }
@@ -51,6 +53,8 @@ Service::Service(
 	//create avahistringlist from list<string>
 	this->stringlist = strlist;
 	this->txt = Service::getTxt(strlist);
+
+        this->configuration_.setRawDescriptions(stringlist);
 }
 
 Service::~Service() {

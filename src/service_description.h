@@ -44,10 +44,6 @@ class ServiceDescription
 		
 		ServiceDescription();	
 
-                /**
-                * Allows to set the txt field of a service in a raw fashion
-                */
-		void setRawDescriptions(const std::list<std::string>& descriptions);
 
 	public:
 		ServiceDescription(const std::string& servicename);
@@ -87,6 +83,11 @@ class ServiceDescription
                 * \return List of txt fields
 		*/
 		std::list<std::string> getRawDescriptions() const;
+
+                /**
+                * Allows to set the txt field of a service in a raw fashion
+                */
+		void setRawDescriptions(const std::list<std::string>& descriptions);
 
                 /**
                 * Retrieve all labels that are available in the description 

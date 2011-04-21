@@ -47,7 +47,7 @@ void ServiceDiscovery::start(const ServiceConfiguration& conf)
         }
 
         LOG_INFO("Creating local service %s", conf.getName().c_str());
-	mLocalService = new LocalService(client, conf.getName(), conf.getType(), conf.getPort(), conf.getServiceDescription().getRawDescriptions(), conf.getTTL(), true);
+	mLocalService = new LocalService(client, conf.getName(), conf.getType(), conf.getPort(), conf.getRawDescriptions(), conf.getTTL(), true);
 
         // making sure it the service is seen before proceeding 
         boost::timer timer;	

@@ -39,7 +39,7 @@ bool ServiceBase::operator==(const ServiceBase& comp) {
 
 void ServiceBase::setConfiguration(const ServiceConfiguration& config)
 {
-
+    configuration_ = config;
 }
 
 ServiceConfiguration ServiceBase::getConfiguration() const

@@ -28,6 +28,8 @@ private:
 	 * related avahi client instance
 	 */
 	Client *client_;
+
+protected:
         ServiceConfiguration configuration_;
 
 public:
