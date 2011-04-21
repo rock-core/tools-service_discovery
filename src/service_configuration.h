@@ -44,10 +44,6 @@ class ServiceConfiguration : public ServiceDescription
 		std::string getType() const;
 		
 		void setType(const std::string& type);
-		/**
-		* Get all raw description fields
-		*/
-		ServiceDescription getServiceDescription() const;
 
 		uint16_t getPort() const;
 		

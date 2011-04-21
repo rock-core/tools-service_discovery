@@ -49,11 +49,6 @@ void ServiceConfiguration::setType(const std::string& type)
 	type_ = type;
 }
 
-ServiceDescription ServiceConfiguration::getServiceDescription() const
-{
-	return (ServiceDescription) *this;
-}
-
 uint16_t ServiceConfiguration::getPort() const
 {
 	return port_;
