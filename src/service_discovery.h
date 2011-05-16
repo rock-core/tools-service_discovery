@@ -63,6 +63,8 @@ public:
 
         void listenOn(const std::vector<std::string>& types);
 
+        void update(const ServiceDescription& description);
+
 	void stop();
 
 	/**

@@ -29,43 +29,47 @@ ServiceDiscovery::~ServiceDiscovery()
 
 void ServiceDiscovery::start(const ServiceConfiguration& conf)
 {
+    if( mLocalService != NULL ) {
+        LOG_FATAL("Service Discovery instance tries to start a second local service");
+        throw std::runtime_error("Service Discovery instance tries to start a second local service");
+    }
 
-        mMode = PUBLISH;
-	mLocalConfiguration = conf;
+    mMode = PUBLISH;
+    mLocalConfiguration = conf;
 
-        Client* client = Client::getInstance();
-        
-        // Register browser if it does not exist yet for this type    
-        if( mBrowsers.count(conf.getType()) == 0)
+    Client* client = Client::getInstance();
+
+    // Register browser if it does not exist yet for this type    
+    if( mBrowsers.count(conf.getType()) == 0)
+    {
+        // Register browser
+        LOG_INFO("Adding service browser for type: %s", conf.getType().c_str());
+        ServiceBrowser* browser = new ServiceBrowser(client, conf.getType());
+        browser->serviceAddedConnect(sigc::mem_fun(this, &ServiceDiscovery::addedService));
+        browser->serviceRemovedConnect(sigc::mem_fun(this, &ServiceDiscovery::removedService));
+        mBrowsers[conf.getType()] = browser;
+    }
+
+    LOG_INFO("Creating local service %s", conf.getName().c_str());
+    mLocalService = new LocalService(client, conf.getName(), conf.getType(), conf.getPort(), conf.getServiceDescription().getRawDescriptions(), conf.getTTL(), true);
+
+    // making sure it the service is seen before proceeding 
+    boost::timer timer;	
+    while(!mPublished)
+    {
+        if(!mPublished && timer.elapsed_min() > 10)
         {
-            // Register browser
-            LOG_INFO("Adding service browser for type: %s", conf.getType().c_str());
-            ServiceBrowser* browser = new ServiceBrowser(client, conf.getType());
-            browser->serviceAddedConnect(sigc::mem_fun(this, &ServiceDiscovery::addedService));
-            browser->serviceRemovedConnect(sigc::mem_fun(this, &ServiceDiscovery::removedService));
-            mBrowsers[conf.getType()] = browser;
+            LOG_FATAL("Timout reached: resolution of local service failed");
+            throw std::runtime_error("Timeout reached: resolution of local service failed\n");
+        } else if(mPublished)
+        {
+            break;
         }
 
-        LOG_INFO("Creating local service %s", conf.getName().c_str());
-	mLocalService = new LocalService(client, conf.getName(), conf.getType(), conf.getPort(), conf.getServiceDescription().getRawDescriptions(), conf.getTTL(), true);
+        sleep(0.1);
+    }
 
-        // making sure it the service is seen before proceeding 
-        boost::timer timer;	
-        while(!mPublished)
-        {
-            if(!mPublished && timer.elapsed_min() > 10)
-            {
-                LOG_FATAL("Timout reached: resolution of local service failed");
-                throw std::runtime_error("Timeout reached: resolution of local service failed\n");
-            } else if(mPublished)
-            {
-                break;
-            }
-
-            sleep(0.1);
-        }
-	
-        LOG_INFO("Local service %s started", conf.getName().c_str());
+    LOG_INFO("Local service %s started", conf.getName().c_str());
 }
 
 void ServiceDiscovery::listenOn(const std::vector<std::string>& types)
@@ -90,6 +94,27 @@ void ServiceDiscovery::listenOn(const std::vector<std::string>& types)
             browser->serviceRemovedConnect(sigc::mem_fun(this, &ServiceDiscovery::removedService));
             mBrowsers[*it] = browser;
         }
+    }
+}
+
+
+void ServiceDiscovery::update(const ServiceDescription& description) 
+{
+    if(mLocalService != NULL) {
+        std::list<std::string> raw_desc = description.getRawDescriptions();
+        std::vector<std::string> labels = description.getLabels();
+
+        mLocalService->updateStringList(raw_desc);
+
+        std::vector<std::string>::iterator it;
+
+        for(it = labels.begin(); it != labels.end(); it++) {
+            mLocalConfiguration.setDescription(*it, description.getDescription(*it));
+        }
+
+    } else {
+        LOG_FATAL("Service Discovery tries to update a description on a non-started local service.\n");
+        throw std::runtime_error("Service Discovery tries to update a description on a non-started local service");
     }
 }
 
