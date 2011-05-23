@@ -43,6 +43,8 @@ protected:
 		}
 		txt = ntxt;
 	}
+
+        void addDescriptionsToConfiguration(const std::list<std::string>& strlist);
 	
 	
 public:

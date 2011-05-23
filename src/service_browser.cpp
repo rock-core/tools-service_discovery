@@ -113,7 +113,7 @@ ServiceBrowser::~ServiceBrowser() {
 //a callback called on a service resolver event
 void ServiceBrowser::resolveCallback(AvahiServiceResolver *sr, AvahiIfIndex interface, AvahiProtocol protocol, AvahiResolverEvent event, const char *name, const char *type, const char *domain, const char *host, const AvahiAddress *address, uint16_t port, AvahiStringList *txt, AvahiLookupResultFlags flags, void *userdata)
 {
-	ResolveData *data = (ResolveData*) userdata;
+    ResolveData *data = (ResolveData*) userdata;
     ServiceBrowser *sb = data->sb;
     switch(event)
     {
@@ -158,6 +158,8 @@ void ServiceBrowser::resolveCallback(AvahiServiceResolver *sr, AvahiIfIndex inte
             RemoteService rms(sb, interface, protocol, sname, stype, sdomain, strlist, port, shost, *address, sr, new sigc::signal<void, RemoteService>());
             rms.resolveData = data;
             ServiceConfiguration remoteConfig = rms.getConfiguration();
+            
+
             LOG_INFO("Service resolved: %d %d %s %s %s", remoteConfig.getInterfaceIndex(), remoteConfig.getProtocol(), remoteConfig.getName().c_str(), remoteConfig.getType().c_str(), remoteConfig.getDomain().c_str());
 			
 			sem_wait(sb->getServicesSem());
@@ -200,7 +202,6 @@ void ServiceBrowser::resolveCallback(AvahiServiceResolver *sr, AvahiIfIndex inte
 
 void ServiceBrowser::browseCallback(AvahiServiceBrowser *sb, AvahiIfIndex interface, AvahiProtocol protocol, AvahiBrowserEvent event, const char *name, const char *type, const char *domain, AvahiLookupResultFlags flags, void *userdata)
 {
-
     AvahiClient* client = avahi_service_browser_get_client(sb);
     ServiceBrowser *asb = (ServiceBrowser*) userdata;
 

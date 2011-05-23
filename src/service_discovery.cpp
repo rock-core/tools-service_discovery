@@ -146,7 +146,6 @@ void ServiceDiscovery::stop()
 //TODO: ServiceEvent should be RemoteService and ServiceDescription
 void ServiceDiscovery::addedService(const RemoteService& service)
 {
-
 	ServiceEvent event(service);
         ServiceConfiguration remoteConfig = service.getConfiguration();
 

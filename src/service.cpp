@@ -51,6 +51,8 @@ Service::Service(
 	//create avahistringlist from list<string>
 	this->stringlist = strlist;
 	this->txt = Service::getTxt(strlist);
+
+        addDescriptionsToConfiguration(strlist);
 }
 
 Service::~Service() {
@@ -70,6 +72,25 @@ bool Service::operator==(const Service& comp) {
 	}
 	return true;
 }
+
+
+void Service::addDescriptionsToConfiguration(const std::list<std::string>& strlist) {
+    ServiceConfiguration config = getConfiguration();
+
+    std::list<std::string>::const_iterator it;
+
+    for(it = strlist.begin(); it != strlist.end(); it++) {
+        size_t pos = it->find('=');
+
+        std::string key = it->substr(0, pos);
+        std::string val = it->substr(pos + 1);
+
+        config.setDescription(key, val);
+    }
+
+    setConfiguration(config);
+}
+
 
 } // end namespace servicediscovery
 
