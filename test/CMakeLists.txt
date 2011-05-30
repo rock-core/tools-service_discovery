@@ -14,9 +14,15 @@ add_executable(${TEST_EXECUTABLE} EXCLUDE_FROM_ALL
   ${TEST_SOURCE} ${SOURCES}
 )
 
+add_executable(sdtest EXCLUDE_FROM_ALL
+  test.cpp ${SOURCES}
+)
+
 target_link_libraries(${TEST_EXECUTABLE} 
   ${PROJECT_NAME} ${EXTERNAL_LIBS} ${Boost_LIBRARIES}
 )
+
+target_link_libraries(sdtest ${PROJECT_NAME} ${EXTERNAL_LIBS} ${Boost_LIBRARIES})
 
 add_custom_target(test 
   ${TEST_EXECUTABLE} --log_level=message

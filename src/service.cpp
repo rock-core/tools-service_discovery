@@ -26,7 +26,6 @@ AvahiStringList* Service::getTxt(std::list<std::string> lst)
 
 Service::Service(const Service& serv) : ServiceBase((const ServiceBase&) serv)
 {
-	
 	this->stringlist = serv.getStringList();
 	//create avahistringlist from a list<string>
 	//this is done to prevent using the same instance of avahistringlist on object copy and then deleting it on the destruction of the object
