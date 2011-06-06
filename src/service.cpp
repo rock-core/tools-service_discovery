@@ -24,7 +24,8 @@ AvahiStringList* Service::getTxt(std::list<std::string> lst)
 	return stxt;
 }
 
-Service::Service(const Service& serv) : ServiceBase((const ServiceBase&) serv)
+Service::Service(const Service& serv) 
+ : configuration_(serv.configuration_), client_(serv.client_) 
 {
 	this->stringlist = serv.getStringList();
 	//create avahistringlist from a list<string>
@@ -43,15 +44,21 @@ Service::Service(
 			std::string domain,
 			uint16_t port,
 			std::list<std::string> strlist
-			) : ServiceBase(client, interf, prot, name, type, domain) {
+			) {
+
+        client_ = client;
+        configuration_.setInterfaceIndex(interf);
+        configuration_.setProtocol(prot);
+        configuration_.setName(name);
+        configuration_.setType(type);
+        configuration_.setDomain(domain);
+
 	this->port = port;
 	this->dontCheckTXT = false;
 
 	//create avahistringlist from list<string>
 	this->stringlist = strlist;
 	this->txt = Service::getTxt(strlist);
-
-        addDescriptionsToConfiguration(strlist);
 }
 
 Service::~Service() {
@@ -60,7 +67,7 @@ Service::~Service() {
 }
 
 bool Service::operator==(const Service& comp) {
-	bool upres = (ServiceBase) (*this) == (ServiceBase) comp;
+	bool upres = (configuration_ == comp.getConfiguration());
 	if (!upres)
 		return false;
 	if (port != comp.getPort())
@@ -90,6 +97,34 @@ void Service::addDescriptionsToConfiguration(const std::list<std::string>& strli
     setConfiguration(config);
 }
 
+void Service::setConfiguration(const ServiceConfiguration& config)
+{
+    configuration_ = config;
+}
+
+ServiceConfiguration Service::getConfiguration() const
+{
+    ServiceConfiguration config = configuration_;
+
+        std::list<std::string>::const_iterator it;
+
+        for(it = stringlist.begin(); it != stringlist.end(); it++) {
+            size_t pos = it->find('=');
+
+            std::string key = it->substr(0, pos);
+            std::string val = it->substr(pos + 1);
+
+            config.setDescription(key, val);
+    }
+
+    return config;
+}
+
+Client* Service::getClient()
+{
+    assert(client_);
+    return client_;
+}
 
 } // end namespace servicediscovery
 

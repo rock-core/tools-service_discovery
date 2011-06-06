@@ -58,8 +58,7 @@ protected:
 	/**
 	 * signal  
 	 */
-	sigc::signal<void,
-		RemoteService> *RemoteServiceSignal;
+	sigc::signal<void, RemoteService> *RemoteServiceSignal;
 
 	/**
 	 * semaphore for the RemoteServiceSignal object

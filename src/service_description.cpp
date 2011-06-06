@@ -31,7 +31,7 @@ void ServiceDescription::setName(const std::string& name)
 	name_ = name;
 }
 
-bool ServiceDescription::operator==(const ServiceDescription& other) const
+bool ServiceDescription::compareWithoutTXT(const ServiceDescription& other) const 
 {
         if( interfaceIndex_ != other.getInterfaceIndex() && !(interfaceIndex_ == AVAHI_IF_UNSPEC || other.getInterfaceIndex() == AVAHI_IF_UNSPEC))
             return false;
@@ -51,6 +51,14 @@ bool ServiceDescription::operator==(const ServiceDescription& other) const
 
 	if (td1 != td2)
 		return false;
+
+        return true;
+}
+
+bool ServiceDescription::operator==(const ServiceDescription& other) const
+{
+        if(!compareWithoutTXT(other))
+            return false;
 
 	std::vector<std::string> labels = this->getLabels();
 

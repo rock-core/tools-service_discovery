@@ -33,6 +33,8 @@ void ServiceBrowser::bootstrap() {
 			sem_init(&service_added_sem,0,1) == -1
 				||
 			sem_init(&service_removed_sem,0,1) == -1
+                                ||
+                        sem_init(&service_updated_sem, 0, 1) == -1
 		) {
 		LOG_FATAL("Semaphore initialization failed");
 		throw 1;
@@ -170,9 +172,8 @@ void ServiceBrowser::resolveCallback(AvahiServiceResolver *sr, AvahiIfIndex inte
 				List<RemoteService>::iterator srv;
 				srv = sb->getInternalServices()->find(rms);
 				if (srv != sb->getInternalServices()->end()) {
-
 					LOG_INFO("Service already in DB, but txt records have changed");
-					(*srv).emitSignal();
+					sb->serviceUpdatedEmit(rms);
 					
 				} else {
 					
@@ -180,7 +181,7 @@ void ServiceBrowser::resolveCallback(AvahiServiceResolver *sr, AvahiIfIndex inte
 		        	sb->getInternalServices()->push_back(rms);
 
 		        	LOG_INFO("Service added to DB. Signal sent to %d slots", sb->ServiceAdded.size());
-	            	sb->serviceAddedEmit(rms);
+	            	        sb->serviceAddedEmit(rms);
 		
 				}
 
@@ -238,12 +239,12 @@ void ServiceBrowser::browseCallback(AvahiServiceBrowser *sb, AvahiIfIndex interf
 				std::string sname(name);
 				std::string stype(type);
 				std::string sdomain(domain);
-				ServiceBase serv(asb->getClient(), interface, protocol, sname, stype, sdomain);
+				Service serv(asb->getClient(), interface, protocol, sname, stype, sdomain);
 				List<RemoteService>::iterator it;
 				//find the signal to be removed
 				sem_wait(asb->getServicesSem());
 				for (it = asb->getInternalServices()->begin() ; it != asb->getInternalServices()->end(); ++it) {
-					if ((ServiceBase) (*it) == serv) {
+					if (it->getConfiguration() == serv.getConfiguration()) {
 						
 						//emit the service removed signal
 						asb->serviceRemovedEmit((*it));
@@ -263,7 +264,6 @@ void ServiceBrowser::browseCallback(AvahiServiceBrowser *sb, AvahiIfIndex interf
                                 } else {
                                     LOG_INFO("Service not removed: %s", sname.c_str());
                                 }
-
         	}
 
             break;
