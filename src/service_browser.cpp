@@ -81,8 +81,7 @@ void freeAfRemoteService(RemoteService srv) {
 	}
 	
 	//remove the signal object
-	srv.freeSignal();
-
+	//srv.freeSignal();
 }
 
 ServiceBrowser::~ServiceBrowser() {
@@ -157,7 +156,7 @@ void ServiceBrowser::resolveCallback(AvahiServiceResolver *sr, AvahiIfIndex inte
 			}
 
 
-            RemoteService rms(sb, interface, protocol, sname, stype, sdomain, strlist, port, shost, *address, sr, new sigc::signal<void, RemoteService>());
+            RemoteService rms(sb, interface, protocol, sname, stype, sdomain, strlist, port, shost, *address, sr);
             rms.resolveData = data;
             ServiceConfiguration remoteConfig = rms.getConfiguration();
             
