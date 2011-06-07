@@ -1,6 +1,7 @@
 #include "service_discovery.h"
 #include <boost/timer.hpp>
 #include <stdexcept>
+#include <base/logging.h>
 
 namespace servicediscovery {
 

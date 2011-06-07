@@ -7,6 +7,7 @@
 
 #include <service_discovery/remote_service.h>
 #include <iostream>
+#include <base/logging.h>
 
 namespace servicediscovery { 
 

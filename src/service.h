@@ -62,7 +62,7 @@ public:
 
 	Service(Client *client, AvahiIfIndex interf, AvahiProtocol prot, std::string name, 
                 std::string type, std::string domain, uint16_t port = 0, 
-                std::list<std::string> list = std::list<string>());
+                std::list<std::string> list = std::list<std::string>());
 
 	virtual ~Service();
 

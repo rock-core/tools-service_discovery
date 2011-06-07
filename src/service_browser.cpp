@@ -7,6 +7,7 @@
 
 #include "service_browser.h"
 #include "client.h"
+#include <base/logging.h>
 
 namespace servicediscovery {
 

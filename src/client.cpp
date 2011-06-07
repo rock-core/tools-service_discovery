@@ -5,6 +5,7 @@
  */
 
 #include <service_discovery/client.h>
+#include <base/logging.h>
 
 namespace servicediscovery { 
 
