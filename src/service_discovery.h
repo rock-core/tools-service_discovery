@@ -63,6 +63,8 @@ public:
 
         void listenOn(const std::vector<std::string>& types);
 
+        void update(const ServiceDescription& description);
+
 	void stop();
 
 	/**
@@ -98,6 +100,10 @@ public:
 	
 	std::vector<std::string> getServiceNames();
 
+        ServiceConfiguration getConfiguration() {
+            return mLocalService->getConfiguration(); 
+        }
+
 	void addedComponentConnect(const sigc::slot<void, ServiceEvent>& slot) {
 		sem_wait(&added_component_sem);
 		ServiceAddedSignal.connect(slot);
@@ -124,11 +130,17 @@ private:
 	*/
 	void removedService(const RemoteService& service);
 
+        /**
+         * Update service descriptions
+         */
+        void updatedService(const RemoteService& service);
+
 	sigc::signal<void, ServiceEvent> ServiceAddedSignal;
 	sigc::signal<void, ServiceEvent> ServiceRemovedSignal;
 
 	sem_t added_component_sem;
 	sem_t removed_component_sem;
+        sem_t updated_component_sem;
 
 	List<ServiceDescription> mServices;
 	sem_t services_sem;

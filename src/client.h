@@ -25,7 +25,6 @@
 
 #include <avahi-common/error.h>
 #include <avahi-common/thread-watch.h>
-#include <base/logging.h>
 #include <base/singleton.h>
 
 namespace servicediscovery {

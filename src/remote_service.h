@@ -58,8 +58,7 @@ protected:
 	/**
 	 * signal  
 	 */
-	sigc::signal<void,
-		RemoteService> *RemoteServiceSignal;
+	//sigc::signal<void, RemoteService> *RemoteServiceSignal;
 
 	/**
 	 * semaphore for the RemoteServiceSignal object
@@ -67,88 +66,87 @@ protected:
 	sem_t RMS_sem;
 	 
 public:
+        //the data used in the service browser. pointer also used here so that the memory is freed along with the service resolver
+        ResolveData* resolveData;
 
-	//the data used in the service browser. pointer also used here so that the memory is freed along with the service resolver
-	ResolveData* resolveData;
+        RemoteService(
+                ServiceBrowser *browser,
+                AvahiIfIndex interf,
+                AvahiProtocol prot,
+                std::string name,
+                std::string type,
+                std::string domain,
+                std::list<std::string> list,
+                uint16_t port,
+                std::string host_name,
+                AvahiAddress address,
+                AvahiServiceResolver *sr
+        //        sigc::signal<void, RemoteService> *rms
+        );
 
-	RemoteService(
-			ServiceBrowser *browser,
-			AvahiIfIndex interf,
-			AvahiProtocol prot,
-			std::string name,
-			std::string type,
-			std::string domain,
-			std::list<std::string> list,
-			uint16_t port,
-			std::string host_name,
-			AvahiAddress address,
-			AvahiServiceResolver *sr,
-			sigc::signal<void,
-		RemoteService> *rms
+        virtual ~RemoteService();
 
-	);
-	virtual ~RemoteService();
+        /*
+        bool serviceSignalConnect(const sigc::slot<void, RemoteService>& slot_) {
+            if (!RemoteServiceSignal) {
+                return false;
+            }
+            sem_wait(&RMS_sem);
+            RemoteServiceSignal->connect(slot_);
+            sem_post(&RMS_sem);		
+            return true;
+        }
 
-	bool serviceSignalConnect(const sigc::slot<void, RemoteService>& slot_) {
-		if (!RemoteServiceSignal) {
-			return false;
-		}
-		sem_wait(&RMS_sem);
-		RemoteServiceSignal->connect(slot_);
-		sem_post(&RMS_sem);		
-		return true;
-	}
-	
-	//to be used only by the service browser. TODO: avoid public use
-	void emitSignal() {
-		if (RemoteServiceSignal) {
-			sem_wait(&RMS_sem);
-			RemoteServiceSignal->emit(*this);
-			sem_post(&RMS_sem);
-		}
-	}
-	//to be used only by the service browser. TODO: avoid public use
-	void freeSignal() {
-		if (RemoteServiceSignal) {
-			delete RemoteServiceSignal;
-		}
-	}
-	
-	
-    AvahiAddress getAddress() const
-    {
-        return address;
-    }
+        //to be used only by the service browser. TODO: avoid public use
+        void emitSignal() {
+            if (RemoteServiceSignal) {
+                sem_wait(&RMS_sem);
+                RemoteServiceSignal->emit(*this);
+                sem_post(&RMS_sem);
+            }
+        }
+        //to be used only by the service browser. TODO: avoid public use
+        void freeSignal() {
+            if (RemoteServiceSignal) {
+                delete RemoteServiceSignal;
+            }
+        }
+        */
 
-    ServiceBrowser *getBrowser() const
-    {
-        return browser;
-    }
+        AvahiAddress getAddress() const
+        {
+            return address;
+        }
 
-    std::string getHostName() const
-    {
-        return host_name;
-    }
+        ServiceBrowser *getBrowser() const
+        {
+            return browser;
+        }
 
-    AvahiServiceResolver* getServiceResolver()
-	{
-    	return sr;
-	}
+        std::string getHostName() const
+        {
+            return host_name;
+        }
 
-    void setServiceResolver(AvahiServiceResolver* nsr)
-    {
-    	if (sr)
-    		avahi_service_resolver_free(sr);
-    }
+        AvahiServiceResolver* getServiceResolver()
+        {
+            return sr;
+        }
 
-    std::string getAddressString() {
-        char a[AVAHI_ADDRESS_STR_MAX];
-        avahi_address_snprint(a, sizeof(a), &address);
-        std::string addr(a);
-		return addr;
-    }
+        void setServiceResolver(AvahiServiceResolver* nsr)
+        {
+            if (sr)
+                avahi_service_resolver_free(sr);
+        }
 
-    bool operator==(RemoteService serv);
+        std::string getAddressString() {
+            char a[AVAHI_ADDRESS_STR_MAX];
+            avahi_address_snprint(a, sizeof(a), &address);
+            std::string addr(a);
+            return addr;
+        }
+
+        bool operator==(RemoteService serv);
 };
 
 } // end namespace servicediscovery

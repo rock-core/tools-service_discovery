@@ -86,12 +86,16 @@ private:
 	sigc::signal<void, RemoteService> ServiceAdded;
 
 	/** signal for removal of a service */
-	sigc::signal<void,
-		RemoteService> ServiceRemoved;
+	sigc::signal<void, RemoteService> ServiceRemoved;
+
+        /** signal for updating a service */
+        sigc::signal<void, RemoteService> ServiceUpdated;
 
 	sem_t service_added_sem;
 
 	sem_t service_removed_sem;
+
+        sem_t service_updated_sem;
 
 public:
 
@@ -161,6 +165,18 @@ public:
 		ServiceRemoved.emit(rms);
 		sem_post(&service_removed_sem);
 	}
+
+        void serviceUpdatedConnect(const sigc::slot<void, RemoteService>& slot_) {
+                sem_wait(&service_updated_sem);
+                ServiceUpdated.connect(slot_);
+                sem_post(&service_updated_sem);
+        }
+
+        void serviceUpdatedEmit(RemoteService rms) {
+                sem_wait(&service_updated_sem);
+                ServiceUpdated.emit(rms);
+                sem_post(&service_updated_sem);
+        }
 
     List<RemoteService> getServices()
     {

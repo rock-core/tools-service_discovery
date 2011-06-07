@@ -34,7 +34,7 @@ set(SOURCES
     local_service.cpp
     remote_service.cpp
     service.cpp
-    service_base.cpp
+    # service_base.cpp
     service_browser.cpp
     service_discovery.cpp
     service_description.cpp 

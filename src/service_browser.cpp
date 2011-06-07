@@ -7,6 +7,7 @@
 
 #include "service_browser.h"
 #include "client.h"
+#include <base/logging.h>
 
 namespace servicediscovery {
 
@@ -33,6 +34,8 @@ void ServiceBrowser::bootstrap() {
 			sem_init(&service_added_sem,0,1) == -1
 				||
 			sem_init(&service_removed_sem,0,1) == -1
+                                ||
+                        sem_init(&service_updated_sem, 0, 1) == -1
 		) {
 		LOG_FATAL("Semaphore initialization failed");
 		throw 1;
@@ -79,8 +82,7 @@ void freeAfRemoteService(RemoteService srv) {
 	}
 	
 	//remove the signal object
-	srv.freeSignal();
-
+	//srv.freeSignal();
 }
 
 ServiceBrowser::~ServiceBrowser() {
@@ -113,7 +115,7 @@ ServiceBrowser::~ServiceBrowser() {
 //a callback called on a service resolver event
 void ServiceBrowser::resolveCallback(AvahiServiceResolver *sr, AvahiIfIndex interface, AvahiProtocol protocol, AvahiResolverEvent event, const char *name, const char *type, const char *domain, const char *host, const AvahiAddress *address, uint16_t port, AvahiStringList *txt, AvahiLookupResultFlags flags, void *userdata)
 {
-	ResolveData *data = (ResolveData*) userdata;
+    ResolveData *data = (ResolveData*) userdata;
     ServiceBrowser *sb = data->sb;
     switch(event)
     {
@@ -155,9 +157,11 @@ void ServiceBrowser::resolveCallback(AvahiServiceResolver *sr, AvahiIfIndex inte
 			}
 
 
-            RemoteService rms(sb, interface, protocol, sname, stype, sdomain, strlist, port, shost, *address, sr, new sigc::signal<void, RemoteService>());
+            RemoteService rms(sb, interface, protocol, sname, stype, sdomain, strlist, port, shost, *address, sr);
             rms.resolveData = data;
             ServiceConfiguration remoteConfig = rms.getConfiguration();
+            
+
             LOG_INFO("Service resolved: %d %d %s %s %s", remoteConfig.getInterfaceIndex(), remoteConfig.getProtocol(), remoteConfig.getName().c_str(), remoteConfig.getType().c_str(), remoteConfig.getDomain().c_str());
 			
 			sem_wait(sb->getServicesSem());
@@ -168,9 +172,8 @@ void ServiceBrowser::resolveCallback(AvahiServiceResolver *sr, AvahiIfIndex inte
 				List<RemoteService>::iterator srv;
 				srv = sb->getInternalServices()->find(rms);
 				if (srv != sb->getInternalServices()->end()) {
-
 					LOG_INFO("Service already in DB, but txt records have changed");
-					(*srv).emitSignal();
+					sb->serviceUpdatedEmit(rms);
 					
 				} else {
 					
@@ -178,7 +181,7 @@ void ServiceBrowser::resolveCallback(AvahiServiceResolver *sr, AvahiIfIndex inte
 		        	sb->getInternalServices()->push_back(rms);
 
 		        	LOG_INFO("Service added to DB. Signal sent to %d slots", sb->ServiceAdded.size());
-	            	sb->serviceAddedEmit(rms);
+	            	        sb->serviceAddedEmit(rms);
 		
 				}
 
@@ -200,7 +203,6 @@ void ServiceBrowser::resolveCallback(AvahiServiceResolver *sr, AvahiIfIndex inte
 
 void ServiceBrowser::browseCallback(AvahiServiceBrowser *sb, AvahiIfIndex interface, AvahiProtocol protocol, AvahiBrowserEvent event, const char *name, const char *type, const char *domain, AvahiLookupResultFlags flags, void *userdata)
 {
-
     AvahiClient* client = avahi_service_browser_get_client(sb);
     ServiceBrowser *asb = (ServiceBrowser*) userdata;
 
@@ -237,12 +239,12 @@ void ServiceBrowser::browseCallback(AvahiServiceBrowser *sb, AvahiIfIndex interf
 				std::string sname(name);
 				std::string stype(type);
 				std::string sdomain(domain);
-				ServiceBase serv(asb->getClient(), interface, protocol, sname, stype, sdomain);
+				Service serv(asb->getClient(), interface, protocol, sname, stype, sdomain);
 				List<RemoteService>::iterator it;
 				//find the signal to be removed
 				sem_wait(asb->getServicesSem());
 				for (it = asb->getInternalServices()->begin() ; it != asb->getInternalServices()->end(); ++it) {
-					if ((ServiceBase) (*it) == serv) {
+					if (it->getConfiguration() == serv.getConfiguration()) {
 						
 						//emit the service removed signal
 						asb->serviceRemovedEmit((*it));
@@ -262,7 +264,6 @@ void ServiceBrowser::browseCallback(AvahiServiceBrowser *sb, AvahiIfIndex interf
                                 } else {
                                     LOG_INFO("Service not removed: %s", sname.c_str());
                                 }
-
         	}
 
             break;

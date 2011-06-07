@@ -15,7 +15,7 @@ void testUpdated (servicediscovery::RemoteService rms) {
 void testAdded (servicediscovery::RemoteService rms) {
 	std::cout << " -=- TESTING SIGNAL: ADDED SERVICE: " << rms.getName() << std::endl;
 	//connect a callback on service txt updates
-	rms.serviceSignalConnect(sigc::ptr_fun(testUpdated));
+	//rms.serviceSignalConnect(sigc::ptr_fun(testUpdated));
 }
 
  

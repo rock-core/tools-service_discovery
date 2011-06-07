@@ -85,8 +85,12 @@ public:
 
 	std::string getDescription(const std::string& label)
 	{
-		return configuration_.getDescription(label);
+		return discovery_.getConfiguration().getDescription(label);
 	}
+
+        void update() {
+            discovery_.update(configuration_);
+        }
 
         /**
         * Publish service with service name and a type such as _mydomain._tcp
@@ -210,6 +214,7 @@ void Init_servicediscovery_ruby()
 	.define_method("get_description",&wrap::ServiceDiscovery::getDescription, (Arg("label")))
 	.define_method("publish", &wrap::ServiceDiscovery::publish, (Arg("name"), Arg("type")) )
 	.define_method("listen_on", wrap_listenOn, (Arg("domain list")) ) //&wrap::ServiceDiscovery::listenOn, (Arg("domain list")) )
+        .define_method("update", &wrap::ServiceDiscovery::update)
 	.define_method("find_services", &wrap::ServiceDiscovery::findServices, (Arg("servicename")) )
 	.define_method("get_all_services", &wrap::ServiceDiscovery::getAllServices)
         ;

@@ -44,7 +44,6 @@ class ServiceDescription
 		
 		ServiceDescription();	
 
-
 	public:
 		ServiceDescription(const std::string& servicename);
 
@@ -57,6 +56,11 @@ class ServiceDescription
 		std::string getName() const;
 		
 		void setName(const std::string& name);
+
+                /**
+                 * compare this ServiceDescription without concering TXT data
+                 */
+                bool compareWithoutTXT(const ServiceDescription& other) const;
 
 		/**
 		* Get the description associated with this service and 
@@ -78,16 +82,16 @@ class ServiceDescription
 		*/	
 		void setDescription(const std::string& label, const std::string& description);
 
+                /**
+                * Allows to set the txt field of a service in a raw fashion
+                */
+		void setRawDescriptions(const std::list<std::string>& descriptions);
+
 		/**
 		* Get all raw description fields
                 * \return List of txt fields
 		*/
 		std::list<std::string> getRawDescriptions() const;
-
-                /**
-                * Allows to set the txt field of a service in a raw fashion
-                */
-		void setRawDescriptions(const std::list<std::string>& descriptions);
 
                 /**
                 * Retrieve all labels that are available in the description 

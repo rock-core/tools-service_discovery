@@ -6,6 +6,7 @@
  */
 
 #include <service_discovery/local_service.h>
+#include <base/logging.h>
 
 namespace servicediscovery { 
 
