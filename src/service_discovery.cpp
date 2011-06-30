@@ -5,7 +5,10 @@
 
 namespace servicediscovery {
 
-ServiceDiscovery::ServiceDiscovery()
+std::vector<ServiceDiscovery*> ServiceDiscovery::msServiceDiscoveries;
+sem_t ServiceDiscovery::services_sem;
+
+ServiceDiscovery::ServiceDiscovery() : mPublished(false)
 {
 	mLocalService = NULL;
         mMode = NONE;
@@ -22,12 +25,87 @@ ServiceDiscovery::ServiceDiscovery()
 		LOG_FATAL("Semaphore initialization failed");
 		throw 1;
 	}
-	
+
+        sem_wait(&services_sem);
+        msServiceDiscoveries.push_back(this);
+        sem_post(&services_sem);
 }
 
 ServiceDiscovery::~ServiceDiscovery()
 {
 	stop();
+
+        sem_wait(&services_sem);
+        std::vector<ServiceDiscovery*>::iterator it;
+        it = std::find(msServiceDiscoveries.begin(), msServiceDiscoveries.end(), this);
+        if(it != msServiceDiscoveries.end())
+            msServiceDiscoveries.erase(it);
+        sem_post(&services_sem);
+}
+
+bool ServiceDiscovery::update(const std::string& name, const ServiceDescription& description)
+{
+        // serach all service discoveries in the same process for the service with the given name
+        bool success = false;
+        sem_wait(&services_sem);
+        std::vector<ServiceDiscovery*>::iterator it;
+        for(it = msServiceDiscoveries.begin(); it != msServiceDiscoveries.end(); it++)
+        {
+            ServiceConfiguration conf = (*it)->getConfiguration();
+            if(conf.getName() == name)
+            {
+                (*it)->update(description);  
+                success = true;
+                break;
+            }
+        }
+        sem_post(&services_sem);
+
+        return success;
+}
+
+ServiceDescription ServiceDiscovery::getServiceDescription(const std::string& name)
+{
+        bool found = false;
+        ServiceDescription sd("");
+        sem_wait(&services_sem);
+        std::vector<ServiceDiscovery*>::iterator it;
+        for(it = msServiceDiscoveries.begin(); it != msServiceDiscoveries.end(); it++)
+        {
+            ServiceConfiguration conf = (*it)->getConfiguration();
+            if(conf.getName() == name)
+            {
+                sd == conf;
+                found = true;
+                break;
+            }
+        }
+        sem_post(&services_sem);
+
+        if(!found)
+        {
+            char buffer[512];
+            sprintf(buffer, "Could not find service: %s\n", name.c_str());
+            throw std::runtime_error(std::string(buffer));
+        }
+
+        return sd;
+}
+
+
+std::vector<ServiceDescription> ServiceDiscovery::getUpdateableServices()
+{
+        std::vector<ServiceDescription> serviceList;
+        sem_wait(&services_sem);
+        std::vector<ServiceDiscovery*>::iterator it;
+        for(it = msServiceDiscoveries.begin(); it != msServiceDiscoveries.end(); it++)
+        {
+            ServiceConfiguration conf = (*it)->getConfiguration();
+            serviceList.push_back(conf);
+        }
+        sem_post(&services_sem);
+
+        return serviceList;
 }
 
 void ServiceDiscovery::start(const ServiceConfiguration& conf)
@@ -147,7 +225,6 @@ void ServiceDiscovery::stop()
 		delete mLocalService;
 		mLocalService = NULL;
 	}
-
 }
 
 //TODO: ServiceEvent should be RemoteService and ServiceDescription

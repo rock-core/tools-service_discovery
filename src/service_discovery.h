@@ -38,7 +38,7 @@ enum SDException {
  *   // what to perform when a component has been added
  * }
  * std::string someServiceData;
- * ServiceDiscovery::ServiceDiscovery;
+ * ServiceDiscovery::ServiceDiscovery service;
  * std::string serviceName = "ModuleA";
  * std::string serviceType = "_module._tcp"
  * ServiceDiscovery::Configuration conf(someName, serviceType);
@@ -59,13 +59,47 @@ public:
 	ServiceDiscovery();
 	~ServiceDiscovery();
 
+        /**
+        * Associate the service discovery object with a local service
+        * \param conf Service configuration
+        */
 	void start(const ServiceConfiguration& conf);
 
+        /**
+        * Use the service discovery object only to listen for a list
+        * of given service types
+        * \param types list of types, e.g. whereas types is of format _test._tcp
+        */
         void listenOn(const std::vector<std::string>& types);
 
-        void update(const ServiceDescription& description);
+        /**
+        * Update a service description that has been associated with the current  service discovery
+        * \param description New service description that will be published
+        */
+        void update(const ServiceDescription& desc);
 
+        /**
+        * Update all known services of the given name using the associated description
+        * \param servicename Name of the service
+        * \param description New description of the service
+        */
+        static bool update(const std::string& servicename, const ServiceDescription& description);
+        
+        /**
+        * Retrieve the service description for a given service
+        * \param servicename
+        */
+        static ServiceDescription getServiceDescription(const std::string& servicename);
+
+        /**
+        * Stop the listening and publishing activities of the service discovery object
+        */
 	void stop();
+
+        /**
+        * Get a list of service descriptions for services that can be updated via this method. 
+        */
+        static std::vector<ServiceDescription> getUpdateableServices();
 
 	/**
 	 * Use the SearchPattern with name to search for service name and txt for txt records. both are "OR"-ed
@@ -143,7 +177,7 @@ private:
         sem_t updated_component_sem;
 
 	List<ServiceDescription> mServices;
-	sem_t services_sem;
+	static sem_t services_sem;
 
         bool mPublished;
 
@@ -159,6 +193,8 @@ private:
 	ServiceConfiguration mLocalConfiguration;
 
         Mode mMode;
+
+        static std::vector<ServiceDiscovery*> msServiceDiscoveries;
 
 };
 
