@@ -243,9 +243,13 @@ void ServiceBrowser::browseCallback(AvahiServiceBrowser *sb, AvahiIfIndex interf
 				List<RemoteService>::iterator it;
 				//find the signal to be removed
 				sem_wait(asb->getServicesSem());
-				for (it = asb->getInternalServices()->begin() ; it != asb->getInternalServices()->end(); ++it) {
-					if (it->getConfiguration() == serv.getConfiguration()) {
-						
+				for (it = asb->getInternalServices()->begin() ; it != asb->getInternalServices()->end(); ++it)
+                                {
+                                        ServiceConfiguration sc = it->getConfiguration();
+                                        // The notification of service removal does not contain the TXT information
+                                        // thus comparision needs to be done here without TXT fields
+					if ( sc.compareWithoutTXT(serv.getConfiguration()) )
+                                        {
 						//emit the service removed signal
 						asb->serviceRemovedEmit((*it));
 						
