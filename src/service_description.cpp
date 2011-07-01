@@ -226,12 +226,13 @@ std::string ServiceDescription::getProtocolString() const
 
 void ServiceDescription::setDomain(const std::string& domain)
 {
+    domain_ = domain;
 
 }
 
 std::string ServiceDescription::getDomain() const
 {
-	return domain_;
+    return domain_;
 }
 
 void ServiceDescription::setInterfaceIndex(int interfaceIndex)
