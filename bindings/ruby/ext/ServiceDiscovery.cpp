@@ -85,7 +85,7 @@ public:
 
 	std::string getDescription(const std::string& label)
 	{
-		return discovery_.getConfiguration().getDescription(label);
+		return configuration_.getDescription(label);
 	}
 
         void update() {

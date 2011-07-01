@@ -115,20 +115,7 @@ void Service::setConfiguration(const ServiceConfiguration& config)
 
 ServiceConfiguration Service::getConfiguration() const
 {
-    ServiceConfiguration config = configuration_;
-
-        std::list<std::string>::const_iterator it;
-
-        for(it = stringlist.begin(); it != stringlist.end(); it++) {
-            size_t pos = it->find('=');
-
-            std::string key = it->substr(0, pos);
-            std::string val = it->substr(pos + 1);
-
-            config.setDescription(key, val);
-    }
-
-    return config;
+    return configuration_;
 }
 
 Client* Service::getClient()
