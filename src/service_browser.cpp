@@ -41,7 +41,6 @@ void ServiceBrowser::bootstrap() {
 		throw 1;
 	}
 
-	serviceResolveTryCount = 5;
 }
 
 ServiceBrowser::ServiceBrowser(Client *client, AvahiIfIndex interface, AvahiProtocol protocol, std::string type, std::string domain, AvahiLookupFlags flags, void* data)
@@ -98,7 +97,7 @@ ServiceBrowser::~ServiceBrowser() {
 void ServiceBrowser::resolveCallback(AvahiServiceResolver *sr, AvahiIfIndex interface, AvahiProtocol protocol, AvahiResolverEvent event, const char *name, const char *type, const char *domain, const char *host, const AvahiAddress *address, uint16_t port, AvahiStringList *txt, AvahiLookupResultFlags flags, void *userdata)
 {
     ResolveData *data = (ResolveData*) userdata;
-    ServiceBrowser *sb = data->sb;
+    ServiceBrowser *sb = data->serviceBrowser;
     switch(event)
     {
         // if found service cannot be resolved, throw an error
@@ -108,18 +107,20 @@ void ServiceBrowser::resolveCallback(AvahiServiceResolver *sr, AvahiIfIndex inte
         						type, 
         						interface,
         						avahi_strerror(avahi_client_errno(avahi_service_resolver_get_client(sr))));
-            if (data->count >= sb->serviceResolveTryCount) {
+            if (data->count >= ServiceBrowser::MAX_RESOLVER_TRIES) {
             	//TODO: it seems that it doesn't make more attempts'
             	LOG_WARN("Failed attempts to resolve this service has exceeded the limit. Service resolver object freed");
             	delete data;
 	            avahi_service_resolver_free(sr);
             } else {
             	data->count = data->count + 1;
-            	LOG_WARN("Failed attempt %d out of %d", data->count, sb->serviceResolveTryCount);
+            	LOG_WARN("Failed attempt %d out of %d", data->count, ServiceBrowser::MAX_RESOLVER_TRIES);
             }
             break;
 
         // if found service can be resolved
+        // Note that once the resolver has been found and the service should be kept informed
+        // about updates, the AvahiServiceResolver has to be kept (should not be deleted)
         case AVAHI_RESOLVER_FOUND:
 
 			//reset the counter for retries
@@ -185,8 +186,8 @@ void ServiceBrowser::resolveCallback(AvahiServiceResolver *sr, AvahiIfIndex inte
 
 void ServiceBrowser::browseCallback(AvahiServiceBrowser *sb, AvahiIfIndex interface, AvahiProtocol protocol, AvahiBrowserEvent event, const char *name, const char *type, const char *domain, AvahiLookupResultFlags flags, void *userdata)
 {
-    AvahiClient* client = avahi_service_browser_get_client(sb);
-    ServiceBrowser *asb = (ServiceBrowser*) userdata;
+    AvahiClient *client = avahi_service_browser_get_client(sb);
+    ServiceBrowser *serviceBrowser = (ServiceBrowser*) userdata;
 
 	switch (event)
     {
@@ -203,7 +204,7 @@ void ServiceBrowser::browseCallback(AvahiServiceBrowser *sb, AvahiIfIndex interf
         	
         	ResolveData *tdata;
         	tdata = new ResolveData();
-        	tdata->sb = asb;
+                tdata->serviceBrowser = serviceBrowser;
         	tdata->count = 0;
         	
             // try to resolve the new found service. If resolver object cannot be created, throw an error
@@ -221,11 +222,11 @@ void ServiceBrowser::browseCallback(AvahiServiceBrowser *sb, AvahiIfIndex interf
 				std::string sname(name);
 				std::string stype(type);
 				std::string sdomain(domain);
-				Service serv(asb->getClient(), interface, protocol, sname, stype, sdomain);
+				Service serv(serviceBrowser->getClient(), interface, protocol, sname, stype, sdomain);
 				List<RemoteService>::iterator it;
 				//find the signal to be removed
-				sem_wait(asb->getServicesSem());
-				for (it = asb->getInternalServices()->begin() ; it != asb->getInternalServices()->end(); ++it)
+				sem_wait(serviceBrowser->getServicesSem());
+				for (it = serviceBrowser->getInternalServices()->begin() ; it != serviceBrowser->getInternalServices()->end(); ++it)
                                 {
                                         ServiceConfiguration sc = it->getConfiguration();
                                         // The notification of service removal does not contain the TXT information
@@ -233,13 +234,13 @@ void ServiceBrowser::browseCallback(AvahiServiceBrowser *sb, AvahiIfIndex interf
 					if ( sc.compareWithoutTXT(serv.getConfiguration()) )
                                         {
 						//emit the service removed signal
-						asb->serviceRemovedEmit((*it));
-						asb->getInternalServices()->erase(it);
+						serviceBrowser->serviceRemovedEmit((*it));
+						serviceBrowser->getInternalServices()->erase(it);
 						removed = true;
 						break;
 					}
 				}
-				sem_post(asb->getServicesSem());
+				sem_post(serviceBrowser->getServicesSem());
 
                                 if(removed)
                                 {

@@ -34,8 +34,8 @@ namespace servicediscovery {
  * struct used to count failed attempts of service resolution
  */
 struct ResolveData {
-	ServiceBrowser *sb;
-	int count;
+        ServiceBrowser* serviceBrowser;
+        int count;
 };
 
 
@@ -102,7 +102,7 @@ public:
 	/**
 	 * the browser will keep the service resolver object upon this amount of failed attempts
 	 */
-	int serviceResolveTryCount;
+	const int static MAX_RESOLVER_TRIES = 5;
 	
 	/**
 	 * Class to browse existing services given a avahi client and a type to browse

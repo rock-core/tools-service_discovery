@@ -71,15 +71,6 @@ void RemoteService::freeServiceResolver()
     }
 }
 
-void RemoteService::setServiceResolver(AvahiServiceResolver* resolver)
-{
-    if(resolver)
-    {
-        freeServiceResolver();
-        sr = resolver;
-    }
-}
-
 std::string RemoteService::getAddressString()
 {
     char a[AVAHI_ADDRESS_STR_MAX];

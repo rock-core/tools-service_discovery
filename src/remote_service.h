@@ -134,12 +134,6 @@ public:
         }
 
         /**
-        * Set the service resolver
-        * \param resolver Service resolver
-        */
-        void setServiceResolver(AvahiServiceResolver* resolver);
-
-        /**
         * Free the associated service resolver and resolver data
         */
         void freeServiceResolver();
