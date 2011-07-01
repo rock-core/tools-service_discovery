@@ -56,7 +56,11 @@ class ServiceConfiguration : public ServiceDescription
 		void setPublishMode(bool mode);
 
 		bool getPublishMode() const;
-
+                
+                /**
+                * General description of the service
+                */
+                std::string toString();
 };
 
 

@@ -79,5 +79,12 @@ bool ServiceConfiguration::getPublishMode() const
 	return publishMode_;
 }
 
+std::string ServiceConfiguration::toString()
+{
+    char buffer[2024];
+    sprintf(buffer, "Name: %s, type: %s, protocol: %s, domain: %s, interface: %d, port: %d, ttl: %d, publishmode: %d", getName().c_str(), getType().c_str(), getProtocolString().c_str(), getDomain().c_str(), getInterfaceIndex(), getPort(), getTTL(), getPublishMode());
+    return std::string(buffer);
+}
+
 } // end namespace servicediscovery
 

@@ -6,6 +6,7 @@
  */
 
 #include <service_discovery/service.h>
+#include <base/logging.h>
 
 namespace servicediscovery { 
 
@@ -71,9 +72,15 @@ Service::~Service() {
 }
 
 bool Service::operator==(const Service& comp) {
-	bool upres = (configuration_ == comp.getConfiguration());
+	bool upres;
+        if( !(this->dontCheckTXT || comp.dontCheckTXT) )
+            upres = (configuration_ == comp.getConfiguration());
+        else 
+            upres = configuration_.compareWithoutTXT(comp.getConfiguration());
+
 	if (!upres)
 		return false;
+
 	if (port != comp.getPort())
 		return false;
 	if (!(this->dontCheckTXT || comp.dontCheckTXT)) {

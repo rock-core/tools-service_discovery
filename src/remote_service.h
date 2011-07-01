@@ -133,18 +133,18 @@ public:
             return sr;
         }
 
-        void setServiceResolver(AvahiServiceResolver* nsr)
-        {
-            if (sr)
-                avahi_service_resolver_free(sr);
-        }
+        /**
+        * Set the service resolver
+        * \param resolver Service resolver
+        */
+        void setServiceResolver(AvahiServiceResolver* resolver);
 
-        std::string getAddressString() {
-            char a[AVAHI_ADDRESS_STR_MAX];
-            avahi_address_snprint(a, sizeof(a), &address);
-            std::string addr(a);
-            return addr;
-        }
+        /**
+        * Free the associated service resolver and resolver data
+        */
+        void freeServiceResolver();
+
+        std::string getAddressString();
 
         bool operator==(RemoteService serv);
 };

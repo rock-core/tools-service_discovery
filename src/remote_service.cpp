@@ -55,5 +55,38 @@ bool RemoteService::operator ==(RemoteService serv) {
 	return true;
 }
 
+void RemoteService::freeServiceResolver()
+{
+    if(sr)
+    {
+        if(resolveData)
+        {
+            delete resolveData;
+            resolveData = NULL;
+        }
+
+
+        avahi_service_resolver_free(sr);
+        sr = NULL;
+    }
+}
+
+void RemoteService::setServiceResolver(AvahiServiceResolver* resolver)
+{
+    if(resolver)
+    {
+        freeServiceResolver();
+        sr = resolver;
+    }
+}
+
+std::string RemoteService::getAddressString()
+{
+    char a[AVAHI_ADDRESS_STR_MAX];
+    avahi_address_snprint(a, sizeof(a), &address);
+    std::string addr(a);
+    return addr;
+}
+
 } // end namespace servicediscovery
 

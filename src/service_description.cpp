@@ -8,11 +8,11 @@ namespace servicediscovery {
 const uint32_t ServiceDescription::mDNSMaxRecordSize = 200;
 const uint32_t ServiceDescription::mDNSMaxPayloadSize = 2000;
 
-ServiceDescription::ServiceDescription()
+ServiceDescription::ServiceDescription() : name_(), type_(), protocol_(AVAHI_PROTO_UNSPEC), domain_(), interfaceIndex_(AVAHI_IF_UNSPEC), descriptions_(), labels_()
 {
 }
 
-ServiceDescription::ServiceDescription(const std::string& servicename) : name_(servicename)
+ServiceDescription::ServiceDescription(const std::string& servicename) : name_(servicename), type_(), protocol_(), domain_(), interfaceIndex_(), descriptions_(), labels_()
 {
 }
 

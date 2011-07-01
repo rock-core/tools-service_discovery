@@ -66,40 +66,22 @@ ServiceBrowser::ServiceBrowser(Client *client, std::string type) {
 	this->bootstrap();
 }
 
-void freeAfRemoteService(RemoteService srv) {
-	AvahiServiceResolver *sr;
-	sr = srv.getServiceResolver();
-	if (sr)
-        {
-		avahi_service_resolver_free(sr);
-                sr = NULL;
-        }
-
-	//delete the object used to count failed attempts						
-	ResolveData *sdata = srv.resolveData;
-	if (sdata) {
-		delete sdata;
-	}
-	
-	//remove the signal object
-	//srv.freeSignal();
-}
-
 ServiceBrowser::~ServiceBrowser() {
         client->lock();
-	List<RemoteService>::iterator it;
-	//free service resolvers
-	sem_wait(&services_sem);
-	for (it = services.begin() ; it != services.end(); ++it) {
-		freeAfRemoteService((*it));
-	}
-	sem_post(&services_sem);
-
 	if (browser)
         {       
 		avahi_service_browser_free(browser);
                 browser = NULL;
         }
+
+	//free service resolvers
+	sem_wait(&services_sem);
+        List<RemoteService>::iterator it;
+	for (it = services.begin() ; it != services.end(); ++it) {
+		it->freeServiceResolver();
+	}
+	sem_post(&services_sem);
+
         client->unlock();
 }
 
@@ -252,9 +234,6 @@ void ServiceBrowser::browseCallback(AvahiServiceBrowser *sb, AvahiIfIndex interf
                                         {
 						//emit the service removed signal
 						asb->serviceRemovedEmit((*it));
-						
-						freeAfRemoteService((*it));
-						
 						asb->getInternalServices()->erase(it);
 						removed = true;
 						break;
