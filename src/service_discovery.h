@@ -22,18 +22,18 @@ enum SDException {
  * @brief
  * A wrapper class for the avahi service discovery
  * @verbatim
- * namespace dc = rock::communication;
+ * namespace sd = servicediscovery;
  * void removeCallback(dc::ServiceEvent e)
  * {
  * 
  *    // what to perform when component has been added
- *    dc::ServiceDescription sd = e.getServiceDescription();
+ *    sd::ServiceConfiguration configuration = e.getServiceConfiguration();
  *
- *    std::string serviceName = sd.getName();
- *    std::string labelData = sd.getDescription("my-label");
+ *    std::string serviceName = configuration.getName();
+ *    std::string labelData = configuration.getDescription("my-label");
  *    ...
  * }
- * void addCallback(dc::ServiceEvent e)
+ * void addCallback(sd::ServiceEvent e)
  * {
  *   // what to perform when a component has been added
  * }
@@ -41,13 +41,13 @@ enum SDException {
  * ServiceDiscovery::ServiceDiscovery service;
  * std::string serviceName = "ModuleA";
  * std::string serviceType = "_module._tcp"
- * ServiceDiscovery::Configuration conf(someName, serviceType);
+ * sd::ServiceConfiguration conf(someName, serviceType);
  * conf.setDescription("my-label","data-associated-with-label");
- * service.addedComponentConnect(signc::mem_fun(*this, &addCallback));
- * service.removeComponentConnect(signc::mem_fin(*this, &removeCallback));
+ * service.addedComponentConnect(sigc::mem_fun(*this, &addCallback));
+ * service.removedComponentConnect(sigc::mem_fun(*this, &removeCallback));
  * service.start(conf);
  *
- * std::vector<ServiceDescription>
+ * std::vector<sd::ServiceDescription>
  * service.findServices(SearchPattern("my-component-name"));
  * 
  * @endverbatim
