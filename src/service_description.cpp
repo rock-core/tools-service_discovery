@@ -123,7 +123,8 @@ void ServiceDescription::setDescription(const std::string& label, const std::str
 	// Based on size how much bytes does the description consume
 	int requiredNumberOfEntries = ceil( static_cast<double>(descriptionsSize) / static_cast<double>(mDNSMaxRecordSize - label.size()) );
 
-	int currentPayloadSize = descriptionsSize + requiredNumberOfEntries * mDNSMaxRecordSize;
+	int currentDescriptionSize = getDescriptionSize();
+	int currentPayloadSize = descriptionsSize + requiredNumberOfEntries * label.size() + currentDescriptionSize;
 
 	if( currentPayloadSize > mDNSMaxPayloadSize)
 	{
@@ -243,6 +244,21 @@ void ServiceDescription::setInterfaceIndex(int interfaceIndex)
 int ServiceDescription::getInterfaceIndex() const
 {
 	return interfaceIndex_;
+}
+
+int ServiceDescription::getDescriptionSize() const
+{
+    std::list<std::string> descriptions = getRawDescriptions();
+    std::list<std::string>::iterator it = descriptions.begin();
+
+    int size = 0;
+
+    for(; it != descriptions.end(); it++)
+    {
+	size += it->size();
+    }
+
+    return size;
 }
 
 

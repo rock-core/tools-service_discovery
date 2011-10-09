@@ -102,7 +102,7 @@ void ServiceBrowser::resolveCallback(AvahiServiceResolver *sr, AvahiIfIndex inte
     {
         // if found service cannot be resolved, throw an error
         case AVAHI_RESOLVER_FAILURE:
-        	LOG_WARN("Resolver failed to resolve service %s of type %s on interface %d. Error: %s", 
+        	LOG_INFO("Resolver failed to resolve service %s of type %s on interface %d. Error: %s", 
         						name, 
         						type, 
         						interface,
@@ -173,9 +173,6 @@ void ServiceBrowser::resolveCallback(AvahiServiceResolver *sr, AvahiIfIndex inte
             	LOG_INFO("Service not added (already in DB)");
             }
 			sem_post(sb->getServicesSem());
-
-//			printls(*(sb->getInternalServices()));
-
 
             break;
 
