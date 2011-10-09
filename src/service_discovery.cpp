@@ -8,7 +8,9 @@ namespace servicediscovery {
 std::vector<ServiceDiscovery*> ServiceDiscovery::msServiceDiscoveries;
 sem_t ServiceDiscovery::services_sem;
 
-ServiceDiscovery::ServiceDiscovery() : mPublished(false)
+ServiceDiscovery::ServiceDiscovery() 
+	: mPublished(false)
+	, mTimeout(60)
 {
 	mLocalService = NULL;
         mMode = NONE;
@@ -133,14 +135,14 @@ void ServiceDiscovery::start(const ServiceConfiguration& conf)
         mBrowsers[conf.getType()] = browser;
     }
 
-    LOG_INFO("Creating local service %s", conf.getName().c_str());
+    LOG_INFO("Creating local service %s, waiting for it to show up in servicelist ...", conf.getName().c_str());
     mLocalService = new LocalService(client, conf.getName(), conf.getType(), conf.getPort(), conf.getRawDescriptions(), conf.getTTL(), true);
 
-    // making sure it the service is seen before proceeding 
+    // making sure the service can be seen before proceeding 
     boost::timer timer;	
     while(!mPublished)
     {
-        if(!mPublished && timer.elapsed_min() > 10)
+        if(!mPublished && timer.elapsed_min() > mTimeout)
         {
             LOG_FATAL("Timout reached: resolution of local service failed");
             throw std::runtime_error("Timeout reached: resolution of local service failed\n");
