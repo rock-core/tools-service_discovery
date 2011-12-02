@@ -25,7 +25,7 @@ int main(int argc, char** argv)
 	servicediscovery::Client* client = servicediscovery::Client::getInstance();
 	
 	//create a service browser
-	servicediscovery::ServiceBrowser sbrowser(client, "_rimres._tcp");
+	servicediscovery::ServiceBrowser sbrowser(client, "_sd_test._tcp");
 
 	//connect a callback to the service added signal. Method can also be a class member. Look at sigc++ api
 	sbrowser.serviceAddedConnect(sigc::ptr_fun(testAdded));
@@ -33,7 +33,7 @@ int main(int argc, char** argv)
 	//publish a sample service to test the callbacks
 	std::list<std::string> strlst;
 	strlst.push_back("service_year=1999");
-	servicediscovery::LocalService serv(client, "MyTestService", "_rimres._tcp", 10000, strlst);
+	servicediscovery::LocalService serv(client, "MyTestService", "_sd_test._tcp", 10000, strlst);
 	
 	sleep(5);
 	

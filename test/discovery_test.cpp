@@ -5,15 +5,16 @@
 #include <stdlib.h>
 #include <time.h>
 #include <sstream>
-#include "ServiceDiscovery.h"
+#include <service_discovery/service_discovery.h>
 
 
 using namespace std;
-using namespace dfki::communication; 
+using namespace servicediscovery;
 
 struct ServiceLandscape
 {
-  ServiceLandscape() : domain("_rimres._tcp") {
+  ServiceLandscape() : domain("_rimres._tcp") 
+  {
     srand(time(NULL));
     ServiceConfiguration com1 = createConfiguration("Com1");
     ServiceConfiguration com2 = createConfiguration("Com2");
@@ -27,9 +28,9 @@ struct ServiceLandscape
     power1.setDescription("location", "2,0,1");
 
     com1.setDescription("service", "1,-1,0:communication");
-    com2.setDescription("service", "2,-1,0:dfki::robot::communication");
-    com3.setDescription("service", "3,-1,0:communication");
-    power1.setDescription("service", "4,1,0:dfki::power");
+    com2.setDescription("service", "2,-1,0:lunar_mission::robot:communication");
+    com3.setDescription("service", "3,-1,0:lunar_mission::communication");
+    power1.setDescription("service", "4,1,0:power");
 
     com1.setDescription("remote", "none:50");
     com2.setDescription("remote", "none:50");
@@ -41,9 +42,16 @@ struct ServiceLandscape
     com3.setDescription("flags", pattern::castFlags(pattern::READY));
     power1.setDescription("flags", pattern::castFlags(pattern::BUSY));
 
+    BOOST_MESSAGE("Starting com1");
     startService(com1);
+
+    BOOST_MESSAGE("Starting com2");
     startService(com2);
+
+    BOOST_MESSAGE("Starting com3");
     startService(com3);
+
+    BOOST_MESSAGE("Starting power");
     startService(power1);
 
     watcher = startService(find);    
@@ -55,7 +63,6 @@ struct ServiceLandscape
   ~ServiceLandscape() {
     vector<ServiceDiscovery*>::iterator it;
     for(it = ServiceInfos.begin(); it != ServiceInfos.end(); it++) {
-      // (*it)->stop(); 
       // automatically done via ServiceDiscovery destructor
       delete *it;
     }
@@ -114,7 +121,7 @@ BOOST_AUTO_TEST_CASE( findServices )
   // PropertyPattern() uses label = "*", description = "*"
   result = watcher->findServices(PropertyPattern());      
 
-  BOOST_CHECK_EQUAL(4, result.size());  
+  BOOST_CHECK_EQUAL(4 /*utility services */ + 1 /*the watch service itself*/, result.size());  
 
   // --------------------------------------------------------------------------
   // FIND ALL SERVICES MATCHING A PROPERTY
@@ -171,11 +178,11 @@ BOOST_AUTO_TEST_CASE( findServices )
   // FIND ALL SERVICES WITHIN A SPECIFIC NAMESPACE
   // --------------------------------------------------------------------------
 
-  result = watcher->findServices(PropertyPattern(), "dfki");
+  result = watcher->findServices(PropertyPattern(), "lunar_mission");
 
   BOOST_REQUIRE_EQUAL(2, result.size());
 
-  result = watcher->findServices(PropertyPattern(), "dfki::robot");
+  result = watcher->findServices(PropertyPattern(), "lunar_mission::robot");
   
   BOOST_REQUIRE_EQUAL(1, result.size());
   

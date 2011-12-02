@@ -22,12 +22,12 @@ int main (int argc, char const* argv[])
 			string("12345678901234567890123456789012345678901234567890");
 		
 	ServiceDiscovery servdesc;
-	ServiceConfiguration conf("SampleComponent","_rimres._tcp");
+	ServiceConfiguration conf("SampleComponent","_sd_test._tcp");
 	conf.setDescription("IOR",IOR);
 	servdesc.start(conf);
 
 	ServiceDiscovery servdesc2;
-	ServiceConfiguration conf2("SampleComponent2" ,"_rimres._tcp");
+	ServiceConfiguration conf2("SampleComponent2" ,"_sd_test._tcp");
 	conf.setDescription("IOR", IOR);
 	servdesc2.start(conf2);
 

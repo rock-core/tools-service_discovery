@@ -182,4 +182,4 @@ struct AuthorityPattern : public ServicePattern
 
 } // end namespace servicediscovery
 
-#endif // RIMRES_SERVICEPATTERN_CORE_H_
+#endif // _SERVICE_DISCOVERY_SERVICEPATTERN_CORE_H_

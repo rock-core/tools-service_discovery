@@ -39,7 +39,7 @@ int main(int argc, char** argv)
 	servicediscovery::afAvahiClient client;
 	
 	//create a service browser
-	servicediscovery::afServiceBrowser sbrowser(&client, "_rimres._tcp");
+	servicediscovery::afServiceBrowser sbrowser(&client, "_sd_test._tcp");
 
 	//connect a callback to the service added signal. Method can also be a class member. Look at sigc++ api
 	sbrowser.serviceAddedConnect(sigc::ptr_fun(testAdded));
@@ -50,7 +50,7 @@ int main(int argc, char** argv)
 	//publish a sample service to test the callbacks
 	std::list<std::string> strlst;
 	strlst.push_back("service_year=1999");
-	servicediscovery::afLocalService serv(&client, "MyTestService", "_rimres._tcp", 10000, strlst);
+	servicediscovery::afLocalService serv(&client, "MyTestService", "_sd_test._tcp", 10000, strlst);
 	
 	//run the main event loop (in this case in a different thread because default poll is afThreadPoll, so it program will continue normal execution)
 	client.dispatch();
