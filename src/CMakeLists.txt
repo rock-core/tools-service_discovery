@@ -11,9 +11,6 @@ set(SOURCES
     service_pattern.cpp
 )
 
-add_executable(test_servicediscovery testmain.cpp ${SOURCES})
-target_link_libraries(test_servicediscovery ${LIBRARIES})
-
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
 target_link_libraries(${PROJECT_NAME} ${EXTERNAL_LIBS})
 
