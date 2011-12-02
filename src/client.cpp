@@ -6,6 +6,7 @@
 
 #include <service_discovery/client.h>
 #include <base/logging.h>
+#include <stdexcept>
 
 namespace servicediscovery { 
 
@@ -24,7 +25,7 @@ Client::Client() {
 	// If creation of msAvahiClient is not immediately successful throw error 
 	if (!msAvahiClient) {
 	    LOG_FATAL("Failed to create client: %s" , avahi_strerror(error));
-            throw 0; //TODO: do sth else
+            throw std::runtime_error("Failed to create avahi client");
 	}
 
         avahi_threaded_poll_start(msPoll);
@@ -50,7 +51,7 @@ void Client::unlock() {
 }
 
 void Client::stateUpdateCallback(AvahiClient* avahiClient, AvahiClientState state, void* userdata) {
-//    LOG_INFO(" Clientstate: %d\n", state);
+    LOG_DEBUG(" Clientstate: %d\n", state);
 }
 
 } // end namespace servicediscovery

@@ -1,5 +1,5 @@
-#ifndef RIMRES_SERVICEDISCOVERY_CORE_H_
-#define RIMRES_SERVICEDISCOVERY_CORE_H_
+#ifndef _SERVICEDISCOVERY_CORE_H_
+#define _SERVICEDISCOVERY_CORE_H_
 
 #include <string>
 #include <vector>

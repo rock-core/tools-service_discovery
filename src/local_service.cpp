@@ -1,8 +1,7 @@
 /*
- * local_service.cpp
- *
- *  Created on: Mar 17, 2010
- *      Author: darko
+ * \file local_service.cpp
+ * \author darko.makreshanski@dfki.de
+ * \author thomas.roehr@dfki.de
  */
 
 #include <service_discovery/local_service.h>

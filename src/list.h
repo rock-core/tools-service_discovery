@@ -1,8 +1,6 @@
 /*
- * list.h
- *
- *  Created on: Mar 19, 2010
- *      Author: darko
+ * \file list.h
+ * \author darko.makreshanski@dfki.de
  */
 
 #ifndef _SERVICE_DISCOVERY_LIST_H_

@@ -1,8 +1,7 @@
 /*
- * client.h
- *
- *  Created on: Mar 17, 2010
- *      Author: darko
+ * @file client.h
+ * @author Darko Makreshanski
+ * @copyright DFKI Robotics Innovation Center, 2010
  */
 
 #ifndef _SERVICE_DISCOVERY_AVAHICLIENT_H_
@@ -50,7 +49,7 @@ private:
 
 	/**
 	 * Every avahi client program must enter in a poll loop to speak to the avahi-daemon and receive asynchronous messages
-         * we will use a single poll instance
+         * A single poll instance is used
 	 */
         static AvahiThreadedPoll* msPoll; 
 	
@@ -65,8 +64,6 @@ public:
         static void lock();
 
         void unlock();
-
-
 };
 
 } // end namespace servicediscovery
