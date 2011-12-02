@@ -14,6 +14,7 @@ int main(int argc, char** argv)
 	
 	//create a client with default constructor with threaded poll
 	servicediscovery::Client* client = servicediscovery::Client::getInstance();
+        cout << "Publish a service named MyTestService" << endl;
 	
 	std::list<std::string> strlst;
 	strlst.push_back("service_year=1999");

@@ -28,6 +28,7 @@ int main (int argc, char const* argv[])
 
         printf("Retrieve description for sample component\n");
         ServiceDescription sd = ServiceDiscovery::getServiceDescription("SampleComponent");
+        sleep(5);
         printf("Set new description for sample component\n");
         sd.setDescription("LOCATION","x:1,y:2,z:3");
         printf("Update description for sample component\t");

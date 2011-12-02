@@ -47,7 +47,7 @@ ServiceDiscovery::~ServiceDiscovery()
 
 bool ServiceDiscovery::update(const std::string& name, const ServiceDescription& description)
 {
-        // serach all service discoveries in the same process for the service with the given name
+        // search all service discoveries in the same process for the service with the given name
         bool success = false;
         sem_wait(&services_sem);
         std::vector<ServiceDiscovery*>::iterator it;

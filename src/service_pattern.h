@@ -39,7 +39,8 @@ namespace pattern {
  * \brief Abstract base class for ServicePattern. Provides a simple interface for
  * searching via specific service patterns (position, type, group, state, etc.)
  */
-struct ServicePattern {
+struct ServicePattern 
+{
   /**
    * \brief General interface for filtering ServiceDescription matching a specific
    * ServicePattern.
@@ -67,7 +68,8 @@ struct ServicePattern {
  * If label = "*", PropertyPattern will search in each description.
  */
 
-struct PropertyPattern : public ServicePattern {
+struct PropertyPattern : public ServicePattern 
+{
   PropertyPattern(const std::string& label = "*", const std::string& expression = ".*")
    : label(label), expression(expression, boost::regex::extended) {}
 
@@ -96,7 +98,8 @@ namespace pattern {
  * distance for each services to a given point (x,y,z) and lists all modules that
  * are in range of a given distance.
  */
-struct PositionPattern : public ServicePattern {
+struct PositionPattern : public ServicePattern 
+{
   PositionPattern(int x, int y, int z, double distance) 
     : x(x), y(y), z(z), distance(distance) {}
   ~PositionPattern() {}
@@ -116,7 +119,8 @@ struct PositionPattern : public ServicePattern {
  * The FlagPattern works on the flags property and lists all services that matches
  * all given flags.
  */
-struct FlagPattern : public ServicePattern {
+struct FlagPattern : public ServicePattern 
+{
   FlagPattern(int flags) : flags(flags) {}
   ~FlagPattern() {}
 
@@ -143,7 +147,8 @@ struct FlagPattern : public ServicePattern {
  * \verbatim
  *
  */
-struct MultiPattern : public ServicePattern {
+struct MultiPattern : public ServicePattern 
+{
   MultiPattern() {}
   ~MultiPattern() {}
 
@@ -163,7 +168,8 @@ struct MultiPattern : public ServicePattern {
 /**
  * \brief Filtering services by its authority (based on the remote property)
  */
-struct AuthorityPattern : public ServicePattern {
+struct AuthorityPattern : public ServicePattern 
+{
   AuthorityPattern(int authority, bool atleast = true) : authority(authority), atleast(atleast) {}  
   ~AuthorityPattern() {}
 

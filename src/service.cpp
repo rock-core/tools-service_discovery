@@ -13,13 +13,16 @@ namespace servicediscovery {
 AvahiStringList* Service::getTxt(std::list<std::string> lst)
 {
 	AvahiStringList *stxt = NULL;
-	if(lst.size() > 0) {
-		std::list<std::string>::iterator it;
-		it = lst.begin();
-		stxt = avahi_string_list_new((*it).c_str(), NULL);
-		it++;
-		for (;it != lst.end(); it++) {
-			stxt = avahi_string_list_add(stxt, (*it).c_str());
+	if(lst.size() > 0) 
+	{
+                // initialize string
+		std::list<std::string>::iterator it = lst.begin();
+		stxt = avahi_string_list_new(it->c_str(), NULL);
+		++it;
+
+		for (;it != lst.end(); ++it) 
+		{
+			stxt = avahi_string_list_add(stxt, it->c_str());
 		}
 	}
 	return stxt;
@@ -47,7 +50,8 @@ Service::Service(
 			std::string domain,
 			uint16_t port,
 			std::list<std::string> strlist
-			) {
+			)
+{
 
         client_ = client;
         configuration_.setInterfaceIndex(interf);
@@ -66,12 +70,14 @@ Service::Service(
         this->configuration_.setRawDescriptions(stringlist);
 }
 
-Service::~Service() {
+Service::~Service()
+{
 	if (txt)
 		avahi_string_list_free(txt);
 }
 
-bool Service::operator==(const Service& comp) {
+bool Service::operator==(const Service& comp)
+{
 	bool upres;
         if( !(this->dontCheckTXT || comp.dontCheckTXT) )
             upres = (configuration_ == comp.getConfiguration());
@@ -91,7 +97,8 @@ bool Service::operator==(const Service& comp) {
 }
 
 
-void Service::addDescriptionsToConfiguration(const std::list<std::string>& strlist) {
+void Service::addDescriptionsToConfiguration(const std::list<std::string>& strlist)
+{
     ServiceConfiguration config = getConfiguration();
 
     std::list<std::string>::const_iterator it;
