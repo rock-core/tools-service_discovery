@@ -142,16 +142,16 @@ void ServiceDiscovery::start(const ServiceConfiguration& conf)
     boost::timer timer;	
     while(!mPublished)
     {
-        if(!mPublished && timer.elapsed_min() > mTimeout)
+        if(!mPublished && timer.elapsed() > mTimeout)
         {
-            LOG_FATAL("Timout reached: resolution of local service failed");
-            throw std::runtime_error("Timeout reached: resolution of local service failed\n");
+            LOG_FATAL("Timout of %d s reached: resolution of local service failed", mTimeout);
+            throw std::runtime_error("ServiceDiscovery reached timeout: resolution of local service failed");
         } else if(mPublished)
         {
             break;
         }
 
-        sleep(0.1);
+        sleep(0.5);
     }
 
     LOG_INFO("Local service %s started", conf.getName().c_str());
