@@ -1,3 +1,5 @@
+#define BOOST_TEST_DYN_LINK
+//#define BOOST_TEST_MODULE Fixtures
 #define BOOST_TEST_MODULE std_string
 #include <boost/test/unit_test.hpp>
 
