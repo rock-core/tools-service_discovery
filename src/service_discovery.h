@@ -73,7 +73,7 @@ public:
         void listenOn(const std::vector<std::string>& types);
 
         /**
-        * Update a service description that has been associated with the current  service discovery
+        * Update a service description that has been associated with the current service discovery
         * \param description New service description that will be published
         */
         void update(const ServiceDescription& desc);
@@ -97,7 +97,8 @@ public:
 	void stop();
 
         /**
-        * Get a list of service descriptions for services that can be updated via this method. 
+        * Get a list of service descriptions for services that can be updated via the 
+        * update(const std::string&, const ServiceDescription& ) method. 
         */
         static std::vector<ServiceDescription> getUpdateableServices();
 
@@ -188,9 +189,7 @@ private:
 	std::map<std::string, ServiceBrowser*> mBrowsers;
 
         // There can be only a single local service and a single
-        // local configuration	
 	LocalService* mLocalService;
-	ServiceConfiguration mLocalConfiguration;
 
         Mode mMode;
 

@@ -174,7 +174,6 @@ int LocalService::updateStringList(std::list<std::string> listn) {
         ServiceConfiguration config = getConfiguration();
 
 	int res;
-        getClient()->lock();
 	if ((res = avahi_entry_group_update_service_txt_strlst(
 				group,
 				config.getInterfaceIndex(),
@@ -184,14 +183,11 @@ int LocalService::updateStringList(std::list<std::string> listn) {
 				config.getType().c_str(),
 				config.getDomain().c_str(),
 				list)) < 0) {
-                getClient()->unlock();
 		LOG_FATAL("updateStringList - Failed to update txt records: %s", avahi_strerror(res));
 		return -2;
 	}
-        getClient()->unlock();
 	
-	Service::setTxt(list);
-	stringlist = listn;
+	setStringList(listn); 
 	
 	return 0;
 	

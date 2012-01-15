@@ -131,5 +131,12 @@ Client* Service::getClient()
     return client_;
 }
 
+void Service::setStringList(std::list<std::string> list)
+{
+    stringlist = list;
+    setTxt( Service::getTxt(stringlist) );
+    configuration_.setRawDescriptions(stringlist);
+}
+
 } // end namespace servicediscovery
 

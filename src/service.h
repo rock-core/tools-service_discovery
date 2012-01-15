@@ -45,6 +45,13 @@ protected:
 		txt = ntxt;
 	}
 
+	/**
+	* Set the internal string list - updates txt and configuration 
+	* at the same time
+	* \param list List of strings as description for the service
+	*/
+        void setStringList(std::list<std::string> list);
+
         /** related avahi client instance */
         Client* client_;
 

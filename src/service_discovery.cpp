@@ -77,7 +77,7 @@ ServiceDescription ServiceDiscovery::getServiceDescription(const std::string& na
             ServiceConfiguration conf = (*it)->getConfiguration();
             if(conf.getName() == name)
             {
-                sd == conf;
+                sd = conf;
                 found = true;
                 break;
             }
@@ -119,7 +119,6 @@ void ServiceDiscovery::start(const ServiceConfiguration& conf)
     }
 
     mMode = PUBLISH;
-    mLocalConfiguration = conf;
 
     Client* client = Client::getInstance();
 
@@ -188,15 +187,7 @@ void ServiceDiscovery::update(const ServiceDescription& desc)
 {
     if(mLocalService != NULL) {
         std::list<std::string> raw_desc = desc.getRawDescriptions();
-        std::vector<std::string> labels = desc.getLabels();
-
         mLocalService->updateStringList(raw_desc);
-
-        std::vector<std::string>::iterator it;
-
-        for(it = labels.begin(); it != labels.end(); it++) {
-            mLocalConfiguration.setDescription(*it, desc.getDescription(*it));
-        }
 
         LOG_INFO("Updated local service: %s", mLocalService->getName().c_str());
     } else {
@@ -234,8 +225,9 @@ void ServiceDiscovery::addedService(const RemoteService& service)
 {
 	ServiceEvent event(service);
         ServiceConfiguration remoteConfig = service.getConfiguration();
+        ServiceConfiguration localConfig = mLocalService->getConfiguration();
 
-        if ( mMode == PUBLISH && mLocalConfiguration.getName() == remoteConfig.getName() && mLocalConfiguration.getType() == remoteConfig.getType())
+        if ( mMode == PUBLISH && localConfig.getName() == remoteConfig.getName() && localConfig.getType() == remoteConfig.getType())
 	{
             LOG_INFO("Service published: %s", service.getName().c_str());
             mPublished = true;
