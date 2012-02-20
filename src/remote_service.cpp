@@ -7,6 +7,7 @@
 
 #include <service_discovery/remote_service.h>
 #include <iostream>
+#include <stdexcept>
 #include <base/logging.h>
 
 namespace servicediscovery { 
@@ -23,18 +24,16 @@ RemoteService::RemoteService(
 			std::string host_name,
 			AvahiAddress address,
 			AvahiServiceResolver *sr
-		//	sigc::signal<void, RemoteService> *RemoteServiceSignal
 	) : Service(browser->getClient(), interf, prot, name, type, domain, port, list) {
 	this->host_name = host_name;
 	this->address = address;
 	this->sr = sr;
-	//this->RemoteServiceSignal = RemoteServiceSignal;
 
 	if (sem_init(&RMS_sem,0,1) == -1) {
-		LOG_FATAL("Semaphore initialization failed");
-		throw 1;
+		std::string message = "Semaphore initialization failed";
+		LOG_FATAL(message.c_str());
+		throw std::runtime_error("Semphore initialization failed");
 	}
-	
 }
 
 RemoteService::~RemoteService() {
@@ -64,7 +63,6 @@ void RemoteService::freeServiceResolver()
             delete resolveData;
             resolveData = NULL;
         }
-
 
         avahi_service_resolver_free(sr);
         sr = NULL;

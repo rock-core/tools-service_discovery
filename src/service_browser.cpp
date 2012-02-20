@@ -7,6 +7,7 @@
 
 #include "service_browser.h"
 #include "client.h"
+#include <stdexcept>
 #include <base/logging.h>
 
 namespace servicediscovery {
@@ -25,8 +26,10 @@ void ServiceBrowser::bootstrap() {
         client->unlock();
 
 	if (!browser) {
-		LOG_FATAL("Failed to create avahi service browser: %s", avahi_strerror(avahi_client_errno(client->getAvahiClient())));
-		throw 0; //TODO improve this
+		char buffer[512];
+		snprintf(buffer, 512, "Failed to create avahi service browser: %s", avahi_strerror(avahi_client_errno(client->getAvahiClient())));
+		LOG_FATAL(buffer);
+		throw std::runtime_error(buffer);
 	}
 	if (
 			sem_init(&services_sem,0,1) == -1
@@ -37,8 +40,9 @@ void ServiceBrowser::bootstrap() {
                                 ||
                         sem_init(&service_updated_sem, 0, 1) == -1
 		) {
-		LOG_FATAL("Semaphore initialization failed");
-		throw 1;
+		std::string message = "Semaphore initialization failed";
+		LOG_FATAL(message.c_str());
+		throw std::runtime_error(message);
 	}
 
 }

@@ -24,8 +24,9 @@ ServiceDiscovery::ServiceDiscovery()
                         ||
                 sem_init(&updated_component_sem,0,1) == -1
 	) {
-		LOG_FATAL("Semaphore initialization failed");
-		throw 1;
+		std::string message = "Semaphore initialization failed";
+		LOG_FATAL(message.c_str());
+		throw std::runtime_error(message);
 	}
 
         sem_wait(&services_sem);
