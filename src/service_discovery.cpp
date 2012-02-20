@@ -134,16 +134,17 @@ void ServiceDiscovery::start(const ServiceConfiguration& conf)
         mBrowsers[conf.getType()] = browser;
     }
 
-    LOG_INFO("Creating local service %s, waiting for it to show up in servicelist ...", conf.getName().c_str());
+    LOG_INFO("Creating local service %s", conf.getName().c_str());
     mLocalService = new LocalService(client, conf.getName(), conf.getType(), conf.getPort(), conf.getRawDescriptions(), conf.getTTL(), true);
 
+    LOG_INFO("Waiting for service %s to show up in servicelist ...", conf.getName().c_str());
     // making sure the service can be seen before proceeding 
     boost::timer timer;	
     while(!mPublished)
     {
         if(!mPublished && timer.elapsed() > mTimeout)
         {
-            LOG_FATAL("Timout of %d s reached: resolution of local service failed", mTimeout);
+            LOG_FATAL("Timeout of %d s reached: resolution of local service failed", mTimeout);
             throw std::runtime_error("ServiceDiscovery reached timeout: resolution of local service failed");
         } else if(mPublished)
         {

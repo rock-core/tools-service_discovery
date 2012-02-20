@@ -207,7 +207,7 @@ void ServiceBrowser::browseCallback(AvahiServiceBrowser *sb, AvahiIfIndex interf
             // try to resolve the new found service. If resolver object cannot be created, throw an error
             if (!(avahi_service_resolver_new(client, interface, protocol, name, type, domain, AVAHI_PROTO_UNSPEC, AvahiLookupFlags (0), resolveCallback, tdata)))
             {
-            	LOG_FATAL("Failed to create service resolver object for: %s. Error: ", name, avahi_strerror(avahi_client_errno(client)));
+            	LOG_FATAL("Failed to create service resolver object for: %s. Error: %s", name, avahi_strerror(avahi_client_errno(client)));
             }
             break;
 
