@@ -225,12 +225,16 @@ void ServiceDiscovery::addedService(const RemoteService& service)
 {
 	ServiceEvent event(service);
         ServiceConfiguration remoteConfig = service.getConfiguration();
-        ServiceConfiguration localConfig = mLocalService->getConfiguration();
 
-        if ( mMode == PUBLISH && localConfig.getName() == remoteConfig.getName() && localConfig.getType() == remoteConfig.getType())
-	{
-            LOG_INFO("Service published: %s", service.getName().c_str());
-            mPublished = true;
+        if(mLocalService)
+        {
+            ServiceConfiguration localConfig = mLocalService->getConfiguration();
+
+            if ( mMode == PUBLISH && localConfig.getName() == remoteConfig.getName() && localConfig.getType() == remoteConfig.getType())
+            {
+                LOG_INFO("Service published: %s", service.getName().c_str());
+                mPublished = true;
+            }
         }
 
 	sem_wait(&services_sem);

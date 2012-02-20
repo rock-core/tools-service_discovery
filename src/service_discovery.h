@@ -188,7 +188,7 @@ private:
         // Map service type such as _myservice._tcp to a corresponding browser
 	std::map<std::string, ServiceBrowser*> mBrowsers;
 
-        // There can be only a single local service and a single
+        // There can be only a single local service
 	LocalService* mLocalService;
 
         Mode mMode;
