@@ -79,6 +79,7 @@ class ServiceDescription
     * another description.
 		* \param label Label of description
 		* \param description Description
+		* \throws std::runtime_error if label exceeds length of 200 byte or payload size will exceed the set maximum (currently set to 1300 bytes)
 		*/	
 		void setDescription(const std::string& label, const std::string& description);
 

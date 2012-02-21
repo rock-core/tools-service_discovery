@@ -1,12 +1,16 @@
 #include "service_description.h"
 #include <cmath>
+#include <stdexcept>
 #include <base/logging.h>
 
 namespace servicediscovery {
 
 // Maximum size a mDNS record can store per entry
 const uint32_t ServiceDescription::mDNSMaxRecordSize = 200;
-const uint32_t ServiceDescription::mDNSMaxPayloadSize = 2000;
+
+// Currently set to 1300, since the current recommendation is using size no larger than 1300 bytes
+// http://files.dns-sd.org/draft-cheshire-dnsext-dns-sd.txt
+const uint32_t ServiceDescription::mDNSMaxPayloadSize = 1300;
 
 ServiceDescription::ServiceDescription() : name_(), type_(), protocol_(AVAHI_PROTO_UNSPEC), domain_(), interfaceIndex_(AVAHI_IF_UNSPEC), descriptions_(), labels_()
 {
@@ -117,7 +121,7 @@ void ServiceDescription::setDescription(const std::string& label, const std::str
 	} else if (labelSize >= 200)
 	{
 		LOG_FATAL("Size of label exceeds maximum payload size");
-		return;
+		throw std::runtime_error("Size of label exceeds maximum payload size");
 	}
 
 	// Based on size how much bytes does the description consume
@@ -128,7 +132,10 @@ void ServiceDescription::setDescription(const std::string& label, const std::str
 
 	if( currentPayloadSize > mDNSMaxPayloadSize)
 	{
-		LOG_FATAL("Size of descriptions exceeds maximum payload size: %d vs. maximum %d", currentPayloadSize, mDNSMaxPayloadSize);
+		char buffer[256];
+		snprintf(buffer,256, "Size of descriptions exceeds maximum allowed payload size: current %d vs. maximum %d", currentPayloadSize, mDNSMaxPayloadSize);
+		LOG_FATAL(buffer)
+		throw std::runtime_error(buffer);
 	}
 
 	std::list<std::string>::iterator it;	
