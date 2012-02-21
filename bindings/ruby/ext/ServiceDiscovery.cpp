@@ -163,7 +163,7 @@ Array wrap_getLabels(Object description)
 	std::vector<std::string> labels = sd->getLabels();
 	
 	Array labelArray;
-	for(int i = 0; i < labels.size(); i++)
+	for(size_t i = 0; i < labels.size(); ++i)
 	{
 		labelArray.push( String(labels[i]) );
 	}

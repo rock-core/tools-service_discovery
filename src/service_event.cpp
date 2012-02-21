@@ -24,9 +24,11 @@ const ServiceConfiguration& ServiceEvent::getServiceConfiguration() const
 bool ServiceEvent::operator==(const ServiceEvent& other) const
 {
 	if( this->getServiceConfiguration() == other.getServiceConfiguration())
+	{
 		return true;
-	
-	else false;
+	} else {
+		return false;
+	}
 }
 
 

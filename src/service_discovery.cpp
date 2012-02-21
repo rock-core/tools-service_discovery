@@ -314,7 +314,6 @@ std::vector<ServiceDescription> ServiceDiscovery::findServices(SearchPattern pat
 	sem_wait(&services_sem);
 	for (it = mServices.begin() ; it != mServices.end() ; it++) {
 
-		size_t found;
 		ServiceDescription description = *it;
 		if(pattern.name == "")
 		{

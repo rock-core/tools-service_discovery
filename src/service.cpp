@@ -29,7 +29,8 @@ AvahiStringList* Service::getTxt(std::list<std::string> lst)
 }
 
 Service::Service(const Service& serv) 
- : configuration_(serv.configuration_), client_(serv.client_) 
+	:  client_(serv.client_) 
+ 	,configuration_(serv.configuration_)
 {
 	this->stringlist = serv.getStringList();
 	//create avahistringlist from a list<string>

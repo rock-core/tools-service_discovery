@@ -124,7 +124,7 @@ void ServiceDescription::setDescription(const std::string& label, const std::str
 	int requiredNumberOfEntries = ceil( static_cast<double>(descriptionsSize) / static_cast<double>(mDNSMaxRecordSize - label.size()) );
 
 	int currentDescriptionSize = getDescriptionSize();
-	int currentPayloadSize = descriptionsSize + requiredNumberOfEntries * label.size() + currentDescriptionSize;
+	unsigned int currentPayloadSize = descriptionsSize + requiredNumberOfEntries * label.size() + currentDescriptionSize;
 
 	if( currentPayloadSize > mDNSMaxPayloadSize)
 	{
@@ -174,7 +174,6 @@ std::list<std::string> ServiceDescription::getRawDescriptions() const
 void ServiceDescription::setRawDescriptions(const std::list<std::string>& descriptions)
 {
 	descriptions_ = descriptions;
-	int descriptionSize = descriptions_.size();
 
 	labels_	= std::vector<std::string>();
 

@@ -33,8 +33,8 @@ LocalService::LocalService(Client *client,
 	group = NULL;
 	this->flags = flags;
 	this->ttl = ttl;
-	if (publish) {
-		int pres = this->publish();
+	if(publish) {
+		this->publish();
 	}
 }
 
@@ -51,8 +51,8 @@ LocalService::LocalService(
 	group = NULL;
 	flags = (AvahiPublishFlags) 0;
 	this->ttl = ttl;
-	if (publish) {
-		int pres = this->publish();
+	if(publish) {
+		this->publish();
 	}
 }
 
