@@ -2,6 +2,7 @@
 #include <boost/timer.hpp>
 #include <stdexcept>
 #include <base/logging.h>
+#include <map>
 
 namespace servicediscovery {
 
@@ -93,6 +94,31 @@ ServiceDescription ServiceDiscovery::getServiceDescription(const std::string& na
         }
 
         return sd;
+}
+
+std::map<std::string, ServiceDescription> ServiceDiscovery::getVisibleServices(const SearchPattern& pattern)
+{
+	std::map<std::string, ServiceDescription> descriptions;
+        sem_wait(&services_sem);
+        std::vector<ServiceDiscovery*>::iterator it = msServiceDiscoveries.begin();
+        for(; it != msServiceDiscoveries.end(); ++it)
+        {
+            LOG_DEBUG("Find services");
+            std::vector<ServiceDescription> services = (*it)->_findServices(pattern);
+            std::vector<ServiceDescription>::iterator serviceIt = services.begin(); 
+            for(; serviceIt != services.end(); ++serviceIt)
+            {
+                if(descriptions.count(serviceIt->getName()) == 0)
+                {
+                    descriptions[serviceIt->getName()] = *serviceIt;
+                } else {
+                    LOG_DEBUG("Service already known: '%s'", serviceIt->getName().c_str());
+                }
+            }
+        }
+        sem_post(&services_sem);
+
+        return descriptions;
 }
 
 
@@ -248,6 +274,54 @@ void ServiceDiscovery::addedService(const RemoteService& service)
 	sem_post(&added_component_sem);
 }
 
+std::vector<ServiceDescription> ServiceDiscovery::_findServices(const SearchPattern& pattern)
+{
+	std::vector<ServiceDescription> res;
+	List<ServiceDescription>::iterator it;
+	for (it = mServices.begin() ; it != mServices.end() ; it++) {
+
+		ServiceDescription description = *it;
+		if(pattern.name == "")
+		{
+			res.push_back(description);
+			continue;
+		}
+
+		if(pattern.name == description.getName())
+		{
+			res.push_back(description);
+			break;
+		}
+		
+		std::string descriptionItem = description.getDescription(pattern.label);
+		if( descriptionItem != "") 
+		{
+			if(descriptionItem.find(pattern.txt))
+			{
+				res.push_back(description);
+				continue;
+			}
+
+		} else if(pattern.txt != "") {
+
+			std::vector<std::string> labels = description.getLabels();
+			int labelsSize = labels.size();
+
+			for(int i = 0; i < labelsSize; i++)
+			{
+				std::string descriptionItem = description.getDescription(pattern.label);
+				if(descriptionItem.find(pattern.txt))
+				{
+					res.push_back(description);
+					continue;
+				}
+			}
+		}
+	}
+
+        return res;
+}
+
 
 void ServiceDiscovery::updatedService(const RemoteService& service)
 {
@@ -310,48 +384,8 @@ std::vector<std::string> ServiceDiscovery::getServiceNames()
 std::vector<ServiceDescription> ServiceDiscovery::findServices(SearchPattern pattern)
 {
 	std::vector<ServiceDescription> res;
-	List<ServiceDescription>::iterator it;
 	sem_wait(&services_sem);
-	for (it = mServices.begin() ; it != mServices.end() ; it++) {
-
-		ServiceDescription description = *it;
-		if(pattern.name == "")
-		{
-			res.push_back(description);
-			continue;
-		}
-
-		if(pattern.name == description.getName())
-		{
-			res.push_back(description);
-			break;
-		}
-		
-		std::string descriptionItem = description.getDescription(pattern.label);
-		if( descriptionItem != "") 
-		{
-			if(descriptionItem.find(pattern.txt))
-			{
-				res.push_back(description);
-				continue;
-			}
-
-		} else if(pattern.txt != "") {
-
-			std::vector<std::string> labels = description.getLabels();
-			int labelsSize = labels.size();
-
-			for(int i = 0; i < labelsSize; i++)
-			{
-				std::string descriptionItem = description.getDescription(pattern.label);
-				if(descriptionItem.find(pattern.txt))
-				{
-					res.push_back(description);
-					continue;
-				}
-			}
-		}
-	}
+        res = _findServices(pattern);
 	sem_post(&services_sem);
 	return res;
 }

@@ -151,6 +151,14 @@ public:
 		sem_post(&removed_component_sem);
 	}
 
+        /**
+         * Relying on all running Servicediscovery within a process, this function
+         * allows to search for visible services an all existing domains - search pattern 
+         * allows to limit the search if required
+         */
+        static std::map<std::string, ServiceDescription> getVisibleServices(const SearchPattern& pattern = SearchPattern("")); 
+
+
 private:
 
         enum Mode { NONE = 0, LISTEN_ONLY = 1, PUBLISH = 2};
@@ -169,6 +177,8 @@ private:
          * Update service descriptions
          */
         void updatedService(const RemoteService& service);
+
+	std::vector<ServiceDescription> _findServices(const SearchPattern& pattern);
 
 	sigc::signal<void, ServiceEvent> ServiceAddedSignal;
 	sigc::signal<void, ServiceEvent> ServiceRemovedSignal;
