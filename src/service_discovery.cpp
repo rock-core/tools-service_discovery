@@ -89,7 +89,7 @@ ServiceDescription ServiceDiscovery::getServiceDescription(const std::string& na
         if(!found)
         {
             char buffer[512];
-            sprintf(buffer, "Could not find service: %s\n", name.c_str());
+            snprintf(buffer, 512, "Could not find service: %s\n", name.c_str());
             throw std::runtime_error(std::string(buffer));
         }
 
@@ -171,8 +171,8 @@ void ServiceDiscovery::start(const ServiceConfiguration& conf)
     {
         if(!mPublished && timer.elapsed() > mTimeout)
         {
-            LOG_FATAL("Timeout of %d s reached: resolution of local service failed", mTimeout);
-            throw std::runtime_error("ServiceDiscovery reached timeout: resolution of local service failed");
+            LOG_FATAL("Timeout of %d s reached: resolution of local service failed -- try again after restarting avahi-daemon", mTimeout);
+            throw std::runtime_error("ServiceDiscovery reached timeout: resolution of local service failed -- try again after restarting avahi-daemon");
         } else if(mPublished)
         {
             break;
