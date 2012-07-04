@@ -381,7 +381,7 @@ std::vector<std::string> ServiceDiscovery::getServiceNames()
 }
 
 
-std::vector<ServiceDescription> ServiceDiscovery::findServices(SearchPattern pattern)
+std::vector<ServiceDescription> ServiceDiscovery::findServices(const SearchPattern& pattern)
 {
 	std::vector<ServiceDescription> res;
 	sem_wait(&services_sem);
@@ -390,8 +390,7 @@ std::vector<ServiceDescription> ServiceDiscovery::findServices(SearchPattern pat
 	return res;
 }
 
-std::vector<ServiceDescription> ServiceDiscovery::findServices(const ServicePattern& pattern,         
-    std::string name_space)
+std::vector<ServiceDescription> ServiceDiscovery::findServices(const ServicePattern& pattern, const std::string& name_space)
 {
     std::vector<ServiceDescription> result;
     List<ServiceDescription>::iterator it;
