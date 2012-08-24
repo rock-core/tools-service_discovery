@@ -36,7 +36,7 @@ int main (int argc, char const* argv[])
         servdesc.listenOn(types);
 	
 	sleep(5);
-	std::vector<ServiceDescription> services =  servdesc.findServices(ServiceDiscovery::SearchPattern(""));
+	std::vector<ServiceDescription> services =  servdesc.findServices();
 	std::cout << " - Found services: " << std::endl;
         std::vector<ServiceDescription>::iterator it = services.begin();
         for(;it != services.end(); it++)

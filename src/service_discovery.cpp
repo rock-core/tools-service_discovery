@@ -277,46 +277,15 @@ void ServiceDiscovery::addedService(const RemoteService& service)
 std::vector<ServiceDescription> ServiceDiscovery::_findServices(const SearchPattern& pattern)
 {
 	std::vector<ServiceDescription> res;
-	List<ServiceDescription>::iterator it;
-	for (it = mServices.begin() ; it != mServices.end() ; it++) {
-
+	List<ServiceDescription>::const_iterator it;
+	for (it = mServices.begin() ; it != mServices.end() ; it++) 
+	{
 		ServiceDescription description = *it;
-		if(pattern.name == "")
-		{
+                if(pattern.isMatching(description))
+                {
 			res.push_back(description);
-			continue;
-		}
-
-		if(pattern.name == description.getName())
-		{
-			res.push_back(description);
-			break;
-		}
-		
-		std::string descriptionItem = description.getDescription(pattern.label);
-		if( descriptionItem != "") 
-		{
-			if(descriptionItem.find(pattern.txt))
-			{
-				res.push_back(description);
-				continue;
-			}
-
-		} else if(pattern.txt != "") {
-
-			std::vector<std::string> labels = description.getLabels();
-			int labelsSize = labels.size();
-
-			for(int i = 0; i < labelsSize; i++)
-			{
-				std::string descriptionItem = description.getDescription(pattern.label);
-				if(descriptionItem.find(pattern.txt))
-				{
-					res.push_back(description);
-					continue;
-				}
-			}
-		}
+                        continue;
+                }
 	}
 
         return res;

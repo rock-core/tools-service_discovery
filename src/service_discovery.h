@@ -102,31 +102,6 @@ public:
         */
         static std::vector<ServiceDescription> getUpdateableServices();
 
-	/**
-	 * Use the SearchPattern with name to search for service name and txt for txt records. both are "OR"-ed
-	 */
-	struct SearchPattern 
-	{
-		SearchPattern(std::string name) : txt("") {
-			this->name = name;
-		}
-
-		SearchPattern(std::string name, std::string txt) {
-			this->name = name;
-			this->txt = txt;
-		}
-
-		SearchPattern(std::string name, std::string label, std::string txt)
-		{
-			this->name = name;
-			this->label = label;
-			this->txt = txt;
-		}
-
-		std::string name;
-		std::string label;
-		std::string txt;
-	};
 		
 	std::vector<ServiceDescription> findServices( const SearchPattern& pattern = SearchPattern("") );
 

@@ -122,7 +122,7 @@ public:
          */
 	std::vector<dc::ServiceDescription> findServices(const std::string& name)
 	{
-		return discovery_.findServices(dc::ServiceDiscovery::SearchPattern(name));
+		return discovery_.findServices(dc::SearchPattern(name));
 	}
 
 	std::vector<std::string> getAllServices()
