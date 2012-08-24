@@ -14,7 +14,15 @@ set(SOURCES
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
 target_link_libraries(${PROJECT_NAME} ${EXTERNAL_LIBS})
 
-install(TARGETS ${PROJECT_NAME}
+set(UTIL_BROWSE ${PROJECT_NAME}-browse)
+add_executable(${UTIL_BROWSE} utils/browse.cpp)
+target_link_libraries(${UTIL_BROWSE} ${PROJECT_NAME})
+
+set(UTIL_PUBLISH ${PROJECT_NAME}-publish)
+add_executable(${UTIL_PUBLISH} utils/publish.cpp)
+target_link_libraries(${UTIL_PUBLISH} ${PROJECT_NAME})
+
+install(TARGETS ${PROJECT_NAME} ${UTIL_BROWSE} ${UTIL_PUBLISH}
 	RUNTIME DESTINATION bin
 	ARCHIVE DESTINATION lib
 	LIBRARY DESTINATION lib
