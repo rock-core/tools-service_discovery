@@ -23,30 +23,16 @@ ServiceConfiguration::ServiceConfiguration(const std::string& name, const std::s
 	this->setPublishMode(true);
 }
 
-
-
 ServiceConfiguration::ServiceConfiguration() : ServiceDescription()
 {
 	this->setName("undefined-service");
 	this->setPort(0);
 	this->setTTL(0);
 	this->setPublishMode(false);
-
-
 }
 
 ServiceConfiguration::~ServiceConfiguration()
 {
-}
-
-std::string ServiceConfiguration::getType() const
-{
-	return type_;
-}
-
-void ServiceConfiguration::setType(const std::string& type)
-{
-	type_ = type;
 }
 
 uint16_t ServiceConfiguration::getPort() const
