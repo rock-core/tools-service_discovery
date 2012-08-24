@@ -1,5 +1,4 @@
 #define BOOST_TEXT_DYN_LINK
-#define BOOST_TEST_MODULE Fixtures
 #include <boost/test/unit_test.hpp>
 
 #include <service_discovery/service_discovery.h>
