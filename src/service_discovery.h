@@ -148,8 +148,19 @@ public:
          */
 	std::vector<std::string> getServiceNames();
 
-        ServiceConfiguration getConfiguration() {
-            return mLocalService->getConfiguration(); 
+        /**
+         * Get the current configuration of this service discovery if in PUBLISH mode
+         * \throws if the service discovery is in LISTEN_ONLY mode, where no service configuration 
+         * exists
+         * \return ServiceConfiguration of a published service
+         */
+        ServiceConfiguration getConfiguration() const {
+            if(mMode == LISTEN_ONLY)
+            {
+                throw std::runtime_error("Get configuration cannot be called for a service in started in listen only mode");
+            } else { 
+                return mLocalService->getConfiguration(); 
+            }
         }
 
 	void addedComponentConnect(const sigc::slot<void, ServiceEvent>& slot) {
