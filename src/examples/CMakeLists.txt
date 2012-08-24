@@ -3,7 +3,6 @@ set(EXAMPLES
     browse-publish-update
     publish
     servicediscovery
-    logging
     update
 )
 
