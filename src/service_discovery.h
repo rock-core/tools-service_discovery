@@ -47,16 +47,42 @@ enum SDException {
  * service.removedComponentConnect(sigc::mem_fun(*this, &removeCallback));
  * service.start(conf);
  *
- * std::vector<sd::ServiceDescription>
- * service.findServices(SearchPattern("my-component-name"));
+ * std::vector<sd::ServiceDescription> services = 
+ *     service.findServices(SearchPattern("my-component-name"));
  * 
  * @endverbatim
+ * @detail
+ * The service discovery takes advantage of the features of avahi and allows 
+ * you to publish and browse for services based on existing or newly created
+ * types. 
+ *
+ * Depending on the need, the service discovery can be used in a listening mode
+ * only or in publishing mode. However, for each service you intend to publish, 
+ * you have to create a new ServiceDiscovery instance. 
+ *
+ * This implementation support a avahi-daemon restart after you service discovery
+ * instances have been created. 
+ * At startup of the service discovery a running avahi-daemon is required. 
+ * Nevertheless, if you need to restart the avahi-daemon after a successful start, 
+ * all service browsers will be registered.
+ * Any attached application has to deal with the newly emitted ServiceEvents. 
+ *
+ * Implementation details: 
+ * All service discovery objects within the same process will access the 
+ * avahi daemon through a single client connection. Thus synchronization is 
+ * needed and performed using a unique lock on the client instance.
+ *
  */
 class ServiceDiscovery : public sigc::trackable
 {
 
 public: 
 	ServiceDiscovery();
+
+        /**
+         * Default deconstructor -- will cleanup all underlying resolvers 
+         * and browsers created for this instance
+         */
 	~ServiceDiscovery();
 
         /**
@@ -102,12 +128,24 @@ public:
         */
         static std::vector<ServiceDescription> getUpdateableServices();
 
+        /**
+         * Search Services using a standard search pattern
+         * \return List of service descriptions of all available services, by default of all services
+         * seen by this service discovery instance
+         */
 		
 	std::vector<ServiceDescription> findServices( const SearchPattern& pattern = SearchPattern("") );
 
+        /**
+         * Search services using a predefined set of service pattern
+         */
         std::vector<ServiceDescription> findServices(const ServicePattern& pattern, 
                 const std::string& name_space = "*");
 	
+
+        /**
+         * Get list of names of services currently seen by this service discovery instance
+         */
 	std::vector<std::string> getServiceNames();
 
         ServiceConfiguration getConfiguration() {
@@ -136,24 +174,31 @@ public:
 
 private:
 
+        // The internal modes for the service discovery, reflect the
+        // usage as service publisher or listener only, i.e. 
+        // to allow search one or more avahi domains, e.g. 
+        // _test._tcp or similar
         enum Mode { NONE = 0, LISTEN_ONLY = 1, PUBLISH = 2};
 
 	/**
-	* Added service
+	* Callback handler, when a service has been removed 
 	*/
 	void addedService(const RemoteService& service);
 
 	/**
-	* Removed service
+	* Callback handler, when a service has been removed
 	*/
 	void removedService(const RemoteService& service);
 
         /**
-         * Update service descriptions
+         * Callback handler, when service hase been updated 
          */
         void updatedService(const RemoteService& service);
 
 	std::vector<ServiceDescription> _findServices(const SearchPattern& pattern);
+        /**
+         * Search for services -- without acquiring the lock on services
+         */
 
 	sigc::signal<void, ServiceEvent> ServiceAddedSignal;
 	sigc::signal<void, ServiceEvent> ServiceRemovedSignal;
@@ -165,6 +210,7 @@ private:
 	List<ServiceDescription> mServices;
 	static sem_t services_sem;
 
+        // Flag whether service is published or not
         bool mPublished;
 
         // Seems to allow better thread safety and handling of the dbus if 
@@ -178,6 +224,7 @@ private:
 
         Mode mMode;
 
+        // Global list of service discovery instances
         static std::vector<ServiceDiscovery*> msServiceDiscoveries;
 
         // Time to wait for a local service to be seen
