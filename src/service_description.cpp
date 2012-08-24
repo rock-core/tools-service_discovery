@@ -12,11 +12,25 @@ const uint32_t ServiceDescription::mDNSMaxRecordSize = 200;
 // http://files.dns-sd.org/draft-cheshire-dnsext-dns-sd.txt
 const uint32_t ServiceDescription::mDNSMaxPayloadSize = 1300;
 
-ServiceDescription::ServiceDescription() : name_(), type_(), protocol_(AVAHI_PROTO_UNSPEC), domain_(), interfaceIndex_(AVAHI_IF_UNSPEC), descriptions_(), labels_()
+ServiceDescription::ServiceDescription() 
+    : name_()
+    , type_()
+    , protocol_(AVAHI_PROTO_UNSPEC)
+    , domain_()
+    , interfaceIndex_(AVAHI_IF_UNSPEC)
+    , descriptions_()
+    , labels_()
 {
 }
 
-ServiceDescription::ServiceDescription(const std::string& servicename) : name_(servicename), type_(), protocol_(), domain_(), interfaceIndex_(), descriptions_(), labels_()
+ServiceDescription::ServiceDescription(const std::string& servicename) 
+    : name_(servicename)
+    , type_()
+    , protocol_()
+    , domain_()
+    , interfaceIndex_()
+    , descriptions_()
+    , labels_()
 {
 }
 
@@ -266,7 +280,6 @@ int ServiceDescription::getDescriptionSize() const
 
     return size;
 }
-
 
 } // end namespace servicediscovery
 
