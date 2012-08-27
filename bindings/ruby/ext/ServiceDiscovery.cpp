@@ -118,11 +118,10 @@ public:
 	/**
 	 * Search for services
          * To retrieve all call with an empty string 
-	 * TODO: Improve the pattern search of the underlying service-discovery library
          */
-	std::vector<dc::ServiceDescription> findServices(const std::string& name)
+	std::vector<dc::ServiceDescription> findServices(const std::string& name, const std::string& label, const std::string& txt, const std::string& type)
 	{
-		return discovery_.findServices(dc::SearchPattern(name));
+		return discovery_.findServices(dc::SearchPattern(name, label, txt, type));
 	}
 
 	std::vector<std::string> getAllServices()

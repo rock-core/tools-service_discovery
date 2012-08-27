@@ -9,7 +9,7 @@ class ServiceDiscoveryTest < Test::Unit::TestCase
 		name = "my-service"
 		type = "_rimres._tcp"
 		sd = ServiceDiscovery.new
-		sd.listen_on(["_test._tcp"])
+		sd.listen_on(["_sd_test._tcp"])
 	end
 	
 	def test_ServiceDescription
@@ -36,7 +36,7 @@ class ServiceDiscoveryTest < Test::Unit::TestCase
 
 	def test_ServiceDiscoveryInterfaces
 		name = "my-service"
-		type = "_rimres._tcp"
+		type = "_sd_test._tcp"
 		sd = ServiceDiscovery.new
 
 
@@ -47,18 +47,18 @@ class ServiceDiscoveryTest < Test::Unit::TestCase
 		
 		assert_equal(description, retrievedDescription)
 
-		services = sd.find_services(name)
+		services = sd.find_services(name, ".*",".*",".*")
 		emptyList = []
 		assert_equal(emptyList, services)
 
-		sd.listen_on(["_test._tcp"])
+		sd.listen_on(["_sd_test._tcp"])
 
 		for i in 1..10 do
 			puts "Running services: "
-			services = sd.find_services("")
+			services = sd.find_services(".*",".*",".*",".*")
 			services.each do |service|
 				content = service.get_description "test-label"
-				puts "#{service.getName}"
+				puts "#{service.get_name}"
 				puts "label content: #{content}"
 			end
 
