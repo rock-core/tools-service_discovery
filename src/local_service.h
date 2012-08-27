@@ -17,22 +17,30 @@
 
 namespace servicediscovery {
 
-
 /**
+ * @class LocalService
  * @brief
- * A class for service objects that are meant to be published
+ * LocalService for service objects that are meant to be published. Should be not used directly
+ * unless you take care of taking the client lock. 
  */
 class LocalService: public Service {
 private:
 	/**
 	 * in this framework every service to be published is connected to one entry group
 	 */
-	AvahiEntryGroup *group;
-	AvahiPublishFlags flags;
+	AvahiEntryGroup *mGroup;
+	AvahiPublishFlags mFlags;
 	
-	uint32_t ttl;
+	uint32_t mTTL;
+
+	bool mPublished;
 	
 	static void entry_group_callback(AvahiEntryGroup *g, AvahiEntryGroupState state, void *userdata);
+
+	/**
+	 * Unpublish service - does not acquire the client lock itself
+	 */
+	void _unpublish();
 
 public:
 
@@ -82,6 +90,7 @@ public:
 			uint32_t ttl=0,
 			bool publish=false
 			);
+
 	virtual ~LocalService();
 
 	/**
@@ -100,6 +109,12 @@ public:
 	 * opposite of publish. Unpublish a service.
 	 */
 	void unpublish();
+
+        /**
+         * Tests whether the local service is published or not
+         * \return True when published, false when not
+         */
+        bool published();
 	
 	/**
 	 * update the service additional information

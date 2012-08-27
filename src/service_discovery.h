@@ -73,7 +73,7 @@ enum SDException {
  * needed and performed using a unique lock on the client instance.
  *
  */
-class ServiceDiscovery : public sigc::trackable
+class ServiceDiscovery : public sigc::trackable, public ClientObserver
 {
 
 public: 
@@ -105,6 +105,19 @@ public:
         void update(const ServiceDescription& desc);
 
         /**
+         * Implementation of the observer function in order to 
+         * react to underlying client connection changes
+         * This update is called from the Client and with an
+         * acquire avahi client lock
+         */
+        virtual void update(const ClientObserver::Event& event);
+
+        /**
+        * Stop the listening and publishing activities of the service discovery object
+        */
+	void stop();
+
+        /**
         * Update all known services of the given name using the associated description
         * \param servicename Name of the service
         * \param description New description of the service
@@ -118,11 +131,6 @@ public:
         static ServiceDescription getServiceDescription(const std::string& servicename);
 
         /**
-        * Stop the listening and publishing activities of the service discovery object
-        */
-	void stop();
-
-        /**
         * Get a list of service descriptions for services that can be updated via the 
         * update(const std::string&, const ServiceDescription& ) method. 
         */
@@ -133,15 +141,13 @@ public:
          * \return List of service descriptions of all available services, by default of all services
          * seen by this service discovery instance
          */
-		
-	std::vector<ServiceDescription> findServices( const SearchPattern& pattern = SearchPattern("") );
+	std::vector<ServiceDescription> findServices( const SearchPattern& pattern = SearchPattern()) const;
 
         /**
          * Search services using a predefined set of service pattern
          */
         std::vector<ServiceDescription> findServices(const ServicePattern& pattern, 
-                const std::string& name_space = "*");
-	
+                const std::string& name_space = "*") const;
 
         /**
          * Get list of names of services currently seen by this service discovery instance
@@ -157,7 +163,7 @@ public:
         ServiceConfiguration getConfiguration() const {
             if(mMode == LISTEN_ONLY)
             {
-                throw std::runtime_error("Get configuration cannot be called for a service in started in listen only mode");
+                throw std::runtime_error("Get configuration cannot be called for a service started in listen only mode");
             } else { 
                 return mLocalService->getConfiguration(); 
             }
@@ -182,7 +188,6 @@ public:
          */
         static std::map<std::string, ServiceDescription> getVisibleServices(const SearchPattern& pattern = SearchPattern("")); 
 
-
 private:
 
         // The internal modes for the service discovery, reflect the
@@ -206,17 +211,43 @@ private:
          */
         void updatedService(const RemoteService& service);
 
-	std::vector<ServiceDescription> _findServices(const SearchPattern& pattern);
         /**
          * Search for services -- without acquiring the lock on services
          */
+	std::vector<ServiceDescription> _findServices(const SearchPattern& pattern) const;
+
+        /**
+         * Start service -- without acquiring the avahi poll loop lock
+         * Use this function within the internal event handlers, since they are called from
+         * the event loop, i.e. with acquired lock
+         */
+	void _start(const ServiceConfiguration& conf);
+
+        /**
+        * Stop the listening and publishing activities of the service discovery object
+        * -- without acquiring the avahi poll loop lock
+        */
+	void _stop();
+
+        /**
+         * Listen for services -- without acquiring the avahi poll loop lock
+         * Use this function within the internal event handlers, since they are called from
+         * the event loop, i.e. with acquired lock
+         *
+         */
+	void _listenOn(const std::vector<std::string>& types);
+
+        /**
+         * Perform necessary steps to reestablish browser, resolver etc. after a avahi-daemon restart
+         */
+	void reconnect();
 
 	sigc::signal<void, ServiceEvent> ServiceAddedSignal;
 	sigc::signal<void, ServiceEvent> ServiceRemovedSignal;
 
-	sem_t added_component_sem;
-	sem_t removed_component_sem;
-        sem_t updated_component_sem;
+	mutable sem_t added_component_sem;
+	mutable sem_t removed_component_sem;
+	mutable sem_t updated_component_sem;
 
 	List<ServiceDescription> mServices;
 	static sem_t services_sem;
@@ -232,7 +263,14 @@ private:
 
         // There can be only a single local service
 	LocalService* mLocalService;
+	// Configuration of the local service 
+	ServiceConfiguration mLocalServiceConfiguration;
 
+        // When in listing mode, the list of service types this instance
+        // is listening to
+        std::vector<std::string> mListenTypes;
+
+        // Mode of the 
         Mode mMode;
 
         // Global list of service discovery instances

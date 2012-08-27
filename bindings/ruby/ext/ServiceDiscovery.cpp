@@ -215,7 +215,7 @@ void Init_servicediscovery_ruby()
 	.define_method("publish", &wrap::ServiceDiscovery::publish, (Arg("name"), Arg("type")) )
 	.define_method("listen_on", wrap_listenOn, (Arg("domain list")) ) //&wrap::ServiceDiscovery::listenOn, (Arg("domain list")) )
         .define_method("update", &wrap::ServiceDiscovery::update)
-	.define_method("find_services", &wrap::ServiceDiscovery::findServices, (Arg("servicename")) )
+	.define_method("find_services", &wrap::ServiceDiscovery::findServices, (Arg("servicename"), Arg("label"), Arg("txt"), Arg("type")) )
 	.define_method("get_all_services", &wrap::ServiceDiscovery::getAllServices)
         ;
 }

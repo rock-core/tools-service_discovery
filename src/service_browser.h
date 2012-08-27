@@ -133,6 +133,12 @@ public:
 
 	virtual ~ServiceBrowser();
 
+        /**
+         * Cleanup internal instances of avahi_browers and resolvers
+         * (do not call if you are using avahi_client_free)
+         */
+        void cleanup();
+
 	/** generic signal for a browser event */
 //	sigc::signal<void,
 //		ServiceBrowser*,

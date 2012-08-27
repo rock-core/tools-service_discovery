@@ -10,11 +10,6 @@
 namespace servicediscovery { 
 
 LocalService::~LocalService() {
-	if (group) {
-                getClient()->lock();
-		avahi_entry_group_free(group);
-                getClient()->unlock();
-	}
 }
 
 LocalService::LocalService(Client *client,
@@ -29,10 +24,11 @@ LocalService::LocalService(Client *client,
 		uint32_t ttl,
 		bool publish)
 	: Service(client, interf, prot, name, type, domain, port, list)
+	, mGroup(0)
+	, mFlags((AvahiPublishFlags) 0) //(flags | AVAHI_PUBLISH_ALLOW_MULTIPLE))
+	, mTTL(ttl)
+	, mPublished(false)
 {
-	group = NULL;
-	this->flags = flags;
-	this->ttl = ttl;
 	if(publish) {
 		this->publish();
 	}
@@ -47,10 +43,10 @@ LocalService::LocalService(
 		uint32_t ttl,
 		bool publish)
 	: Service(client, AVAHI_IF_UNSPEC, AVAHI_PROTO_UNSPEC, name, type, "", port, list)
+	, mGroup(0)
+	, mFlags( (AvahiPublishFlags) 0 ) //(AVAHI_PUBLISH_ALLOW_MULTIPLE | AVAHI_PUBLISH_USE_MULTICAST) )
+	, mTTL(ttl)
 {
-	group = NULL;
-	flags = (AvahiPublishFlags) 0;
-	this->ttl = ttl;
 	if(publish) {
 		this->publish();
 	}
@@ -58,144 +54,145 @@ LocalService::LocalService(
 
 int LocalService::publish()
 {
-
 	if (!getClient()) {
 		LOG_FATAL("Publish - client pointer is NULL");
 		return -1;
 	}
 
-
-	if (group) {
+	if (mGroup) {
 		LOG_WARN("Publish - entry group pointer is not null. Service is already published?");
 		return -2;
 	}
 
-	
-        getClient()->lock();
+
+	// The entry_group_callback is called whenever the state of the entry group changes and called for the first
+	// time with avahi_entry_group_new
+	//
 #ifdef __CUSTOM_TTL__
-	if (!(group = avahi_entry_group_new_custom_ttl(getClient()->getAvahiClient(), entry_group_callback, this, ttl))) {
+	if (!(mGroup = avahi_entry_group_new_custom_ttl(getClient()->getAvahiClient(), entry_group_callback, this, mTTL))) {
 #else
-
-/*  !!!!!!!!!!!!!!!!!!!!!!!!!!!! merge conflict here please solve !!!!!!!!!!!!!!!!!!!!!!!!!!	
-	
-	HEAD:src/LocalService.cpp
-	std::cerr << "INFO: avahi API is not patched for custom TTL\n";
-
-	LOG_WARN("Publish - Avahi API is not patched for custom TTL");
-	b8bdb878597d120f139eaaaa4fc13d6c3c527b4d:src/LocalService.cpp
-	*/
-	if (!(group = avahi_entry_group_new(getClient()->getAvahiClient(), entry_group_callback, this))) {
-#endif	
+	if (!(mGroup = avahi_entry_group_new(getClient()->getAvahiClient(), entry_group_callback, this))) {
+#endif		
 		LOG_FATAL("Publish - Failed to create entry group: %s", avahi_strerror(avahi_client_errno(getClient()->getAvahiClient())));
-                getClient()->unlock();
-        return -3;
-    }
-        getClient()->unlock();
+		return -3;
+	}
    
 	int ret;
-        ServiceConfiguration config = getConfiguration();
+	ServiceConfiguration config = getConfiguration();
 
-        getClient()->lock();
-	if ((ret = avahi_entry_group_add_service_strlst(
-				group,
-				config.getInterfaceIndex(),
-				config.getProtocol(),
-				flags,
-				config.getName().c_str(),
-				config.getType().c_str(),
-				config.getDomain().c_str(),
-				NULL,
-				getPort(),
-				getTxt())) < 0) {
+	if(avahi_entry_group_is_empty(mGroup)) {
+	    if ((ret = avahi_entry_group_add_service_strlst(
+	                            mGroup,
+	                            AVAHI_IF_UNSPEC,
+	                            AVAHI_PROTO_UNSPEC,
+	                            mFlags,
+	                            config.getName().c_str(),
+	                            config.getType().c_str(),
+	                            config.getDomain().c_str(),
+	                            NULL,
+	                            getPort(),
+	                            getTxt())) < 0) {
+	
+	            LOG_FATAL("Failed to add service to the entry group: %s", avahi_strerror(ret));
+	            _unpublish();
+	            return -4;
+	    } 
 
-                getClient()->unlock();
+	    if ((ret = avahi_entry_group_commit(mGroup)) < 0) {
+	        LOG_FATAL("Failed to commit entry group: %s", avahi_strerror(ret));
+	        _unpublish();
+	        return -5;
+	    }
 
-		LOG_FATAL("Failed to add service to the entry group: %s", avahi_strerror(ret));
-		unpublish();
-		return -4;
-	} 
-        getClient()->unlock();
-
-        getClient()->lock();
-    if ((ret = avahi_entry_group_commit(group)) < 0) {
-        getClient()->unlock();
-    	LOG_FATAL("Failed to commit entry group: %s", avahi_strerror(ret));
-    	unpublish();
-    	return -5;
-    }
-    getClient()->unlock();
+	} else {
+	    LOG_INFO("Entry group for local service '%s' is not empty", config.getName().c_str());
+	}
     
-    return 0;
-
+	return 0;
 }
 
 void LocalService::unpublish()
 {
-	if (group) {
-                getClient()->lock();
-		avahi_entry_group_free(group);
-		group = NULL;
-                getClient()->unlock();
+        // "... please do not free the entry group and create a new one ..."
+        // see avahi-common/defs.h
+        // so use reset
+	UniqueClientLock lock;
+	_unpublish();
+}
+
+void LocalService::_unpublish()
+{
+        // "... please do not free the entry group and create a new one ..."
+        // see avahi-common/defs.h
+        // so use reset
+	if (mGroup) {
+		avahi_entry_group_reset(mGroup);
+		mPublished = false;
 	}
+}
+
+bool LocalService::published()
+{
+    return mPublished;
 }
 
 void LocalService::entry_group_callback(AvahiEntryGroup *g, AvahiEntryGroupState state, void *userdata)
 {
-    LocalService* ls = (LocalService*) userdata;
-    ServiceConfiguration config = ls->getConfiguration();
+    LocalService* localService = (LocalService*) userdata;
+    ServiceConfiguration config = localService->getConfiguration();
+
     switch (state) {
         case AVAHI_ENTRY_GROUP_ESTABLISHED :
-        	LOG_INFO("Entry group callback - Service %s is established", config.getName().c_str());
-            break;
+		LOG_INFO("Entry group callback - Service %s is established/published", config.getName().c_str());
+		localService->mPublished = true;
+		break;
 
-        case AVAHI_ENTRY_GROUP_COLLISION : {
-        	LOG_FATAL("Entry group callback - Service collision for %s/%s", config.getType().c_str(), config.getName().c_str());
-            break;
-        }
+        case AVAHI_ENTRY_GROUP_COLLISION :
+	      	LOG_FATAL("Entry group callback - Service collision for %s/%s", config.getType().c_str(), config.getName().c_str());
+		break;
 
         case AVAHI_ENTRY_GROUP_FAILURE :
         	LOG_FATAL("Entry group callback - Entry group failed for service %s, reason: %s", config.getName().c_str(), avahi_strerror(avahi_client_errno(avahi_entry_group_get_client(g))));
             break;
 
         case AVAHI_ENTRY_GROUP_UNCOMMITED:
+		LOG_INFO("Entry group uncommited: '%s", config.getName().c_str());
+		break;
+
         case AVAHI_ENTRY_GROUP_REGISTERING:
-            ;
+		LOG_INFO("Entry group registering: '%s'", config.getName().c_str());
+		break;
+        default: 
+                break;
     }
 }
 
 int LocalService::updateStringList(std::list<std::string> listn) {
-	if (!group) {
+	if (!mGroup) {
 		LOG_FATAL("updateStringList - Entry group not found for updating string list");
 		return -1;
 	}
 	
 	AvahiStringList *list = Service::getTxt(listn);
-	
-        ServiceConfiguration config = getConfiguration();
-
 	int res;
-	Client* client = getClient();
-	client->lock();
+        ServiceConfiguration config = getConfiguration();
 	if ((res = avahi_entry_group_update_service_txt_strlst(
-				group,
+				mGroup,
 				config.getInterfaceIndex(),
 				config.getProtocol(),
-				flags,
+				mFlags,
 				config.getName().c_str(),
 				config.getType().c_str(),
 				config.getDomain().c_str(),
 				list)) < 0) {
 		LOG_FATAL("updateStringList - Failed to update txt records: %s", avahi_strerror(res));
-        	client->unlock();
 		return -2;
-	} else {
-		client->unlock();
 	}
+	
 	
 	setStringList(listn); 
 	
 	return 0;
-	
 }
 
 } // end namespace servicediscovery

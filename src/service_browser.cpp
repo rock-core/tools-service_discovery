@@ -13,7 +13,6 @@
 namespace servicediscovery {
 
 void ServiceBrowser::bootstrap() {
-        client->lock();
 	browser = avahi_service_browser_new(
 				client->getAvahiClient(),
 				interface,
@@ -23,7 +22,6 @@ void ServiceBrowser::bootstrap() {
 				flags,
 				browseCallback,
 				this);
-        client->unlock();
 
 	if (!browser) {
 		char buffer[512];
@@ -69,8 +67,7 @@ ServiceBrowser::ServiceBrowser(Client *client, std::string type) {
 	this->bootstrap();
 }
 
-ServiceBrowser::~ServiceBrowser() {
-        client->lock();
+void ServiceBrowser::cleanup() {
 	if (browser)
         {       
 		avahi_service_browser_free(browser);
@@ -84,10 +81,10 @@ ServiceBrowser::~ServiceBrowser() {
 		it->freeServiceResolver();
 	}
 	sem_post(&services_sem);
-
-        client->unlock();
 }
 
+ServiceBrowser::~ServiceBrowser() {
+}
 //void printls(list<RemoteService> ls) {
 //	cout << "PRINTING SERVICES" << endl;
 //	list<RemoteService>::iterator it;
