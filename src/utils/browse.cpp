@@ -30,7 +30,7 @@ int main(int argc, char** argv)
         }
 
     } else {
-        printf("usage: %s <domain-0> <domain-1> ... <domain-n>\n", argv[0]);
+        printf("usage: %s <service-type-0> <service-type-1> ... <service-type-n>\n", argv[0]);
         exit(0);
     }
 

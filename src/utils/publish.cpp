@@ -20,7 +20,7 @@ int main(int argc, char** argv)
         serviceName = argv[2];
 
     } else {
-        printf("usage: %s <domain-0> <service-name>\n", argv[0]);
+        printf("usage: %s <service-type> <service-name>\n", argv[0]);
         exit(0);
     }
 
