@@ -8,6 +8,7 @@
 #include <base/logging.h>
 #include <stdexcept>
 #include <algorithm>
+#include <dbus/dbus.h>
 
 namespace servicediscovery { 
 
@@ -16,7 +17,8 @@ AvahiClient* Client::msAvahiClient = 0;
 
 Client::Client()
     : mMode(INIT) {
-
+	// Making sure dbus is operating in a thread safe manner
+        dbus_threads_init_default();
         bool runningDaemonRequired = true;
         start(runningDaemonRequired);
 }
