@@ -83,7 +83,7 @@ public:
          * Default deconstructor -- will cleanup all underlying resolvers 
          * and browsers created for this instance
          */
-	~ServiceDiscovery();
+	virtual ~ServiceDiscovery();
 
         /**
         * Associate the service discovery object with a local service
