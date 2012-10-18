@@ -39,12 +39,12 @@ class ServiceDescription
 
 		static const uint32_t mDNSMaxRecordSize;
 		static const uint32_t mDNSMaxPayloadSize;
-		
-		ServiceDescription();	
 
 		int getDescriptionSize() const;
 
 	public:
+		ServiceDescription();	
+
 		ServiceDescription(const std::string& servicename);
 
 		virtual ~ServiceDescription();

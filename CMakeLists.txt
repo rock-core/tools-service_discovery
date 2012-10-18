@@ -34,6 +34,7 @@ pkg_check_modules(SIGC++ REQUIRED "sigc++-2.0")
 pkg_check_modules(BASE REQUIRED "base-lib")
 pkg_check_modules(AVAHICLIENT REQUIRED "avahi-client")
 pkg_check_modules(AVAHICORE REQUIRED "avahi-core")
+pkg_check_modules(DBUS REQUIRED "dbus-1")
 
 include_directories(${SIGC++_INCLUDE_DIRS})
 link_directories(${SIGC++_LIBRARY_DIRS})
@@ -48,6 +49,9 @@ link_directories(${AVAHICLIENT_LIBRARY_DIRS})
 include_directories(${AVAHICORE_INCLUDE_DIRS})
 link_directories(${AVAHICORE_LIBRARY_DIRS})
 
+include_directories(${DBUS_INCLUDE_DIRS})
+link_directories(${DBUS_LIBRARY_DIRS})
+
 # Using the quotation marks to get the ';' as field separator for string lists 
 list(APPEND MY_CFLAGS ${SIGC++_INCLUDE_DIRS} ${AVAHICLIENT_INCLUDE_DIRS} ${AVAHICORE_INCLUDE_DIRS})
 message(${MY_CFLAGS})
@@ -57,7 +61,7 @@ set(THIS_PKG_CFLAGS "-I${THIS_PKG_CFLAGS}")
 message(${THIS_PKG_CFLAGS})
 
 ### Update external libraries that are available
-set(EXTERNAL_LIBS ${Boost_LIBRARIES} ${SIGC++_LIBRARIES} ${BASE_LIBRARIES} ${AVAHICLIENT_LIBRARIES} ${AVAHICORE_LIBRARIES} )
+set(EXTERNAL_LIBS ${Boost_LIBRARIES} ${SIGC++_LIBRARIES} ${BASE_LIBRARIES} ${AVAHICLIENT_LIBRARIES} ${AVAHICORE_LIBRARIES} ${DBUS_LIBRARIES})
 
 # Process CMakeLists.txt in the following subdirectory
 add_subdirectory(src)

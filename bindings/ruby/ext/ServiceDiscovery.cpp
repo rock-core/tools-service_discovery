@@ -118,11 +118,10 @@ public:
 	/**
 	 * Search for services
          * To retrieve all call with an empty string 
-	 * TODO: Improve the pattern search of the underlying service-discovery library
          */
-	std::vector<dc::ServiceDescription> findServices(const std::string& name)
+	std::vector<dc::ServiceDescription> findServices(const std::string& name, const std::string& label, const std::string& txt, const std::string& type)
 	{
-		return discovery_.findServices(dc::ServiceDiscovery::SearchPattern(name));
+		return discovery_.findServices(dc::SearchPattern(name, label, txt, type));
 	}
 
 	std::vector<std::string> getAllServices()
@@ -215,7 +214,7 @@ void Init_servicediscovery_ruby()
 	.define_method("publish", &wrap::ServiceDiscovery::publish, (Arg("name"), Arg("type")) )
 	.define_method("listen_on", wrap_listenOn, (Arg("domain list")) ) //&wrap::ServiceDiscovery::listenOn, (Arg("domain list")) )
         .define_method("update", &wrap::ServiceDiscovery::update)
-	.define_method("find_services", &wrap::ServiceDiscovery::findServices, (Arg("servicename")) )
+	.define_method("do_find_services", &wrap::ServiceDiscovery::findServices, (Arg("servicename"), Arg("label"), Arg("txt"), Arg("type")) )
 	.define_method("get_all_services", &wrap::ServiceDiscovery::getAllServices)
         ;
 }

@@ -1,9 +1,9 @@
 set(TEST_EXECUTABLE ${PROJECT_NAME}-test)
 
 set(TEST_SOURCE
-  testmain.cpp
   discovery_test.cpp
   configuration_test.cpp
+  search_pattern_test.cpp
 )
 
 find_package(Boost COMPONENTS unit_test_framework)

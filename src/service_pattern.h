@@ -16,6 +16,31 @@
 
 namespace servicediscovery { 
 
+/**
+ * Use the SearchPattern with name to search for service name and txt for txt records. both are "OR"-ed
+ */
+struct SearchPattern 
+{
+	SearchPattern(const std::string& _name = ".*" , const std::string& _label = ".*", const std::string& _txt = ".*", const std::string _type = ".*")
+            : namePattern(_name)
+            , labelPattern(_label)
+            , txtPattern(_txt)
+            , typePattern(_type)
+        {}
+
+        boost::regex namePattern;
+        boost::regex labelPattern;
+        boost::regex txtPattern;
+        boost::regex typePattern;
+
+        /**
+         * Check whether search pattern matches description or not
+         * \return True if it matches, False otherwise
+         */
+        virtual bool isMatching(const ServiceDescription& description) const;
+};
+
+		
 namespace pattern {
 
   /**

@@ -12,47 +12,51 @@ void testUpdated (servicediscovery::RemoteService rms) {
 	std::cout << " -=- TESTING SIGNAL: UPDATED SERVICE: " << rms.getName() << std::endl;
 }
 
-void testAdded (servicediscovery::RemoteService rms) {
-	std::cout << " -=- TESTING SIGNAL: ADDED SERVICE: " << rms.getName() << std::endl;
-	//connect a callback on service txt updates
-	//rms.serviceSignalConnect(sigc::ptr_fun(testUpdated));
+void testAdded (servicediscovery::ServiceEvent e) {
+        servicediscovery::ServiceConfiguration configuration = e.getServiceConfiguration();
+	std::cout << " -=- TESTING SIGNAL: ADDED SERVICE: " << configuration.getName() << " type: " << configuration.getType() << std::endl;
 }
 
  
 int main(int argc, char** argv)
 {
-	//create a client with default constructor with threaded poll
-	servicediscovery::Client* client = servicediscovery::Client::getInstance();
-	
+	using namespace servicediscovery;
+
 	//create a service browser
-	servicediscovery::ServiceBrowser sbrowser(client, "_sd_test._tcp");
+        std::vector<std::string> serviceTypes;
+        serviceTypes.push_back("_sd_test._tcp");
+	ServiceDiscovery serviceListener;
+        serviceListener.listenOn(serviceTypes);
 
 	//connect a callback to the service added signal. Method can also be a class member. Look at sigc++ api
-	sbrowser.serviceAddedConnect(sigc::ptr_fun(testAdded));
+	serviceListener.addedComponentConnect(sigc::ptr_fun(testAdded));
 	
 	//publish a sample service to test the callbacks
-	std::list<std::string> strlst;
-	strlst.push_back("service_year=1999");
-	servicediscovery::LocalService serv(client, "MyTestService", "_sd_test._tcp", 10000, strlst);
-	
-	sleep(5);
+	ServiceConfiguration conf("MyTestService", "_sd_test._tcp");
+        conf.setDescription("service_year","1999");
+        ServiceDiscovery servicePublisher;
+        servicePublisher.start(conf);
+
+        std::cout << "Sleep for 20s -- waiting for published service" << std::endl;
+	sleep(20);
 	
 	//update the signal txt record
-	client->lock();
-	strlst.push_back("somethingelse=10");
+        conf.setDescription("somethingelse","10");
 	std::cout << "Updating string list\n";
-	serv.updateStringList(strlst);
-	client->unlock();
+	servicePublisher.update(conf);
 	
 	sleep(5);
 	
 	//print services
-	std::cout << "PRINTING SERVICES:\n";
-	servicediscovery::List<servicediscovery::RemoteService> services = sbrowser.getServices();
-	servicediscovery::List<servicediscovery::RemoteService>::iterator it;
-	for (it = services.begin() ; it != services.end() ; it++) {
-                servicediscovery::ServiceConfiguration config = it->getConfiguration();
-		std::cout << "     SERVICE: " << config.getName() << " " << config.getType() << " " << config.getInterfaceIndex() << std::endl;
+	std::cout << "PRINTING FOUND SERVICESin _sd_test._tcp:\n";
+        SearchPattern pattern(".*",".*",".*",".*");
+
+        std::vector<ServiceDescription> services =  servicePublisher.findServices(pattern);
+        std::vector<ServiceDescription>::iterator it;
+	for (it = services.begin() ; it != services.end() ; it++) 
+        {
+                ServiceDescription description = *it;
+		std::cout << "     SERVICE: " << description.getName() << " " << description.getType() << " " << description.getInterfaceIndex() << std::endl;
 	}
 	std::cout << "FINISHED PRINTING SERVICES.\n";
 

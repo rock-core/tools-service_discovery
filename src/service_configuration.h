@@ -23,9 +23,6 @@ class ServiceConfiguration : public ServiceDescription
 	friend class ServiceDiscovery;
 
 	private:
-		// Avahi type
-		std::string type_;
-
 		static const uint16_t defaultPort_;
 
 		uint16_t port_;
@@ -40,10 +37,6 @@ class ServiceConfiguration : public ServiceDescription
 		ServiceConfiguration(const std::string& name, const std::string& type);
 
 		virtual ~ServiceConfiguration();
-
-		std::string getType() const;
-		
-		void setType(const std::string& type);
 
 		uint16_t getPort() const;
 		
