@@ -12,6 +12,7 @@
   <rosdep name="boost" />
   <rosdep name="base/types" />
   <depend package="rice" />
+  <depend package="ruby" />
   <versioncontrol type="git" url="" />
   <export>
     <cpp cflags="" lflags="-lavahi-client" />
