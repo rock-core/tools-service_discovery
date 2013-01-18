@@ -53,7 +53,7 @@ include_directories(${DBUS_INCLUDE_DIRS})
 link_directories(${DBUS_LIBRARY_DIRS})
 
 # Using the quotation marks to get the ';' as field separator for string lists 
-list(APPEND MY_CFLAGS ${SIGC++_INCLUDE_DIRS} ${AVAHICLIENT_INCLUDE_DIRS} ${AVAHICORE_INCLUDE_DIRS})
+list(APPEND MY_CFLAGS ${SIGC++_INCLUDE_DIRS} ${BASE_INCLUDE_DIRS} ${AVAHICLIENT_INCLUDE_DIRS} ${AVAHICORE_INCLUDE_DIRS})
 message(${MY_CFLAGS})
 string(REGEX REPLACE ";" " -I" THIS_PKG_CFLAGS "${MY_CFLAGS}")
 message(${THIS_PKG_CFLAGS})
