@@ -60,8 +60,10 @@ message(${THIS_PKG_CFLAGS})
 set(THIS_PKG_CFLAGS "-I${THIS_PKG_CFLAGS}")
 message(${THIS_PKG_CFLAGS})
 
+find_package(Threads)
+
 ### Update external libraries that are available
-set(EXTERNAL_LIBS ${Boost_LIBRARIES} ${SIGC++_LIBRARIES} ${BASE_LIBRARIES} ${AVAHICLIENT_LIBRARIES} ${AVAHICORE_LIBRARIES} ${DBUS_LIBRARIES})
+set(EXTERNAL_LIBS ${Boost_LIBRARIES} ${SIGC++_LIBRARIES} ${BASE_LIBRARIES} ${AVAHICLIENT_LIBRARIES} ${AVAHICORE_LIBRARIES} ${DBUS_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 # Process CMakeLists.txt in the following subdirectory
 add_subdirectory(src)
