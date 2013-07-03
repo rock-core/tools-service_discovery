@@ -4,8 +4,9 @@
 cmake_minimum_required(VERSION 2.6)
 find_package(Rock)
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_SOURCE_DIR}/cmake")
-rock_init(service_discovery 1.0)
 set(PROJECT_DESCRIPTION "Service discovery based on AVAHI")
+rock_init(service_discovery 1.0)
+rock_add_source_dir(src ${PROJECT_NAME})
 
 find_package(Boost REQUIRED COMPONENTS regex)
 include_directories(${Boost_INCLUDE_DIRS})
@@ -21,8 +22,6 @@ message(${THIS_PKG_CFLAGS})
 
 
 ## Process CMakeLists.txt in the following subdirectory
-add_subdirectory(src)
 add_subdirectory(test)
-
 add_subdirectory(bindings/ruby)
 
