@@ -11,21 +11,38 @@ set(SOURCES
     service_pattern.cpp
 )
 
-add_library(${PROJECT_NAME} SHARED ${SOURCES})
-target_link_libraries(${PROJECT_NAME} ${EXTERNAL_LIBS})
+set( HEADERS
+    service_discovery.h
+    service.h
+    service_description.h
+    service_pattern.h
+    local_service.h
+    remote_service.h
+    list.h
+    client.h
+    service_browser.h
+    service_configuration.h
+    service_event.h
+)
+
+rock_library(${PROJECT_NAME} 
+                    SOURCES ${SOURCES}
+                    HEADERS ${HEADERS}
+                    DEPS_PKGCONFIG sigc++-2.0
+                        base-lib
+                        avahi-client
+                        avahi-core
+                        dbus-1
+                    DEPS_PLAIN Threads
+                    LIBS ${Boost_REGEX_LIBRARY}
+)
 
 set(UTIL_BROWSE ${PROJECT_NAME}-browse)
-add_executable(${UTIL_BROWSE} utils/browse.cpp)
-target_link_libraries(${UTIL_BROWSE} ${PROJECT_NAME})
-
+rock_executable(${UTIL_BROWSE} utils/browse.cpp
+                     DEPS ${PROJECT_NAME})
 set(UTIL_PUBLISH ${PROJECT_NAME}-publish)
-add_executable(${UTIL_PUBLISH} utils/publish.cpp)
-target_link_libraries(${UTIL_PUBLISH} ${PROJECT_NAME})
 
-install(TARGETS ${PROJECT_NAME} ${UTIL_BROWSE} ${UTIL_PUBLISH}
-	RUNTIME DESTINATION bin
-	ARCHIVE DESTINATION lib
-	LIBRARY DESTINATION lib
-)	
+rock_executable(${UTIL_PUBLISH} utils/publish.cpp
+                     DEPS ${PROJECT_NAME})
 
 add_subdirectory(examples)
