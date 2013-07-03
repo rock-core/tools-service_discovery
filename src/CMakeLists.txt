@@ -34,8 +34,8 @@ rock_library(${PROJECT_NAME}
                         avahi-core
                         dbus-1
                     DEPS_PLAIN Threads
-                    LIBS ${Boost_REGEX_LIBRARY}
 )
+target_link_libraries(${PROJECT_NAME} ${Boost_REGEX_LIBRARY})
 
 set(UTIL_BROWSE ${PROJECT_NAME}-browse)
 rock_executable(${UTIL_BROWSE} utils/browse.cpp
