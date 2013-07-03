@@ -25,6 +25,7 @@ set( HEADERS
     service_event.h
 )
 
+find_package(Threads)
 rock_library(${PROJECT_NAME} 
                     SOURCES ${SOURCES}
                     HEADERS ${HEADERS}
@@ -35,7 +36,7 @@ rock_library(${PROJECT_NAME}
                         dbus-1
                     DEPS_PLAIN Threads
 )
-target_link_libraries(${PROJECT_NAME} ${Boost_REGEX_LIBRARY})
+target_link_libraries(${PROJECT_NAME} ${Boost_REGEX_LIBRARY} ${CMAKE_THREAD_LIBS_INIT})
 
 set(UTIL_BROWSE ${PROJECT_NAME}-browse)
 rock_executable(${UTIL_BROWSE} utils/browse.cpp
