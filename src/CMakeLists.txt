@@ -1,28 +1,29 @@
 set(SOURCES
-    client.cpp
-    local_service.cpp
-    remote_service.cpp
-    service.cpp
-    service_browser.cpp
-    service_discovery.cpp
-    service_description.cpp 
-    service_event.cpp
-    service_configuration.cpp
-    service_pattern.cpp
+    impl/avahi/Client.cpp
+    impl/avahi/LocalService.cpp
+    impl/avahi/RemoteService.cpp
+    impl/avahi/Service.cpp
+    impl/avahi/ServiceBrowser.cpp
+    impl/avahi/ServiceDiscovery.cpp
+    impl/avahi/ServiceDescription.cpp
+    impl/avahi/ServiceEvent.cpp
+    impl/avahi/ServiceConfiguration.cpp
+    impl/avahi/ServicePattern.cpp
 )
 
 set( HEADERS
-    service_discovery.h
-    service.h
-    service_description.h
-    service_pattern.h
-    local_service.h
-    remote_service.h
-    list.h
-    client.h
-    service_browser.h
-    service_configuration.h
-    service_event.h
+    impl/avahi/ServiceDiscovery.hpp
+    impl/avahi/Service.hpp
+    impl/avahi/ServiceDescription.hpp
+    impl/avahi/ServicePattern.hpp
+    impl/avahi/LocalService.hpp
+    impl/avahi/RemoteService.hpp
+    utils/List.hpp
+    impl/avahi/Client.hpp
+    impl/avahi/ServiceBrowser.hpp
+    impl/avahi/ServiceConfiguration.hpp
+    impl/avahi/ServiceEvent.hpp
+    servicediscovery/backward/servicediscovery/service_discovery.h
 )
 
 find_package(Threads)
@@ -39,11 +40,11 @@ rock_library(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} ${Boost_REGEX_LIBRARY} ${CMAKE_THREAD_LIBS_INIT})
 
 set(UTIL_BROWSE ${PROJECT_NAME}-browse)
-rock_executable(${UTIL_BROWSE} utils/browse.cpp
+rock_executable(${UTIL_BROWSE} utils/Browse.cpp
                      DEPS ${PROJECT_NAME})
 set(UTIL_PUBLISH ${PROJECT_NAME}-publish)
 
-rock_executable(${UTIL_PUBLISH} utils/publish.cpp
+rock_executable(${UTIL_PUBLISH} utils/Publish.cpp
                      DEPS ${PROJECT_NAME})
 
 add_subdirectory(examples)

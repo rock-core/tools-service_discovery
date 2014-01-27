@@ -1,9 +1,9 @@
 set(EXAMPLES
-    browse
-    browse-publish-update
-    publish
-    servicediscovery
-    update
+    Browse
+    BrowsePublishUpdate
+    Publish
+    ServiceDiscovery
+    Update
 )
 
 # build all defined examples

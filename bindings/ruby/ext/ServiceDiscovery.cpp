@@ -6,12 +6,11 @@
 #include <vector>
 #include <stdexcept>
 #include <boost/algorithm/string.hpp>
-#include <base/logging.h>
-#include <service_discovery/service_discovery.h>
-#include <service_discovery/service_description.h>
+#include <base/Logging.hpp>
+#include <service_discovery/ServiceDiscovery.hpp>
 
 using namespace Rice;
-namespace dc = servicediscovery;
+namespace dc = servicediscovery::avahi;
 
 
 typedef std::vector<dc::ServiceDescription> ServiceList;
