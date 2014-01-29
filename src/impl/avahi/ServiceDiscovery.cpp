@@ -63,12 +63,17 @@ bool ServiceDiscovery::update(const std::string& name, const ServiceDescription&
         std::vector<ServiceDiscovery*>::iterator it;
         for(it = msServiceDiscoveries.begin(); it != msServiceDiscoveries.end(); it++)
         {
-            ServiceConfiguration conf = (*it)->getConfiguration();
-            if(conf.getName() == name)
+            try {
+                ServiceConfiguration conf = (*it)->getConfiguration();
+                if(conf.getName() == name)
+                {
+                    (*it)->update(description);
+                    success = true;
+                    break;
+                }
+            } catch(...)
             {
-                (*it)->update(description);  
-                success = true;
-                break;
+                // ignore errors
             }
         }
         sem_post(&services_sem);
@@ -84,12 +89,17 @@ ServiceDescription ServiceDiscovery::getServiceDescription(const std::string& na
         std::vector<ServiceDiscovery*>::iterator it;
         for(it = msServiceDiscoveries.begin(); it != msServiceDiscoveries.end(); it++)
         {
-            ServiceConfiguration conf = (*it)->getConfiguration();
-            if(conf.getName() == name)
+            try {
+                ServiceConfiguration conf = (*it)->getConfiguration();
+                if(conf.getName() == name)
+                {
+                    sd = conf;
+                    found = true;
+                    break;
+                }
+            } catch(...)
             {
-                sd = conf;
-                found = true;
-                break;
+                // ignore errors
             }
         }
         sem_post(&services_sem);
@@ -137,8 +147,14 @@ std::vector<ServiceDescription> ServiceDiscovery::getUpdateableServices()
 	std::vector<ServiceDiscovery*>::iterator it;
 	for(it = msServiceDiscoveries.begin(); it != msServiceDiscoveries.end(); it++)
 	{
+            try {
 		ServiceConfiguration conf = (*it)->getConfiguration();
 		serviceList.push_back(conf);
+
+            } catch(...)
+            {
+                // ignore errors
+            }
 	}
 	sem_post(&services_sem);
 	
@@ -186,11 +202,11 @@ void ServiceDiscovery::addedService(const RemoteService& service)
 	ServiceEvent event(service);
         ServiceConfiguration remoteConfig = service.getConfiguration();
 
-        if(mLocalService)
+        if(mLocalService && mMode == PUBLISH)
         {
             ServiceConfiguration localConfig = mLocalService->getConfiguration();
 
-            if ( mMode == PUBLISH && localConfig.getName() == remoteConfig.getName() && localConfig.getType() == remoteConfig.getType())
+            if ( localConfig.getName() == remoteConfig.getName() && localConfig.getType() == remoteConfig.getType())
             {
                 LOG_INFO("Service published: %s", service.getName().c_str());
                 mPublished = true;
