@@ -114,6 +114,36 @@ ServiceDescription ServiceDiscovery::getServiceDescription(const std::string& na
         return sd;
 }
 
+void ServiceDiscovery::registerCallbacks(const std::string& serviceName, const sigc::slot<void, ServiceEvent>& serviceAdded, const sigc::slot<void, ServiceEvent>& serviceRemoved)
+{
+        bool found = false;
+        sem_wait(&services_sem);
+        std::vector<ServiceDiscovery*>::iterator it;
+        for(it = msServiceDiscoveries.begin(); it != msServiceDiscoveries.end(); it++)
+        {
+            ServiceDiscovery* serviceDiscovery = *it;
+            try {
+                if(serviceDiscovery->getConfiguration().getName() == serviceName)
+                {
+                    serviceDiscovery->addedComponentConnect(serviceAdded);
+                    serviceDiscovery->removedComponentConnect(serviceRemoved);
+                    found = true;
+                }
+            } catch(...)
+            {
+                // ignore errors
+            }
+        }
+        sem_post(&services_sem);
+
+        if(!found)
+        {
+            char buffer[512];
+            snprintf(buffer, 512, "Could not find service: %s\n", serviceName.c_str());
+            throw std::runtime_error(std::string(buffer));
+        }
+}
+
 std::map<std::string, ServiceDescription> ServiceDiscovery::getVisibleServices(const SearchPattern& pattern)
 {
         std::map<std::string, ServiceDescription> descriptions;

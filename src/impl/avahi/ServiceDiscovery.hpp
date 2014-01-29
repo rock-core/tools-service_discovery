@@ -189,6 +189,11 @@ public:
          */
         static std::map<std::string, ServiceDescription> getVisibleServices(const SearchPattern& pattern = SearchPattern("")); 
 
+        /**
+         * Register callbacks on a specific ServiceDiscovery object running in the current process
+         */
+        static void registerCallbacks(const std::string& serviceName, const sigc::slot<void, ServiceEvent>& serviceAdded, const sigc::slot<void, ServiceEvent>& serviceRemoved);
+
 private:
 
         // The internal modes for the service discovery, reflect the
