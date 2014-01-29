@@ -386,7 +386,7 @@ void ServiceDiscovery::_start(const ServiceConfiguration& conf)
 
     Client* client = Client::getInstance();
 
-    // Register browser if it does not exist yet for this type    
+    // Register browser if it does not exist yet for this type
     if( mBrowsers.count(conf.getType()) == 0)
     {
         // Register browser

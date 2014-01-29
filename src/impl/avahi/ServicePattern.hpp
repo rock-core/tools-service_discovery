@@ -14,6 +14,9 @@ namespace avahi {
  * \brief Provides the base interface and several implementations for Service Patterns.
  * It encapsulate filtering routines on ServiceDescriptions in different classes.
  * Use the SearchPattern with name to search for service name and txt for txt records. both are "OR"-ed
+ *\verbatim
+ SearchPattern pattern(".*","TXT",".*searchitem.*");
+ \endverbatim
  */
 struct SearchPattern 
 {
