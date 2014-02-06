@@ -7,4 +7,4 @@ Name: @PROJECT_NAME@
 Description: @PROJECT_DESCRIPTION@
 Version: @PROJECT_VERSION@
 Libs: -L${libdir} -l@PROJECT_NAME@ 
-Cflags: -I${includedir} -I${includedir}/servicediscovery/backward @THIS_PKG_CFLAGS@
+Cflags: -I${includedir} -I${includedir}/service_discovery/backward @THIS_PKG_CFLAGS@

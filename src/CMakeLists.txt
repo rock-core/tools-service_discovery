@@ -24,7 +24,7 @@ set( HEADERS
     impl/avahi/ServiceConfiguration.hpp
     impl/avahi/ServiceEvent.hpp
     ServiceDiscovery.hpp
-    servicediscovery/backward/servicediscovery/service_discovery.h
+    service_discovery/backward/service_discovery/service_discovery.h
 )
 
 find_package(Threads)
