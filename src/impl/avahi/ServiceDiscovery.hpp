@@ -156,6 +156,12 @@ public:
 	std::vector<std::string> getServiceNames();
 
         /**
+         * Check if service discovery is running
+         */
+        bool isRunning() const;
+
+
+        /**
          * Get the current configuration of this service discovery if in PUBLISH mode
          * \throws if the service discovery is in LISTEN_ONLY mode, where no service configuration 
          * exists

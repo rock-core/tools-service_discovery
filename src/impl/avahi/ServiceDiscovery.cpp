@@ -11,10 +11,10 @@ std::vector<ServiceDiscovery*> ServiceDiscovery::msServiceDiscoveries;
 boost::mutex ServiceDiscovery::mServicesMutex;
 
 ServiceDiscovery::ServiceDiscovery() 
-	: mPublished(false)
-	, mTimeout(60)
+    : mPublished(false)
+    , mTimeout(60)
 {
-	mLocalService = NULL;
+        mLocalService = NULL;
         mMode = NONE;
 
         {
@@ -324,6 +324,16 @@ std::vector<std::string> ServiceDiscovery::getServiceNames()
 	return names;
 }
 
+bool ServiceDiscovery::isRunning() const
+{
+    if(mLocalService)
+    {
+        return true;
+    }
+
+    return false;
+}
+
 
 std::vector<ServiceDescription> ServiceDiscovery::findServices(const SearchPattern& pattern) const
 {
@@ -397,7 +407,7 @@ void ServiceDiscovery::_start(const ServiceConfiguration& conf)
 
     if( mLocalService != NULL ) 
     {
-        LOG_FATAL("Service Discovery instance tries to start a second local service");
+        LOG_FATAL("Service Discovery instance tries to start a second local service: %s", conf.getName().c_str());
         throw std::runtime_error("Service Discovery instance tries to start a second local service");
     }
 
