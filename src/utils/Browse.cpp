@@ -40,8 +40,7 @@ int main(int argc, char** argv)
         service.addedComponentConnect(sigc::ptr_fun(addService));
         
         service.listenOn(domains);
-        Client::getInstance();
-        
+
         printf("Press ENTER to Exit\n");
         char buffer[2];
         fgets(buffer,2,stdin);
