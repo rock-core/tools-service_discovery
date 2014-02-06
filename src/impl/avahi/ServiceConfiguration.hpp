@@ -24,8 +24,6 @@ class ServiceConfiguration : public ServiceDescription
 	friend class ServiceDiscovery;
 
 	private:
-		static const uint16_t defaultPort_;
-
 		uint16_t port_;
 		uint16_t ttl_;
 		bool publishMode_;
@@ -33,9 +31,16 @@ class ServiceConfiguration : public ServiceDescription
 	public:
 		ServiceConfiguration();	
 
-		ServiceConfiguration(const std::string& name, const std::string& type, uint16_t port);
+                /**
+                 * \param name Name of service
+                 * \param type Type of service such as _foo_type._tcp
+                 * \param port Communication port for avahi
+                 * \param ttlInMS Time-to-live for records
+                 * \param publish Flag to control the publishing mode, if service shall be published set to true
+                 */
+		ServiceConfiguration(const std::string& name, const std::string& type, uint16_t port = 12000, uint16_t ttlInMS = 0, bool publish = true);
 
-		ServiceConfiguration(const std::string& name, const std::string& type);
+		ServiceConfiguration(const ServiceDescription& description);
 
 		virtual ~ServiceConfiguration();
 

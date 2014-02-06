@@ -4,24 +4,13 @@
 namespace servicediscovery { 
 namespace avahi {
 
-const uint16_t ServiceConfiguration::defaultPort_ = 12000; 
-
-ServiceConfiguration::ServiceConfiguration(const std::string& name, const std::string& type) : ServiceDescription()
+ServiceConfiguration::ServiceConfiguration(const std::string& name, const std::string& type, uint16_t port, uint16_t ttlInMS, bool publish)
+    : ServiceDescription(name)
 {
-	this->setName(name);
-	this->setType(type);
-	this->setPort(defaultPort_);
-	this->setTTL(0);
-	this->setPublishMode(true);
-}
-
-ServiceConfiguration::ServiceConfiguration(const std::string& name, const std::string& type, uint16_t port) : ServiceDescription()
-{
-	this->setName(name);
 	this->setType(type);
 	this->setPort(port);
-	this->setTTL(0);
-	this->setPublishMode(true);
+	this->setTTL(ttlInMS);
+	this->setPublishMode(publish);
 }
 
 ServiceConfiguration::ServiceConfiguration() : ServiceDescription()
@@ -30,6 +19,14 @@ ServiceConfiguration::ServiceConfiguration() : ServiceDescription()
 	this->setPort(0);
 	this->setTTL(0);
 	this->setPublishMode(false);
+}
+
+ServiceConfiguration::ServiceConfiguration(const ServiceDescription& description)
+    : ServiceDescription(description)
+{
+	this->setPort(0);
+        this->setTTL(0);
+        this->setPublishMode(true);
 }
 
 ServiceConfiguration::~ServiceConfiguration()
