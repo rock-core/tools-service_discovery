@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include <semaphore.h>
+#include <boost/thread.hpp>
 #include <service_discovery/impl/avahi/Client.hpp>
 #include <service_discovery/impl/avahi/ServiceBrowser.hpp>
 #include <service_discovery/impl/avahi/ServiceEvent.hpp>
@@ -171,15 +171,13 @@ public:
         }
 
 	void addedComponentConnect(const sigc::slot<void, ServiceEvent>& slot) {
-		sem_wait(&added_component_sem);
+		boost::unique_lock<boost::mutex> lock(mAddedComponentMutex);
 		ServiceAddedSignal.connect(slot);
-		sem_post(&added_component_sem);
 	}
 
 	void removedComponentConnect(const sigc::slot<void, ServiceEvent>& slot) {
-		sem_wait(&removed_component_sem);
+		boost::unique_lock<boost::mutex> lock(mRemovedComponentMutex);
 		ServiceRemovedSignal.connect(slot);
-		sem_post(&removed_component_sem);
 	}
 
         /**
@@ -251,12 +249,12 @@ private:
 	sigc::signal<void, ServiceEvent> ServiceAddedSignal;
 	sigc::signal<void, ServiceEvent> ServiceRemovedSignal;
 
-	mutable sem_t added_component_sem;
-	mutable sem_t removed_component_sem;
-	mutable sem_t updated_component_sem;
+	mutable boost::mutex mAddedComponentMutex;
+	mutable boost::mutex mRemovedComponentMutex;
+	mutable boost::mutex mUpdatedComponentMutex;
 
 	List<ServiceDescription> mServices;
-	static sem_t services_sem;
+	static boost::mutex mServicesMutex;
 
         // Flag whether service is published or not
         bool mPublished;

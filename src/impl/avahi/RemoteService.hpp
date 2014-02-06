@@ -13,8 +13,6 @@ struct ResolveData;
 #include <sigc++/sigc++.h>
 #include <avahi-client/lookup.h>
 #include <iostream>
-#include <semaphore.h>
-
 #include <service_discovery/impl/avahi/Service.hpp>
 
 //typedef sigc::slot<void,
@@ -50,16 +48,6 @@ protected:
 	 */
 	AvahiServiceResolver *sr;
 	
-	/**
-	 * signal  
-	 */
-	//sigc::signal<void, RemoteService> *RemoteServiceSignal;
-
-	/**
-	 * semaphore for the RemoteServiceSignal object
-	 */
-	sem_t RMS_sem;
-	 
 public:
         //the data used in the service browser. pointer also used here so that the memory is freed along with the service resolver
         ResolveData* resolveData;
@@ -76,37 +64,9 @@ public:
                 std::string host_name,
                 AvahiAddress address,
                 AvahiServiceResolver *sr
-        //        sigc::signal<void, RemoteService> *rms
         );
 
         virtual ~RemoteService();
-
-        /*
-        bool serviceSignalConnect(const sigc::slot<void, RemoteService>& slot_) {
-            if (!RemoteServiceSignal) {
-                return false;
-            }
-            sem_wait(&RMS_sem);
-            RemoteServiceSignal->connect(slot_);
-            sem_post(&RMS_sem);		
-            return true;
-        }
-
-        //to be used only by the service browser. TODO: avoid public use
-        void emitSignal() {
-            if (RemoteServiceSignal) {
-                sem_wait(&RMS_sem);
-                RemoteServiceSignal->emit(*this);
-                sem_post(&RMS_sem);
-            }
-        }
-        //to be used only by the service browser. TODO: avoid public use
-        void freeSignal() {
-            if (RemoteServiceSignal) {
-                delete RemoteServiceSignal;
-            }
-        }
-        */
 
         AvahiAddress getAddress() const
         {

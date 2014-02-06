@@ -8,7 +8,7 @@ namespace servicediscovery {
 namespace avahi {
 
 std::vector<ServiceDiscovery*> ServiceDiscovery::msServiceDiscoveries;
-sem_t ServiceDiscovery::services_sem;
+boost::mutex ServiceDiscovery::mServicesMutex;
 
 ServiceDiscovery::ServiceDiscovery() 
 	: mPublished(false)
@@ -17,24 +17,10 @@ ServiceDiscovery::ServiceDiscovery()
 	mLocalService = NULL;
         mMode = NONE;
 
-	if (
-		sem_init(&services_sem,0,1) == -1
-			||
-		sem_init(&added_component_sem,0,1) == -1
-			||
-		sem_init(&removed_component_sem,0,1) == -1
-                        ||
-                sem_init(&updated_component_sem,0,1) == -1
-	) 
-	{
-		std::string message = "Semaphore initialization failed";
-		LOG_FATAL(message.c_str());
-		throw std::runtime_error(message);
-	}
-
-        sem_wait(&services_sem);
-        msServiceDiscoveries.push_back(this);
-        sem_post(&services_sem);
+        {
+            boost::unique_lock<boost::mutex> lock(mServicesMutex);
+            msServiceDiscoveries.push_back(this);
+        }
 
         Client* client = Client::getInstance();
         client->addObserver(this);
@@ -47,37 +33,39 @@ ServiceDiscovery::~ServiceDiscovery()
 
             _stop();
 
-            sem_wait(&services_sem);
-            std::vector<ServiceDiscovery*>::iterator it;
-            it = std::find(msServiceDiscoveries.begin(), msServiceDiscoveries.end(), this);
-            if(it != msServiceDiscoveries.end())
-                msServiceDiscoveries.erase(it);
-            sem_post(&services_sem);
+            {
+                boost::unique_lock<boost::mutex> lock(mServicesMutex);
+
+                std::vector<ServiceDiscovery*>::iterator it;
+                it = std::find(msServiceDiscoveries.begin(), msServiceDiscoveries.end(), this);
+                if(it != msServiceDiscoveries.end())
+                    msServiceDiscoveries.erase(it);
+            }
 }
 
 bool ServiceDiscovery::update(const std::string& name, const ServiceDescription& description)
 {
         // search all service discoveries in the same process for the service with the given name
         bool success = false;
-        sem_wait(&services_sem);
-        std::vector<ServiceDiscovery*>::iterator it;
-        for(it = msServiceDiscoveries.begin(); it != msServiceDiscoveries.end(); it++)
         {
-            try {
-                ServiceConfiguration conf = (*it)->getConfiguration();
-                if(conf.getName() == name)
-                {
-                    (*it)->update(description);
-                    success = true;
-                    break;
-                }
-            } catch(...)
+            boost::unique_lock<boost::mutex> lock(mServicesMutex);
+            std::vector<ServiceDiscovery*>::iterator it;
+            for(it = msServiceDiscoveries.begin(); it != msServiceDiscoveries.end(); it++)
             {
-                // ignore errors
+                try {
+                    ServiceConfiguration conf = (*it)->getConfiguration();
+                    if(conf.getName() == name)
+                    {
+                        (*it)->update(description);
+                        success = true;
+                        break;
+                    }
+                } catch(...)
+                {
+                    // ignore errors
+                }
             }
         }
-        sem_post(&services_sem);
-
         return success;
 }
 
@@ -85,24 +73,26 @@ ServiceDescription ServiceDiscovery::getServiceDescription(const std::string& na
 {
         bool found = false;
         ServiceDescription sd("");
-        sem_wait(&services_sem);
-        std::vector<ServiceDiscovery*>::iterator it;
-        for(it = msServiceDiscoveries.begin(); it != msServiceDiscoveries.end(); it++)
         {
-            try {
-                ServiceConfiguration conf = (*it)->getConfiguration();
-                if(conf.getName() == name)
-                {
-                    sd = conf;
-                    found = true;
-                    break;
-                }
-            } catch(...)
+            boost::unique_lock<boost::mutex> lock(mServicesMutex);
+
+            std::vector<ServiceDiscovery*>::iterator it;
+            for(it = msServiceDiscoveries.begin(); it != msServiceDiscoveries.end(); it++)
             {
-                // ignore errors
+                try {
+                    ServiceConfiguration conf = (*it)->getConfiguration();
+                    if(conf.getName() == name)
+                    {
+                        sd = conf;
+                        found = true;
+                        break;
+                    }
+                } catch(...)
+                {
+                    // ignore errors
+                }
             }
         }
-        sem_post(&services_sem);
 
         if(!found)
         {
@@ -117,24 +107,25 @@ ServiceDescription ServiceDiscovery::getServiceDescription(const std::string& na
 void ServiceDiscovery::registerCallbacks(const std::string& serviceName, const sigc::slot<void, ServiceEvent>& serviceAdded, const sigc::slot<void, ServiceEvent>& serviceRemoved)
 {
         bool found = false;
-        sem_wait(&services_sem);
-        std::vector<ServiceDiscovery*>::iterator it;
-        for(it = msServiceDiscoveries.begin(); it != msServiceDiscoveries.end(); it++)
         {
-            ServiceDiscovery* serviceDiscovery = *it;
-            try {
-                if(serviceDiscovery->getConfiguration().getName() == serviceName)
-                {
-                    serviceDiscovery->addedComponentConnect(serviceAdded);
-                    serviceDiscovery->removedComponentConnect(serviceRemoved);
-                    found = true;
-                }
-            } catch(...)
+            boost::unique_lock<boost::mutex> lock(mServicesMutex);
+            std::vector<ServiceDiscovery*>::iterator it;
+            for(it = msServiceDiscoveries.begin(); it != msServiceDiscoveries.end(); it++)
             {
-                // ignore errors
+                ServiceDiscovery* serviceDiscovery = *it;
+                try {
+                    if(serviceDiscovery->getConfiguration().getName() == serviceName)
+                    {
+                        serviceDiscovery->addedComponentConnect(serviceAdded);
+                        serviceDiscovery->removedComponentConnect(serviceRemoved);
+                        found = true;
+                    }
+                } catch(...)
+                {
+                    // ignore errors
+                }
             }
         }
-        sem_post(&services_sem);
 
         if(!found)
         {
@@ -147,7 +138,8 @@ void ServiceDiscovery::registerCallbacks(const std::string& serviceName, const s
 std::map<std::string, ServiceDescription> ServiceDiscovery::getVisibleServices(const SearchPattern& pattern)
 {
         std::map<std::string, ServiceDescription> descriptions;
-        sem_wait(&services_sem);
+        boost::unique_lock<boost::mutex> lock(mServicesMutex);
+
         std::vector<ServiceDiscovery*>::iterator it = msServiceDiscoveries.begin();
         for(; it != msServiceDiscoveries.end(); ++it)
         {
@@ -164,7 +156,6 @@ std::map<std::string, ServiceDescription> ServiceDiscovery::getVisibleServices(c
                 }
             }
         }
-        sem_post(&services_sem);
 
         return descriptions;
 }
@@ -173,20 +164,20 @@ std::map<std::string, ServiceDescription> ServiceDiscovery::getVisibleServices(c
 std::vector<ServiceDescription> ServiceDiscovery::getUpdateableServices()
 {
 	std::vector<ServiceDescription> serviceList;
-	sem_wait(&services_sem);
+	boost::unique_lock<boost::mutex> lock(mServicesMutex);
+
 	std::vector<ServiceDiscovery*>::iterator it;
 	for(it = msServiceDiscoveries.begin(); it != msServiceDiscoveries.end(); it++)
 	{
-            try {
-		ServiceConfiguration conf = (*it)->getConfiguration();
-		serviceList.push_back(conf);
+		try {
+			ServiceConfiguration conf = (*it)->getConfiguration();
+			serviceList.push_back(conf);
 
-            } catch(...)
-            {
-                // ignore errors
-            }
+	} catch(...)
+	{
+		// ignore errors
 	}
-	sem_post(&services_sem);
+	}
 	
 	return serviceList;
 }
@@ -229,7 +220,7 @@ void ServiceDiscovery::stop()
 //TODO: ServiceEvent should be RemoteService and ServiceDescription
 void ServiceDiscovery::addedService(const RemoteService& service)
 {
-	ServiceEvent event(service);
+        ServiceEvent event(service);
         ServiceConfiguration remoteConfig = service.getConfiguration();
 
         if(mLocalService && mMode == PUBLISH)
@@ -243,15 +234,17 @@ void ServiceDiscovery::addedService(const RemoteService& service)
             }
         }
 
-	sem_wait(&services_sem);
-        ServiceDescription configuration = service.getConfiguration();
-        LOG_INFO("+ %s type: %s", configuration.getName().c_str(), configuration.getType().c_str());
-	mServices.push_back( configuration );
-	sem_post(&services_sem);
+        {
+            boost::unique_lock<boost::mutex> lock(mServicesMutex);
+            ServiceDescription configuration = service.getConfiguration();
+            LOG_INFO("+ %s type: %s", configuration.getName().c_str(), configuration.getType().c_str());
+            mServices.push_back( configuration );
+        }
 
-	sem_wait(&added_component_sem);
-	ServiceAddedSignal.emit( event );
-	sem_post(&added_component_sem);
+        {
+            boost::unique_lock<boost::mutex> lock(mAddedComponentMutex);
+            ServiceAddedSignal.emit( event );
+        }
 }
 
 std::vector<ServiceDescription> ServiceDiscovery::_findServices(const SearchPattern& pattern) const
@@ -276,7 +269,7 @@ void ServiceDiscovery::updatedService(const RemoteService& service)
 {
     ServiceDescription desc = service.getConfiguration();
 
-    sem_wait(&services_sem);
+    boost::unique_lock<boost::mutex> lock(mServicesMutex);
 
     List<ServiceDescription>::iterator it;
 
@@ -294,8 +287,6 @@ void ServiceDiscovery::updatedService(const RemoteService& service)
            LOG_INFO("Updated service: %s", service.getName().c_str());
        }
     }
-
-    sem_post(&services_sem);
 }
 
 
@@ -304,33 +295,32 @@ void ServiceDiscovery::removedService(const RemoteService& service)
 	ServiceEvent event(service);
 	ServiceDescription serviceDescription = event.getServiceConfiguration(); 
 
-	sem_wait(&services_sem);
+	boost::unique_lock<boost::mutex> lock(mServicesMutex);
 	List<ServiceDescription>::iterator it = mServices.find(serviceDescription);
 
 	if (it != mServices.end())	
 	{
-	        sem_wait(&removed_component_sem);
-		ServiceDescription configuration = *it;
-		LOG_INFO("- %s type: %s", configuration.getName().c_str(), configuration.getType().c_str());
-		ServiceRemovedSignal.emit( event );
-		sem_post(&removed_component_sem);
+		{
+			boost::unique_lock<boost::mutex> removalLock(mRemovedComponentMutex);
+			ServiceDescription configuration = *it;
+			LOG_INFO("- %s type: %s", configuration.getName().c_str(), configuration.getType().c_str());
+			ServiceRemovedSignal.emit( event );
+		}
 
 		mServices.erase(it);
 	}
-
-	sem_post(&services_sem);
 }
 
 std::vector<std::string> ServiceDiscovery::getServiceNames()
 {
 	std::vector<std::string> names;
 	List<ServiceDescription>::iterator it;
-	sem_wait(&services_sem);
+	boost::unique_lock<boost::mutex> lock(mServicesMutex);
+
 	for (it = mServices.begin() ; it != mServices.end() ; it++) 
-        {
+	{
 		names.push_back(it->getName());
 	}
-	sem_post(&services_sem);
 	return names;
 }
 
@@ -338,9 +328,8 @@ std::vector<std::string> ServiceDiscovery::getServiceNames()
 std::vector<ServiceDescription> ServiceDiscovery::findServices(const SearchPattern& pattern) const
 {
 	std::vector<ServiceDescription> res;
-	sem_wait(&services_sem);
-        res = _findServices(pattern);
-	sem_post(&services_sem);
+	boost::unique_lock<boost::mutex> lock(mServicesMutex);
+	res = _findServices(pattern);
 	return res;
 }
 
@@ -348,7 +337,8 @@ std::vector<ServiceDescription> ServiceDiscovery::findServices(const ServicePatt
 {
     std::vector<ServiceDescription> result;
     List<ServiceDescription>::const_iterator it;
-    sem_wait(&services_sem);
+
+    boost::unique_lock<boost::mutex> lock(mServicesMutex);
 
     for (it = mServices.begin(); it != mServices.end(); it++) 
     {
@@ -364,7 +354,6 @@ std::vector<ServiceDescription> ServiceDiscovery::findServices(const ServicePatt
         }
     }
 
-    sem_post(&services_sem);
     return result;
 }
 
@@ -469,9 +458,10 @@ void ServiceDiscovery::_listenOn(const std::vector<std::string>& types)
 
 void ServiceDiscovery::_stop()
 {
-	sem_wait(&services_sem);
-	mServices.clear();
-	sem_post(&services_sem);
+        {
+                boost::unique_lock<boost::mutex> lock(mServicesMutex);
+                mServices.clear();
+        }
         
         // Delete all mBrowsers
         std::map<std::string, ServiceBrowser*>::iterator it;
@@ -483,14 +473,14 @@ void ServiceDiscovery::_stop()
                     it->second = NULL;
                 }
 
-	}
+        }
         mBrowsers.clear();
 
-	if (mLocalService)
+        if (mLocalService)
         {
-		delete mLocalService;
-		mLocalService = NULL;
-	}
+                delete mLocalService;
+                mLocalService = NULL;
+        }
 }
 
 } // end namespace avahi

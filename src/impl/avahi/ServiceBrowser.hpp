@@ -13,7 +13,7 @@ class ServiceBrowser;
 #include <map>
 #include <list>
 #include <string>
-#include <semaphore.h>
+#include <boost/thread.hpp>
 #include <sigc++/sigc++.h>
 #include <avahi-client/client.h>
 #include <service_discovery/impl/avahi/RemoteService.hpp>
@@ -62,7 +62,7 @@ private:
 
 	List<RemoteService> services;
 
-	sem_t services_sem;
+	boost::mutex mServicesMutex;
 
 	const char* getInType() {
 		return type.c_str();
@@ -83,14 +83,12 @@ private:
 	/** signal for removal of a service */
 	sigc::signal<void, RemoteService> ServiceRemoved;
 
-        /** signal for updating a service */
-        sigc::signal<void, RemoteService> ServiceUpdated;
+	/** signal for updating a service */
+	sigc::signal<void, RemoteService> ServiceUpdated;
 
-	sem_t service_added_sem;
-
-	sem_t service_removed_sem;
-
-        sem_t service_updated_sem;
+	boost::mutex mServiceAddedMutex;
+	boost::mutex mServiceRemovedMutex;
+	boost::mutex mServiceUpdateMutex;
 
 public:
 
@@ -143,72 +141,65 @@ public:
 
 
 	void serviceAddedConnect(const sigc::slot<void, RemoteService>& slot_) {
-		sem_wait(&service_added_sem);
+		boost::unique_lock<boost::mutex> lock(mServiceAddedMutex);
 		ServiceAdded.connect(slot_);
-		sem_post(&service_added_sem);
 	}
 
 	void serviceAddedEmit(RemoteService rms) {
-		sem_wait(&service_added_sem);
+		boost::unique_lock<boost::mutex> lock(mServiceAddedMutex);
 		ServiceAdded.emit(rms);
-		sem_post(&service_added_sem);
 	}
 
 
 	void serviceRemovedConnect(const sigc::slot<void, RemoteService>& slot_) {
-		sem_wait(&service_removed_sem);
+		boost::unique_lock<boost::mutex> lock(mServiceRemovedMutex);
 		ServiceRemoved.connect(slot_);
-		sem_post(&service_removed_sem);
 	}
 
 	void serviceRemovedEmit(RemoteService rms) {
-		sem_wait(&service_removed_sem);
+		boost::unique_lock<boost::mutex> lock(mServiceRemovedMutex);
 		ServiceRemoved.emit(rms);
-		sem_post(&service_removed_sem);
 	}
 
         void serviceUpdatedConnect(const sigc::slot<void, RemoteService>& slot_) {
-                sem_wait(&service_updated_sem);
+                boost::unique_lock<boost::mutex> lock(mServiceUpdateMutex);
                 ServiceUpdated.connect(slot_);
-                sem_post(&service_updated_sem);
         }
 
         void serviceUpdatedEmit(RemoteService rms) {
-                sem_wait(&service_updated_sem);
+                boost::unique_lock<boost::mutex> lock(mServiceUpdateMutex);
                 ServiceUpdated.emit(rms);
-                sem_post(&service_updated_sem);
         }
 
     List<RemoteService> getServices()
     {
-    	sem_wait(&services_sem);
-    	List<RemoteService> tlist = services;
-    	sem_post(&services_sem);
+        boost::unique_lock<boost::mutex> lock(mServicesMutex);
+        List<RemoteService> tlist = services;
         return tlist;
     }
     
     //to be used only by the static callbacks. TODO: how to avoid this to be public
     List<RemoteService> *getInternalServices()
     {
-    	return &services;
+        return &services;
     }
     //to be used only by the static callbacks. TODO: how to avoid this to be public
-    sem_t* getServicesSem()
+    boost::mutex& getServicesMutex()
     {
-    	return &services_sem;
+        return mServicesMutex;
     }
 
     
 
     AvahiServiceBrowser* getAvahiBrowser()
-	{
-    	return browser;
-	}
+    {
+        return browser;
+    }
 
     Client* getClient()
-	{
-    	return client;
-	}
+    {
+        return client;
+    }
 
 
     static void browseCallback(AvahiServiceBrowser *sb, AvahiIfIndex interface, AvahiProtocol protocol,

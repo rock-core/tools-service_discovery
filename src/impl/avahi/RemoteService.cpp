@@ -7,46 +7,38 @@
 namespace servicediscovery { 
 namespace avahi {
 
-RemoteService::RemoteService(
-			ServiceBrowser *browser,
-			AvahiIfIndex interf,
-			AvahiProtocol prot,
-			std::string name,
-			std::string type,
-			std::string domain,
-			std::list<std::string> list,
-			uint16_t port,
-			std::string host_name,
-			AvahiAddress address,
-			AvahiServiceResolver *sr
-	) : Service(browser->getClient(), interf, prot, name, type, domain, port, list) {
-	this->host_name = host_name;
-	this->address = address;
-	this->sr = sr;
-
-	if (sem_init(&RMS_sem,0,1) == -1) {
-		std::string message = "Semaphore initialization failed";
-		LOG_FATAL(message.c_str());
-		throw std::runtime_error("Semphore initialization failed");
-	}
+RemoteService::RemoteService( ServiceBrowser *browser
+        , AvahiIfIndex interf
+        , AvahiProtocol prot
+        , std::string name
+        , std::string type
+        , std::string domain
+        , std::list<std::string> list
+        , uint16_t port
+        , std::string host_name
+        , AvahiAddress address
+        , AvahiServiceResolver *sr )
+    : Service(browser->getClient(), interf, prot, name, type, domain, port, list)
+{
+    this->host_name = host_name;
+    this->address = address;
+    this->sr = sr;
 }
 
-RemoteService::~RemoteService() {
-	if (sem_destroy(&RMS_sem) == -1) {
-		LOG_WARN("Semaphore destruction failed");
-	}
-}
+RemoteService::~RemoteService()
+{}
 
 
-bool RemoteService::operator ==(RemoteService serv) {
-	bool upres = (Service) (*this) == (Service) serv;
-	if (!upres)
-		return false;
-	if (host_name.compare(serv.getHostName()) != 0)
-		return false;
-	if (getAddressString().compare(serv.getAddressString()) != 0)
-		return false;
-	return true;
+bool RemoteService::operator ==(RemoteService serv)
+{
+    bool upres = (Service) (*this) == (Service) serv;
+    if (!upres)
+        return false;
+    if (host_name.compare(serv.getHostName()) != 0)
+        return false;
+    if (getAddressString().compare(serv.getAddressString()) != 0)
+        return false;
+    return true;
 }
 
 void RemoteService::freeServiceResolver()
