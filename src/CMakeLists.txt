@@ -23,6 +23,7 @@ set( HEADERS
     impl/avahi/ServiceBrowser.hpp
     impl/avahi/ServiceConfiguration.hpp
     impl/avahi/ServiceEvent.hpp
+    ServiceDiscovery.hpp
     servicediscovery/backward/servicediscovery/service_discovery.h
 )
 
