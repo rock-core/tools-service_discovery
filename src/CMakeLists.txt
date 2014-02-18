@@ -38,7 +38,7 @@ rock_library(${PROJECT_NAME}
                         dbus-1
                     DEPS_PLAIN Threads
 )
-target_link_libraries(${PROJECT_NAME} ${Boost_REGEX_LIBRARY} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(${PROJECT_NAME} ${Boost_REGEX_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${CMAKE_THREAD_LIBS_INIT})
 
 set(UTIL_BROWSE ${PROJECT_NAME}-browse)
 rock_executable(${UTIL_BROWSE} utils/Browse.cpp

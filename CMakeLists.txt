@@ -15,7 +15,7 @@ message(${THIS_PKG_CFLAGS})
 set(THIS_PKG_CFLAGS "-I${THIS_PKG_CFLAGS}")
 message(${THIS_PKG_CFLAGS})
 
-find_package(Boost REQUIRED COMPONENTS regex)
+find_package(Boost REQUIRED COMPONENTS regex system)
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 
