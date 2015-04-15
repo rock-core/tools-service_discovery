@@ -20,9 +20,4 @@ include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 
 rock_init(service_discovery 1.0)
-rock_add_source_dir(src ${PROJECT_NAME})
-
-## Process CMakeLists.txt in the following subdirectory
-add_subdirectory(test)
-add_subdirectory(bindings/ruby)
-
+rock_standard_layout()
