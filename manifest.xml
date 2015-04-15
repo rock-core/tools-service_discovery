@@ -2,6 +2,7 @@
   <description brief="Service discovery based on AVAHI">
   In order to find distributed components and offered services, a distributed services discovery is required. AVAHI provides a basic library, which will be used in this package to develop a high level API.
   </description>
+  <maintainer>Thomas Roehr/thomas.roehr@dfki.de</maintainer>
   <author>Darko Makreshanski/darko.makreshanski@dfki.de, Thomas Roehr/thomas.roehr@dfki.de</author>
   <license></license>
   <url>http://</url>
