@@ -42,6 +42,8 @@ public:
         EventType type;
     };
 
+    virtual ~ClientObserver() {}
+
     /**
      * Update the observer
      */

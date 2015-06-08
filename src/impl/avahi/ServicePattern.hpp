@@ -27,6 +27,8 @@ struct SearchPattern
             , typePattern(_type)
         {}
 
+        virtual ~SearchPattern() {}
+
         boost::regex namePattern;
         boost::regex labelPattern;
         boost::regex txtPattern;
@@ -65,6 +67,7 @@ namespace pattern {
  */
 struct ServicePattern 
 {
+  virtual ~ServicePattern() {}
   /**
    * \brief General interface for filtering ServiceDescription matching a specific
    * ServicePattern.
@@ -97,7 +100,7 @@ struct PropertyPattern : public ServicePattern
   PropertyPattern(const std::string& label = "*", const std::string& expression = ".*")
    : label(label), expression(expression, boost::regex::extended) {}
 
-  ~PropertyPattern() {}
+  virtual ~PropertyPattern() {}
 
   bool matchDescription(const ServiceDescription& service) const;
 
@@ -126,7 +129,8 @@ struct PositionPattern : public ServicePattern
 {
   PositionPattern(int x, int y, int z, double distance) 
     : x(x), y(y), z(z), distance(distance) {}
-  ~PositionPattern() {}
+
+  virtual ~PositionPattern() {}
 
   bool matchDescription(const ServiceDescription& service) const;
 
@@ -146,7 +150,8 @@ struct PositionPattern : public ServicePattern
 struct FlagPattern : public ServicePattern 
 {
   FlagPattern(int flags) : flags(flags) {}
-  ~FlagPattern() {}
+
+  virtual ~FlagPattern() {}
 
   bool matchDescription(const ServiceDescription& service) const;
 
@@ -174,7 +179,8 @@ struct FlagPattern : public ServicePattern
 struct MultiPattern : public ServicePattern 
 {
   MultiPattern() {}
-  ~MultiPattern() {}
+
+  virtual ~MultiPattern() {}
 
   bool matchDescription(const ServiceDescription& service) const;
 
@@ -195,7 +201,8 @@ struct MultiPattern : public ServicePattern
 struct AuthorityPattern : public ServicePattern 
 {
   AuthorityPattern(int authority, bool atleast = true) : authority(authority), atleast(atleast) {}  
-  ~AuthorityPattern() {}
+
+  virtual ~AuthorityPattern() {}
 
   bool matchDescription(const ServiceDescription& service) const;
 
