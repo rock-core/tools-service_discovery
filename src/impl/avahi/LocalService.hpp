@@ -25,10 +25,6 @@ private:
 	AvahiEntryGroup *mGroup;
 	AvahiPublishFlags mFlags;
 
-#ifdef __CUSTOM_TTL__
-	uint32_t mTTL;
-#endif
-
 	bool mPublished;
 	
 	static void entry_group_callback(AvahiEntryGroup *g, AvahiEntryGroupState state, void *userdata);
