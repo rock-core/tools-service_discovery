@@ -31,7 +31,6 @@ public:
 /**
  * a special case for list of pointers where finding elements is dependent on the pointed object and not the pointer
  */
-template <>
 template <class T>
 class List <T*> : public std::list<T*> {
 public:
