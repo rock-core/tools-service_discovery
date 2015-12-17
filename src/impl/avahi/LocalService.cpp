@@ -21,7 +21,6 @@ LocalService::LocalService(Client *client,
 	: Service(client, interf, prot, name, type, domain, port, list)
 	, mGroup(0)
 	, mFlags((AvahiPublishFlags) 0) //(flags | AVAHI_PUBLISH_ALLOW_MULTIPLE))
-	, mTTL(ttl)
 	, mPublished(false)
 {
 	if(publish) {
@@ -40,7 +39,6 @@ LocalService::LocalService(
 	: Service(client, AVAHI_IF_UNSPEC, AVAHI_PROTO_UNSPEC, name, type, "", port, list)
 	, mGroup(0)
 	, mFlags( (AvahiPublishFlags) 0 ) //(AVAHI_PUBLISH_ALLOW_MULTIPLE | AVAHI_PUBLISH_USE_MULTICAST) )
-	, mTTL(ttl)
 {
 	if(publish) {
 		this->publish();
@@ -63,11 +61,7 @@ int LocalService::publish()
 	// The entry_group_callback is called whenever the state of the entry group changes and called for the first
 	// time with avahi_entry_group_new
 	//
-#ifdef __CUSTOM_TTL__
-	if (!(mGroup = avahi_entry_group_new_custom_ttl(getClient()->getAvahiClient(), entry_group_callback, this, mTTL))) {
-#else
 	if (!(mGroup = avahi_entry_group_new(getClient()->getAvahiClient(), entry_group_callback, this))) {
-#endif		
 		LOG_FATAL("Publish - Failed to create entry group: %s", avahi_strerror(avahi_client_errno(getClient()->getAvahiClient())));
 		return -3;
 	}

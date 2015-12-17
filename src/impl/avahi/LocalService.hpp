@@ -24,8 +24,6 @@ private:
 	 */
 	AvahiEntryGroup *mGroup;
 	AvahiPublishFlags mFlags;
-	
-	uint32_t mTTL;
 
 	bool mPublished;
 	
