@@ -21,7 +21,9 @@ LocalService::LocalService(Client *client,
 	: Service(client, interf, prot, name, type, domain, port, list)
 	, mGroup(0)
 	, mFlags((AvahiPublishFlags) 0) //(flags | AVAHI_PUBLISH_ALLOW_MULTIPLE))
+#ifdef __CUSTOM_TTL__
 	, mTTL(ttl)
+#endif
 	, mPublished(false)
 {
 	if(publish) {
@@ -40,7 +42,9 @@ LocalService::LocalService(
 	: Service(client, AVAHI_IF_UNSPEC, AVAHI_PROTO_UNSPEC, name, type, "", port, list)
 	, mGroup(0)
 	, mFlags( (AvahiPublishFlags) 0 ) //(AVAHI_PUBLISH_ALLOW_MULTIPLE | AVAHI_PUBLISH_USE_MULTICAST) )
+#ifdef __CUSTOM_TTL__
 	, mTTL(ttl)
+#endif
 {
 	if(publish) {
 		this->publish();

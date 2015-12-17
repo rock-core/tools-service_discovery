@@ -24,8 +24,10 @@ private:
 	 */
 	AvahiEntryGroup *mGroup;
 	AvahiPublishFlags mFlags;
-	
+
+#ifdef __CUSTOM_TTL__
 	uint32_t mTTL;
+#endif
 
 	bool mPublished;
 	
