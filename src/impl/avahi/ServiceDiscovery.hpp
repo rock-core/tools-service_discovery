@@ -286,10 +286,6 @@ private:
         // Global list of service discovery instances
         static std::vector<ServiceDiscovery*> msServiceDiscoveries;
 
-        // Time to wait for a local service to be seen
-	// currently set to 60 s
-	int mTimeout;
-
 };
 
 } // end namespace avahi

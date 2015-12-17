@@ -12,7 +12,6 @@ boost::mutex ServiceDiscovery::mServicesMutex;
 
 ServiceDiscovery::ServiceDiscovery() 
     : mPublished(false)
-    , mTimeout(60)
 {
         mLocalService = NULL;
         mMode = NONE;
