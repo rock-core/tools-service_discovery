@@ -7,4 +7,5 @@ Name: @PROJECT_NAME@
 Description: @PROJECT_DESCRIPTION@
 Version: @PROJECT_VERSION@
 Libs: -L${libdir} -l@PROJECT_NAME@ 
+Requires: sigc++-2.0
 Cflags: -I${includedir} -I${includedir}/service_discovery/backward @THIS_PKG_CFLAGS@
