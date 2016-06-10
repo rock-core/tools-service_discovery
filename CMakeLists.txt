@@ -8,11 +8,10 @@ set(PROJECT_DESCRIPTION "Service discovery based on AVAHI")
 
 include(FindPkgConfig)
 pkg_check_modules(SIGC++ REQUIRED "sigc++-2.0")
+
 ## Using the quotation marks to get the ';' as field separator for string lists 
-list(APPEND MY_CFLAGS ${SIGC++_INCLUDE_DIRS})
-string(REGEX REPLACE ";" " -I" THIS_PKG_CFLAGS "${MY_CFLAGS}")
-message(${THIS_PKG_CFLAGS})
-set(THIS_PKG_CFLAGS "-I${THIS_PKG_CFLAGS}")
+list(APPEND MY_CFLAGS ${SIGC++_CFLAGS})
+string(REGEX REPLACE ";" " " THIS_PKG_CFLAGS "${MY_CFLAGS}")
 message(${THIS_PKG_CFLAGS})
 
 find_package(Boost REQUIRED COMPONENTS regex system)
