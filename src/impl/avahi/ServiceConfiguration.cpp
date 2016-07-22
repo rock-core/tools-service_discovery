@@ -1,5 +1,5 @@
 #include "ServiceConfiguration.hpp"
-#include <base/Logging.hpp>
+#include <base-logging/Logging.hpp>
 
 namespace servicediscovery { 
 namespace avahi {
