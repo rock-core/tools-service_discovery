@@ -1,5 +1,5 @@
 #include "Client.hpp"
-#include <base/Logging.hpp>
+#include <base-logging/Logging.hpp>
 #include <stdexcept>
 #include <algorithm>
 #include <dbus/dbus.h>

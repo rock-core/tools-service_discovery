@@ -2,7 +2,7 @@
 #include "ServiceBrowser.hpp"
 #include <iostream>
 #include <stdexcept>
-#include <base/Logging.hpp>
+#include <base-logging/Logging.hpp>
 
 namespace servicediscovery { 
 namespace avahi {

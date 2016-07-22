@@ -6,7 +6,7 @@
 #include <vector>
 #include <stdexcept>
 #include <boost/algorithm/string.hpp>
-#include <base/Logging.hpp>
+#include <base-logging/Logging.hpp>
 #include <service_discovery/ServiceDiscovery.hpp>
 
 using namespace Rice;

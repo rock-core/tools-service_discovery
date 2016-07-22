@@ -19,7 +19,7 @@
 
 #include <avahi-common/error.h>
 #include <avahi-common/thread-watch.h>
-#include <base/Singleton.hpp>
+#include <base-logging/Singleton.hpp>
 
 namespace servicediscovery {
 namespace avahi {
