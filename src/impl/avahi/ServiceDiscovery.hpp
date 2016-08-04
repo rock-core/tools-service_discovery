@@ -162,19 +162,13 @@ public:
 
 
         /**
-         * Get the current configuration of this service discovery if in PUBLISH mode
-         * \throws if the service discovery is in LISTEN_ONLY mode, where no service configuration 
+         * Get the current configuration of this service discovery if in PUBLISH mode and when
+         * the service is running
+         * \throws if the service discovery is in LISTEN_ONLY mode, where no service configuration
          * exists
          * \return ServiceConfiguration of a published service
          */
-        ServiceConfiguration getConfiguration() const {
-            if(mMode == LISTEN_ONLY)
-            {
-                throw std::runtime_error("Get configuration cannot be called for a service started in listen only mode");
-            } else { 
-                return mLocalService->getConfiguration(); 
-            }
-        }
+        ServiceConfiguration getConfiguration() const;
 
 	void addedComponentConnect(const sigc::slot<void, ServiceEvent>& slot) {
 		boost::unique_lock<boost::mutex> lock(mAddedComponentMutex);
@@ -235,9 +229,12 @@ private:
 
         /**
         * Stop the listening and publishing activities of the service discovery object
-        * -- without acquiring the avahi poll loop lock
+        * \param lock_client Set to true if the avahi client lock should be acquired
+        * \param wait_until_unpublished Set to true if it needs to be waited for
+        * the local service to be unpublished (this will not be necessary if the
+        * avahi daemon restarts)
         */
-	void _stop();
+	void _stop(bool lock_client, bool wait_until_unpublished = true);
 
         /**
          * Listen for services -- without acquiring the avahi poll loop lock
@@ -251,6 +248,11 @@ private:
          * Perform necessary steps to reestablish browser, resolver etc. after a avahi-daemon restart
          */
 	void reconnect();
+
+        /**
+         * Cleanup all create avahi browser
+         */
+        void cleanupBrowsers();
 
 	sigc::signal<void, ServiceEvent> ServiceAddedSignal;
 	sigc::signal<void, ServiceEvent> ServiceRemovedSignal;

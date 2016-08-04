@@ -18,6 +18,9 @@ namespace avahi {
  * unless you take care of taking the client lock. 
  */
 class LocalService: public Service {
+
+    friend class ServiceDiscovery;
+
 private:
 	/**
 	 * in this framework every service to be published is connected to one entry group
@@ -26,7 +29,7 @@ private:
 	AvahiPublishFlags mFlags;
 
 	bool mPublished;
-	
+
 	static void entry_group_callback(AvahiEntryGroup *g, AvahiEntryGroupState state, void *userdata);
 
 	/**
@@ -96,7 +99,7 @@ public:
 	 *			-5	failed to commit the entry group
 	 */
 	int publish();
-	
+
 	/**
 	 * opposite of publish. Unpublish a service.
 	 */
@@ -107,7 +110,7 @@ public:
          * \return True when published, false when not
          */
         bool published();
-	
+
 	/**
 	 * update the service additional information
 	 */

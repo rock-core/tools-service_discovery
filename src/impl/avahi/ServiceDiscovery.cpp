@@ -10,7 +10,7 @@ namespace avahi {
 std::vector<ServiceDiscovery*> ServiceDiscovery::msServiceDiscoveries;
 boost::mutex ServiceDiscovery::mServicesMutex;
 
-ServiceDiscovery::ServiceDiscovery() 
+ServiceDiscovery::ServiceDiscovery()
     : mPublished(false)
 {
         mLocalService = NULL;
@@ -27,19 +27,19 @@ ServiceDiscovery::ServiceDiscovery()
 
 ServiceDiscovery::~ServiceDiscovery()
 {
-            Client* client = Client::getInstance();
-            client->removeObserver(this);
+        Client* client = Client::getInstance();
+        client->removeObserver(this);
 
-            _stop();
+        stop();
 
-            {
-                boost::unique_lock<boost::mutex> lock(mServicesMutex);
+        {
+            boost::unique_lock<boost::mutex> lock(mServicesMutex);
 
-                std::vector<ServiceDiscovery*>::iterator it;
-                it = std::find(msServiceDiscoveries.begin(), msServiceDiscoveries.end(), this);
-                if(it != msServiceDiscoveries.end())
-                    msServiceDiscoveries.erase(it);
-            }
+            std::vector<ServiceDiscovery*>::iterator it;
+            it = std::find(msServiceDiscoveries.begin(), msServiceDiscoveries.end(), this);
+            if(it != msServiceDiscoveries.end())
+                msServiceDiscoveries.erase(it);
+        }
 }
 
 bool ServiceDiscovery::update(const std::string& name, const ServiceDescription& description)
@@ -210,12 +210,6 @@ void ServiceDiscovery::update(const ServiceDescription& desc)
     }
 }
 
-void ServiceDiscovery::stop()
-{
-    UniqueClientLock lock;
-    _stop();
-}
-
 //TODO: ServiceEvent should be RemoteService and ServiceDescription
 void ServiceDiscovery::addedService(const RemoteService& service)
 {
@@ -333,6 +327,15 @@ bool ServiceDiscovery::isRunning() const
     return false;
 }
 
+ServiceConfiguration ServiceDiscovery::getConfiguration() const
+{
+    if(mMode == LISTEN_ONLY)
+    {
+        throw std::runtime_error("service_discovery::avahi::ServiceDisccovery: Get configuration cannot be called for a service started in listen only mode");
+    } else {
+        return mLocalServiceConfiguration;
+    }
+}
 
 std::vector<ServiceDescription> ServiceDiscovery::findServices(const SearchPattern& pattern) const
 {
@@ -372,7 +375,7 @@ void ServiceDiscovery::update(const ClientObserver::Event& event)
     {
         case ClientObserver::DISCONNECTED:
             LOG_DEBUG("Client disconnected");
-            _stop();
+            _stop(false /*lock_client*/, false);
             break;
         case ClientObserver::RECOVERED:
             LOG_DEBUG("Client recovered");
@@ -465,31 +468,62 @@ void ServiceDiscovery::_listenOn(const std::vector<std::string>& types)
     }
 }
 
-void ServiceDiscovery::_stop()
+void ServiceDiscovery::stop()
 {
-        {
-                boost::unique_lock<boost::mutex> lock(mServicesMutex);
-                mServices.clear();
-        }
-        
-        // Delete all mBrowsers
-        std::map<std::string, ServiceBrowser*>::iterator it;
-        for(it = mBrowsers.begin(); it != mBrowsers.end(); ++it)
-        {
-                if(it->second)
-                {
-                    delete it->second;
-                    it->second = NULL;
-                }
+    _stop(true, true);
+}
 
-        }
-        mBrowsers.clear();
-
-        if (mLocalService)
+void ServiceDiscovery::_stop(bool lock_client, bool wait_for_unpublished)
+{
+    if (mLocalService)
+    {
         {
-                delete mLocalService;
-                mLocalService = NULL;
+            if(lock_client)
+            {
+                mLocalService->unpublish();
+            } else {
+                mLocalService->_unpublish();
+            }
         }
+
+        while(wait_for_unpublished && mLocalService->published())
+        {
+            // waiting for local service to be unpublished
+            usleep(100);
+        }
+        delete mLocalService;
+        mLocalService = NULL;
+    }
+
+    {
+        if(lock_client)
+        {
+            UniqueClientLock lock;
+            cleanupBrowsers();
+        } else {
+            cleanupBrowsers();
+        }
+    }
+
+    {
+        boost::unique_lock<boost::mutex> lock(mServicesMutex);
+        mServices.clear();
+    }
+}
+
+void ServiceDiscovery::cleanupBrowsers()
+{
+	// Delete all browsers that are associated with this service discovery
+	std::map<std::string, ServiceBrowser*>::iterator it;
+	for(it = mBrowsers.begin(); it != mBrowsers.end(); ++it)
+	{
+	        if(it->second)
+	        {
+	            delete it->second;
+	            it->second = NULL;
+	        }
+	}
+	mBrowsers.clear();
 }
 
 } // end namespace avahi

@@ -68,7 +68,9 @@ void ServiceBrowser::cleanup()
 }
 
 ServiceBrowser::~ServiceBrowser()
-{}
+{
+    cleanup();
+}
 
 //a callback called on a service resolver event
 void ServiceBrowser::resolveCallback(AvahiServiceResolver *sr, AvahiIfIndex interface, AvahiProtocol protocol, AvahiResolverEvent event, const char *name, const char *type, const char *domain, const char *host, const AvahiAddress *address, uint16_t port, AvahiStringList *txt, AvahiLookupResultFlags flags, void *userdata)

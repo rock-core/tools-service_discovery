@@ -27,10 +27,14 @@ int main(int argc, char** argv)
     ServiceDiscovery service;
     ServiceConfiguration configuration(serviceName, domain);
     service.start(configuration);
-    
-    printf("Press ENTER to Exit\n");
+
+    printf("Press ENTER to Stop\n");
     char buffer[2];
     fgets(buffer,2,stdin);
-    
+    service.stop();
+
+    printf("Press ENTER to Exit\n");
+    fgets(buffer,2,stdin);
+
     return 0;
 }

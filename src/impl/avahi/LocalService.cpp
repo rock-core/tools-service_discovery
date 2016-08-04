@@ -4,8 +4,8 @@
 namespace servicediscovery { 
 namespace avahi {
 
-LocalService::~LocalService() {
-}
+LocalService::~LocalService()
+{}
 
 LocalService::LocalService(Client *client,
 		AvahiIfIndex interf,
@@ -111,12 +111,13 @@ void LocalService::unpublish()
 
 void LocalService::_unpublish()
 {
-        // "... please do not free the entry group and create a new one ..."
-        // see avahi-common/defs.h
-        // so use reset
+	// "When you need to modify your services ...  please do not free the
+	// entry group and create a new one when ..."
+	//
+	// see avahi-common/defs.h
+	// so use might be better to use reset, however since we shutdown
 	if (mGroup) {
 		avahi_entry_group_reset(mGroup);
-		mPublished = false;
 	}
 }
 
@@ -146,6 +147,7 @@ void LocalService::entry_group_callback(AvahiEntryGroup *g, AvahiEntryGroupState
 
         case AVAHI_ENTRY_GROUP_UNCOMMITED:
 		LOG_INFO("Entry group uncommited: '%s", config.getName().c_str());
+		localService->mPublished = false;
 		break;
 
         case AVAHI_ENTRY_GROUP_REGISTERING:
