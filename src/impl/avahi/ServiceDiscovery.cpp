@@ -183,8 +183,19 @@ std::vector<ServiceDescription> ServiceDiscovery::getUpdateableServices()
 
 void ServiceDiscovery::start(const ServiceConfiguration& conf)
 {
+    LOG_INFO_S << "Trying to start Service: " << conf.getName() << " " << conf.getType();
+    {
 	UniqueClientLock lock;
 	_start(conf);
+    }
+    if(mLocalService)
+    {
+        while(!mLocalService->published())
+        {
+            usleep(100);
+        }
+        LOG_INFO_S << "Service: " << conf.getName() << " " << conf.getType() << " has been published";
+    }
 }
 
 void ServiceDiscovery::listenOn(const std::vector<std::string>& types)
