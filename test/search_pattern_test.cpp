@@ -1,9 +1,7 @@
-#define BOOST_TEXT_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <service_discovery/ServiceDiscovery.hpp>
 
-#include <service_discovery/service_discovery.h>
-
-using namespace servicediscovery;
+using namespace servicediscovery::avahi;
 
 BOOST_AUTO_TEST_SUITE(ServiceDiscoveryPatternSuite)
 

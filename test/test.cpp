@@ -1,8 +1,7 @@
 #include <stdio.h>
+#include <service_discovery/ServiceDiscovery.hpp>
 
-#include <service_discovery/service_discovery.h>
-
-using namespace servicediscovery;
+using namespace service_discovery;
 
 int main(int argc, char** argv)
 {
