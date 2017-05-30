@@ -1,16 +1,12 @@
-#define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE service_discovery
 #include <boost/test/unit_test.hpp>
-
 #include <vector>
 #include <stdlib.h>
 #include <time.h>
 #include <sstream>
-#include <service_discovery/service_discovery.h>
-
+#include <service_discovery/ServiceDiscovery.hpp>
 
 using namespace std;
-using namespace servicediscovery;
+using namespace servicediscovery::avahi;
 
 struct ServiceLandscape
 {
