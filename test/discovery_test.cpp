@@ -210,7 +210,7 @@ BOOST_AUTO_TEST_CASE( findServices )
 
 BOOST_AUTO_TEST_CASE(DynamicCreateDelete)
 {
-    ServiceConfiguration conf("test_discovery", "_sd_test.tcp");
+    ServiceConfiguration conf("test_discovery", "_sd_test._tcp");
     ServiceDiscovery* serviceDiscovery = new ServiceDiscovery();
 
     serviceDiscovery->start(conf);
