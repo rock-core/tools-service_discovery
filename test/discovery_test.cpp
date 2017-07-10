@@ -39,16 +39,16 @@ struct ServiceLandscape
     com3.setDescription("flags", pattern::castFlags(pattern::READY));
     power1.setDescription("flags", pattern::castFlags(pattern::BUSY));
 
-    BOOST_MESSAGE("Starting com1");
+    BOOST_TEST_MESSAGE("Starting com1");
     startService(com1);
 
-    BOOST_MESSAGE("Starting com2");
+    BOOST_TEST_MESSAGE("Starting com2");
     startService(com2);
 
-    BOOST_MESSAGE("Starting com3");
+    BOOST_TEST_MESSAGE("Starting com3");
     startService(com3);
 
-    BOOST_MESSAGE("Starting power");
+    BOOST_TEST_MESSAGE("Starting power");
     startService(power1);
 
     watcher = new ServiceDiscovery();
@@ -56,7 +56,7 @@ struct ServiceLandscape
     types.push_back(domain);
     watcher->listenOn(types);
 
-    BOOST_MESSAGE("Waiting 10s for finishing the initialization process for all services");
+    BOOST_TEST_MESSAGE("Waiting 10s for finishing the initialization process for all services");
     sleep(20);
   }
 
