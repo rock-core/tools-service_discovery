@@ -32,7 +32,7 @@ rock_library(${PROJECT_NAME}
                     SOURCES ${SOURCES}
                     HEADERS ${HEADERS}
                     DEPS_PKGCONFIG sigc++-2.0
-                        base-lib
+                        base-logging
                         avahi-client
                         avahi-core
                         dbus-1

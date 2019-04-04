@@ -11,7 +11,7 @@
   <rosdep name="avahi" />
   <rosdep name="sigc" />
   <rosdep name="boost" />
-  <rosdep name="base/types" />
+  <rosdep name="base/logging" />
   <depend package="rice" />
   <depend package="ruby" />
   <versioncontrol type="git" url="" />
